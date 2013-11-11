@@ -56,6 +56,7 @@ function receiveData(socket, data) {
         {
                 socket.username = cleanData;
                 socket.write("\r\n\r\nWelcome " + socket.username + "\r\n");
+				return;
         }
 
 
