@@ -1,3 +1,6 @@
+TalkerNode
+==========
+
 TalkerNode is a Talker base, written in Node.js .
 It is still in alpha stage. 
 
