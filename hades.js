@@ -30,7 +30,8 @@ function receiveData(socket, data) {
         if(cleanData.length == 0)
                 return;
 
-        console.log("Moo [" + cleanData + "]");
+		// Useful when in debug mode, you don't want this otherwise... it wouldn't be nice for your users' privacy, would it?
+        // console.log("Moo [" + cleanData + "]");
 
 		// TODO: We're just filtering out IAC commands. We should be dealing with them instead...
 		// IAC commands
