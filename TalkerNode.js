@@ -3,6 +3,7 @@
 // coded by sam@hades
 // hades: telnet hades-talker.org 6660
 
+"use strict";
 var net = require('net');
 
 var sockets = [];
