@@ -55,12 +55,16 @@ function receiveData(socket, data) {
 
         if(socket.username == undefined)
         {
+				// TODO: check if username is valid. We will probably only want a-Z characters, with a minimum and maximum length.
+				// TODO: check if the username isn't reserved. Names like who, quit and version are usually reserved.
+				// TODO: check if the username is already in use
                 socket.username = cleanData;
                 socket.write("\r\n\r\nWelcome " + socket.username + "\r\n");
+				// TODO: tell everyone else that you've connected
 				return;
         }
 
-
+		// Chain of commands:
         if(cleanData === ".quit") {
                 socket.end('Goodbye!\n');
         }
@@ -68,7 +72,9 @@ function receiveData(socket, data) {
                 for(var i = 0; i<sockets.length; i++) {
                         if (sockets[i] !== socket) {
                                 sockets[i].write(socket.username + ": " + data);
-                        }
+                        } else {
+								socket.write("You said: " + data);
+						}
                 }
         }
 }
