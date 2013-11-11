@@ -9,6 +9,8 @@ var sockets = [];
 
 var port = process.env.PORT || 8888;
 
+var talkername = "Moosville";
+
 /*
  * Cleans the input of carriage return, newline and control characters
  */
@@ -84,7 +86,7 @@ function closeSocket(socket) {
  */
 function newSocket(socket) {
         sockets.push(socket);
-        socket.write('Welcome to the Moosville!\r\n\r\nGive me a name:  ');
+        socket.write('Welcome to the '+talkername+'!\r\n\r\nGive me a name:  ');
         socket.on('data', function(data) {
                 receiveData(socket, data);
         })
@@ -96,5 +98,5 @@ function newSocket(socket) {
 // Create a new server and provide a callback for when a connection occurs
 var server = net.createServer(newSocket);
 
-// Listen on port 8888
+// Listen on defined port
 server.listen(port);
