@@ -101,3 +101,4 @@ var server = net.createServer(newSocket);
 
 // Listen on defined port
 server.listen(port);
+console.log(talkername + " initialized on port "+ port);
