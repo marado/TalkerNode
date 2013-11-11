@@ -30,12 +30,25 @@ function receiveData(socket, data) {
 
         console.log("Moo [" + cleanData + "]");
 
-        if(socket.initialshit == undefined)
-        {
-                socket.initialshit = cleanData;
-                return;
-        }
-
+		// TODO: We're just filtering out IAC commands. We should be dealing with them instead...
+		// IAC commands
+		var IAC = [
+			1 , // Telnet IAC - Echo
+			3 , // Telnet IAC - Suppress Go Ahead
+			5 , // Telnet IAC - Status                
+			6 , // Telnet IAC - Timing Mark
+			24, // Telnet IAC - Terminal Type
+			31, // Telnet IAC - Window Size
+			32, // Telnet IAC - Window Speed
+			33, // Telnet IAC - Remote Flow Control
+			34, // Telnet IAC - Linemode
+			36  // Telnet IAC - Environment Variables
+		];
+		if (IAC.indexOf(cleanData.charCodeAt(0)) !== -1) {
+			// This is IAC, not an user input
+			console.log("Moo: IAC: [" + cleanData.charCodeAt(0) +"]");
+		    return;
+		}
 
         if(socket.username == undefined)
         {
