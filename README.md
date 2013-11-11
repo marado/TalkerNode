@@ -11,7 +11,6 @@ coded by sam, from the talker Hades: telnet hades-talker.org 6660
 This is a fork from that code, downloaded at 11/11/2013
 
 -----------------------------------------------------------------------
+
 sam says: teh SamLicence is basically "Do as you will - but if you make
 millions can I get a pint please?"
------------------------------------------------------------------------
-
