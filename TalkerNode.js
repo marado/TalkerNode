@@ -51,9 +51,7 @@ function receiveData(socket, data) {
 	}
 
 	if(socket.username == undefined) {
-		// TODO: implement quit on login screen 
-		// TODO: implement who on login screen 
-		// TODO: implement version on login screen 
+		if (cleanData.toLowerCase() === "quit") return socket.end('Goodbye!\n');
 		var reservedNames=["who","quit","version"];
 		if (reservedNames.indexOf(cleanData.toLowerCase()) > -1) {
 			socket.write("\r\nThat username is reserved, you cannot have it.\r\nGive me a name:  ");

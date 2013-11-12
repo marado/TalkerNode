@@ -1,7 +1,9 @@
 Lot's of things to do. Here's one list, so I don't forget all of it:
 
+* .who		
+* implement who on login screen 
 * .help
-* .who
-* All the TODO's
+* .version
+* implement version on login screen 
 * users database (to have autentication) - use node-dirty, perhaps?
 * session takeover (only after having an user database)
