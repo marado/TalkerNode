@@ -1,9 +1,13 @@
 Lot's of things to do. Here's one list, so I don't forget all of it:
 
-* .who		
 * implement who on login screen 
 * .help
 * .version
 * implement version on login screen 
 * users database (to have autentication) - use node-dirty, perhaps?
 * session takeover (only after having an user database)
+* user connected time (and show on .who)
+* user idle time (and show on .who)
+* user total time (save on database)
+* user registration date (save on database)
+* .examine

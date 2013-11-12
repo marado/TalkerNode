@@ -90,6 +90,27 @@ function doCommand(socket, command) {
 			allButMe(socket,function(me,to){to.write(me.username + ": " + command.split(' ').slice(1).join(" ") + "\r\n");});
 			socket.write("You said: " + command.split(' ').slice(1).join(" ") + "\r\n");
 			break;
+		case ".who":
+			var connected = 0;
+			var connecting = 0;
+			socket.write("+----------------------------------------------------------------------------+\r\n");
+			socket.write("   Current users on " + talkername + "\r\n");
+			socket.write("+----------------------------------------------------------------------------+\r\n");
+			socket.write("  Name              Server              Family\tClient    \r\n");
+			socket.write("+----------------------------------------------------------------------------+\r\n");
+			for (var i = 0; i < sockets.length; i++) {
+				if (typeof sockets[i].username === 'undefined') {
+					connecting++;
+				} else {
+					connected++;
+					var name = sockets[i].username; for (var pad = sockets[i].username.length; pad < 16; pad++) name+=" ";
+					socket.write("  " + name + "  " + sockets[i].server.address().address + ":" + sockets[i].server.address().port + "\t" + sockets[i].server.address().family + "\t" + sockets[i].remoteAddress + ":" + sockets[i].remotePort + "\r\n");
+				}
+			}
+			socket.write("+----------------------------------------------------------------------------+\r\n");
+			socket.write("     Total of " + connected + " connected users"); if (connecting > 0) { socket.write(" and " + connecting + " still connecting"); }
+			socket.write("\r\n+----------------------------------------------------------------------------+\r\n");
+			break;	
 		default:
 			socket.write("There's no such thing as a " + command.split(' ')[0] + " command.\r\n");
 			break;
