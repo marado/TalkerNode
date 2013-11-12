@@ -52,6 +52,7 @@ function receiveData(socket, data) {
 
 	if(socket.username == undefined) {
 		if (cleanData.toLowerCase() === "quit") return socket.end('Goodbye!\n');
+		if (cleanData.toLowerCase() === "who") return who(socket);
 		var reservedNames=["who","quit","version"];
 		if (reservedNames.indexOf(cleanData.toLowerCase()) > -1) {
 			socket.write("\r\nThat username is reserved, you cannot have it.\r\nGive me a name:  ");
@@ -91,25 +92,7 @@ function doCommand(socket, command) {
 			socket.write("You said: " + command.split(' ').slice(1).join(" ") + "\r\n");
 			break;
 		case ".who":
-			var connected = 0;
-			var connecting = 0;
-			socket.write("+----------------------------------------------------------------------------+\r\n");
-			socket.write("   Current users on " + talkername + "\r\n");
-			socket.write("+----------------------------------------------------------------------------+\r\n");
-			socket.write("  Name              Server              Family\tClient    \r\n");
-			socket.write("+----------------------------------------------------------------------------+\r\n");
-			for (var i = 0; i < sockets.length; i++) {
-				if (typeof sockets[i].username === 'undefined') {
-					connecting++;
-				} else {
-					connected++;
-					var name = sockets[i].username; for (var pad = sockets[i].username.length; pad < 16; pad++) name+=" ";
-					socket.write("  " + name + "  " + sockets[i].server.address().address + ":" + sockets[i].server.address().port + "\t" + sockets[i].server.address().family + "\t" + sockets[i].remoteAddress + ":" + sockets[i].remotePort + "\r\n");
-				}
-			}
-			socket.write("+----------------------------------------------------------------------------+\r\n");
-			socket.write("     Total of " + connected + " connected users"); if (connecting > 0) { socket.write(" and " + connecting + " still connecting"); }
-			socket.write("\r\n+----------------------------------------------------------------------------+\r\n");
+			who(socket);
 			break;	
 		default:
 			socket.write("There's no such thing as a " + command.split(' ')[0] + " command.\r\n");
@@ -154,6 +137,39 @@ function allButMe(socket,fn) {
 		}
 	}
 }
+
+
+/*
+ * COMMANDS!
+ */
+
+function who(socket) {
+	var connected = 0;
+	var connecting = 0;
+	socket.write("+----------------------------------------------------------------------------+\r\n");
+	socket.write("   Current users on " + talkername + "\r\n");
+	socket.write("+----------------------------------------------------------------------------+\r\n");
+	socket.write("  Name              Server              Family\tClient    \r\n");
+	socket.write("+----------------------------------------------------------------------------+\r\n");
+	for (var i = 0; i < sockets.length; i++) {
+		if (typeof sockets[i].username === 'undefined') {
+			connecting++;
+		} else {
+			connected++;
+			var name = sockets[i].username; for (var pad = sockets[i].username.length; pad < 16; pad++) name+=" ";
+			socket.write("  " + name + "  " + sockets[i].server.address().address + ":" + sockets[i].server.address().port + "\t" + sockets[i].server.address().family + "\t" + sockets[i].remoteAddress + ":" + sockets[i].remotePort + "\r\n");
+		}
+	}
+	socket.write("+----------------------------------------------------------------------------+\r\n");
+	socket.write("     Total of " + connected + " connected users"); if (connecting > 0) { socket.write(" and " + connecting + " still connecting"); }
+	socket.write("\r\n+----------------------------------------------------------------------------+\r\n");
+
+}
+
+
+/* 
+ * AND FINALLY... THE ACTUAL main()!
+ */
 
 // Create a new server and provide a callback for when a connection occurs
 var server = net.createServer(newSocket);
