@@ -1,0 +1,7 @@
+Lot's of things to do. Here's one list, so I don't forget all of it:
+
+* .help
+* .who
+* All the TODO's
+* users database (to have autentication) - use node-dirty, perhaps?
+* session takeover (only after having an user database)
