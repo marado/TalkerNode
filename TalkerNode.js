@@ -54,7 +54,7 @@ function receiveData(socket, data) {
 		// TODO: check if the username isn't reserved. Names like who, quit and version are usually reserved.
 		// TODO: check if the username is already in use
 		if ((cleanData.match(/^[a-zA-Z]+$/) !== null) && (1 < cleanData.length) && (cleanData.length < 17)) {
-			socket.username = cleanData;
+			socket.username = cleanData.toLowerCase().charAt(0).toUpperCase() + cleanData.toLowerCase().slice(1); // Capitalized name
 			allButMe(socket,function(me,to){to.write("[Entering is: "+ me.username + " ]\r\n");});
 			socket.write("\r\nWelcome " + socket.username + "\r\n");
 		} else {
