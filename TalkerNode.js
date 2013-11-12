@@ -60,14 +60,30 @@ function receiveData(socket, data) {
 		return;
 	}
 
-	// Chain of commands:
-	// TODO: consider that everything that starts with a dot is a command (or an attempt to use one)
-	// TODO: .say command is imperative so one can say a sentence starting with a . (dot)
-	if(cleanData === ".quit") {
-		socket.end('Goodbye!\n');
+	// if we have a command...
+	if (cleanData.charAt(0) === ".") {
+		doCommand(socket, cleanData);
 	} else {
-		allButMe(socket,function(me,to){to.write(me.username + ": " + cleanData + "\r\n");});
-		socket.write("You said: " + cleanData + "\r\n");
+		doCommand(socket, ".say " + cleanData);
+	}
+		
+}
+
+/*
+ * Method for commands. In future this should be elsewhere, but for now we must start already separating this from the rest...
+ */
+function doCommand(socket, command) {
+	switch(command.split(' ')[0]) {
+		case ".quit":
+			socket.end('Goodbye!\n');
+			break;
+		case ".say":
+			allButMe(socket,function(me,to){to.write(me.username + ": " + command.split(' ').slice(1).join(" ") + "\r\n");});
+			socket.write("You said: " + command.split(' ').slice(1).join(" ") + "\r\n");
+			break;
+		default:
+			socket.write("There's no such thing as a " + command.split(' ')[0] + " command.\r\n");
+			break;
 	}
 }
 
