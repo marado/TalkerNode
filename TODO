@@ -1,6 +1,5 @@
 Lot's of things to do. Here's one list, so I don't forget all of it:
 
-* .help
 * .version
 * implement version on login screen 
 * users database (to have autentication) - use node-dirty, perhaps?
