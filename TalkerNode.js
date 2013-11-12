@@ -13,8 +13,9 @@ var talkername = "Moosville";
  * Cleans the input of carriage return, newline and control characters
  */
 function cleanInput(data) {
-	var newString = data.toString().replace("[\u0000-\u001f]", "");
-	return newString.replace(/(\r\n|\n|\r)/gm,"");
+	var newString = data.toString().replace("[\u0000-\u001f]", "").replace(/(\r\n|\n|\r)/gm,"");
+	while (newString.charAt(0) === " ") newString=newString.substring(1);
+	return newString;
 }
 
 /*
@@ -39,7 +40,6 @@ function receiveData(socket, data) {
 		6 , // Telnet IAC - Timing Mark
 		24, // Telnet IAC - Terminal Type
 		31, // Telnet IAC - Window Size
-		32, // Telnet IAC - Window Speed /* FIXME or a space! remember, this is cleanData! */
 		33, // Telnet IAC - Remote Flow Control
 		34, // Telnet IAC - Linemode
 		36  // Telnet IAC - Environment Variables
