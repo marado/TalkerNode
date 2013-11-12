@@ -70,10 +70,9 @@ function receiveData(socket, data) {
                 socket.end('Goodbye!\n');
         }
         else {
-				// FIXME: we're sending stuff even to unconnected users... (pre-login)
                 for(var i = 0; i<sockets.length; i++) {
                         if (sockets[i] !== socket) {
-                                sockets[i].write(socket.username + ": " + data);
+								if (typeof sockets[i].username != 'undefined') sockets[i].write(socket.username + ": " + data);
                         } else {
 								socket.write("You said: " + data);
 						}
