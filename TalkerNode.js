@@ -61,11 +61,13 @@ function receiveData(socket, data) {
 	}
 
 	// Chain of commands:
+	// TODO: consider that everything that starts with a dot is a command (or an attempt to use one)
+	// TODO: .say command is imperative so one can say a sentence starting with a . (dot)
 	if(cleanData === ".quit") {
 		socket.end('Goodbye!\n');
 	} else {
-		allButMe(socket,function(me,to){to.write(me.username + ": " + data);});
-		socket.write("You said: " + data);
+		allButMe(socket,function(me,to){to.write(me.username + ": " + cleanData + "\r\n");});
+		socket.write("You said: " + cleanData + "\r\n");
 	}
 }
 
