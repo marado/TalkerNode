@@ -51,12 +51,15 @@ function receiveData(socket, data) {
 	}
 
 	if(socket.username == undefined) {
-		// TODO: check if username is valid. We will probably only want a-Z characters, with a minimum and maximum length.
 		// TODO: check if the username isn't reserved. Names like who, quit and version are usually reserved.
 		// TODO: check if the username is already in use
-		socket.username = cleanData;
-		allButMe(socket,function(me,to){to.write("[Entering is: "+ me.username + " ]\r\n");});
-		socket.write("\r\n\r\nWelcome " + socket.username + "\r\n");
+		if ((cleanData.match(/^[a-zA-Z]+$/) !== null) && (1 < cleanData.length) && (cleanData.length < 17)) {
+			socket.username = cleanData;
+			allButMe(socket,function(me,to){to.write("[Entering is: "+ me.username + " ]\r\n");});
+			socket.write("\r\nWelcome " + socket.username + "\r\n");
+		} else {
+			socket.write("\r\nInvalid username: it can only contain letters, have at least two characters and be no longer than 16 characters.\r\nGive me a name:  ");
+		}
 		return;
 	}
 
