@@ -55,8 +55,8 @@ function receiveData(socket, data) {
 		// TODO: check if the username isn't reserved. Names like who, quit and version are usually reserved.
 		// TODO: check if the username is already in use
 		socket.username = cleanData;
+		allButMe(socket,function(me,to){to.write("[Entering is: "+ me.username + " ]\r\n");});
 		socket.write("\r\n\r\nWelcome " + socket.username + "\r\n");
-		// TODO: tell everyone else that you've connected
 		return;
 	}
 
