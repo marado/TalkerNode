@@ -1,7 +1,4 @@
-// https://dl.dropboxusercontent.com/u/133374/hades.txt
-// downloaded at 11/11/2013
-// coded by sam@hades
-// hades: telnet hades-talker.org 6660
+// https://github.com/marado/TalkerNode
 
 "use strict";
 var net = require('net');
