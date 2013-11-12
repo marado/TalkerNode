@@ -58,8 +58,9 @@ function receiveData(socket, data) {
 		if (reservedNames.indexOf(cleanData.toLowerCase()) > -1) {
 			socket.write("\r\nThat username is reserved, you cannot have it.\r\nGive me a name:  ");
 		}
-		// TODO: check if the username is already in use
 		else if ((cleanData.match(/^[a-zA-Z]+$/) !== null) && (1 < cleanData.length) && (cleanData.length < 17)) {
+			if (allButMe(socket,function(me,to){if(to.username.toLowerCase()===cleanData.toLowerCase()){return true;}})) 
+				return socket.write("\r\nThat user is already connected!\r\nGive me a name:  ");
 			socket.username = cleanData.toLowerCase().charAt(0).toUpperCase() + cleanData.toLowerCase().slice(1); // Capitalized name
 			allButMe(socket,function(me,to){to.write("[Entering is: "+ me.username + " ]\r\n");});
 			socket.write("\r\nWelcome " + socket.username + "\r\n");
@@ -121,12 +122,15 @@ function newSocket(socket) {
 }
 
 /*
- * Execute function to all connected users *but* the triggering one
+ * Execute function to all connected users *but* the triggering one. 
+ * It stops at the first connected user to which the function returns true, returning true.
  */
 function allButMe(socket,fn) {
 	for(var i = 0; i<sockets.length; i++) {
 		if (sockets[i] !== socket) {
-			if (typeof sockets[i].username != 'undefined') fn(socket,sockets[i]);
+			if (typeof sockets[i].username != 'undefined') {
+				if(fn(socket,sockets[i])) return true;
+			}
 		}
 	}
 }
