@@ -85,6 +85,7 @@ function receiveData(socket, data) {
 function doCommand(socket, command) {
 	switch(command.split(' ')[0]) {
 		case ".quit":
+			allButMe(socket,function(me,to){to.write("[Leaving is: "+ me.username + " ]\r\n");});
 			socket.end('Goodbye!\n');
 			break;
 		case ".say":
