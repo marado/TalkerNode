@@ -13,7 +13,7 @@ var talkername = "Moosville";
  * Cleans the input of carriage return, newline and control characters
  */
 function cleanInput(data) {
-	var newString = data.toString().replace("[\u0000-\u001f]", "").replace(/(\r\n|\n|\r)/gm,"");
+	var newString = data.toString().replace("[\u0000-\u001a]", "").replace("[\u001c-\u001f]", "").replace(/(\r\n|\n|\r)/gm,"").replace(/\u001b\[./gm,"");
 	while (newString.charAt(0) === " ") newString=newString.substring(1);
 	return newString;
 }
