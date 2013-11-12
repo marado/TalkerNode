@@ -39,7 +39,7 @@ function receiveData(socket, data) {
 		6 , // Telnet IAC - Timing Mark
 		24, // Telnet IAC - Terminal Type
 		31, // Telnet IAC - Window Size
-		32, // Telnet IAC - Window Speed
+		32, // Telnet IAC - Window Speed /* FIXME or a space! remember, this is cleanData! */
 		33, // Telnet IAC - Remote Flow Control
 		34, // Telnet IAC - Linemode
 		36  // Telnet IAC - Environment Variables
@@ -51,9 +51,15 @@ function receiveData(socket, data) {
 	}
 
 	if(socket.username == undefined) {
-		// TODO: check if the username isn't reserved. Names like who, quit and version are usually reserved.
+		// TODO: implement quit on login screen 
+		// TODO: implement who on login screen 
+		// TODO: implement version on login screen 
+		var reservedNames=["who","quit","version"];
+		if (reservedNames.indexOf(cleanData.toLowerCase()) > -1) {
+			socket.write("\r\nThat username is reserved, you cannot have it.\r\nGive me a name:  ");
+		}
 		// TODO: check if the username is already in use
-		if ((cleanData.match(/^[a-zA-Z]+$/) !== null) && (1 < cleanData.length) && (cleanData.length < 17)) {
+		else if ((cleanData.match(/^[a-zA-Z]+$/) !== null) && (1 < cleanData.length) && (cleanData.length < 17)) {
 			socket.username = cleanData.toLowerCase().charAt(0).toUpperCase() + cleanData.toLowerCase().slice(1); // Capitalized name
 			allButMe(socket,function(me,to){to.write("[Entering is: "+ me.username + " ]\r\n");});
 			socket.write("\r\nWelcome " + socket.username + "\r\n");
