@@ -6,7 +6,7 @@ var net = require('net');
 var sockets = [];
 var port = process.env.PORT || 8888;
 var talkername = "Moosville";
-var version = "0.0.1";
+var version = "0.0.2";
 
 /*
  * Cleans the input of carriage return, newline and control characters
@@ -91,6 +91,11 @@ function doCommand(socket, command) {
 			allButMe(socket,function(me,to){to.write(me.username + ": " + command.split(' ').slice(1).join(" ") + "\r\n");});
 			socket.write("You said: " + command.split(' ').slice(1).join(" ") + "\r\n");
 			break;
+		case ".emote":
+			var send = socket.username + " " + command.split(' ').slice(1).join(" ") + "\r\n";
+			allButMe(socket,function(me,to){to.write(send);}); 
+			socket.write(send);
+			break;
 		case ".who":
 			who(socket);
 			break;	
@@ -100,6 +105,9 @@ function doCommand(socket, command) {
 		case ".version":
 			show_version(socket);
 			break;	
+		case ".tell": 
+			tell(socket, command.split(' ')[1], command.split(' ').slice(2).join(" "));
+			break;
 		default:
 			socket.write("There's no such thing as a " + command.split(' ')[0] + " command.\r\n");
 			break;
@@ -153,7 +161,7 @@ function who(socket) {
 	var connected = 0;
 	var connecting = 0;
 	socket.write("+----------------------------------------------------------------------------+\r\n");
-	socket.write("   Current users on " + talkername + "\r\n");
+	socket.write("   Current users on " + talkername + " at " + new Date().toLocaleDateString() +", " + new Date().toLocaleTimeString() +"\r\n");
 	socket.write("+----------------------------------------------------------------------------+\r\n");
 	socket.write("  Name              Server              Family\tClient    \r\n");
 	socket.write("+----------------------------------------------------------------------------+\r\n");
@@ -178,9 +186,11 @@ function help(socket) {
 	socket.write("+----------------------------------------------------------------------------+\r\n");
 	socket.write("| .help    - shows you this list of commands and what do they do             |\r\n");
 	socket.write("| .say     - lets you talk with other people. Just .say something!           |\r\n");
+	socket.write("| .emote   - lets you pose something, as if you were acting.                 |\r\n");
 	socket.write("| .quit    - leaving us, are you? Then .quit !                               |\r\n");
 	socket.write("| .who     - lets you know who is connected in the talker at this moment     |\r\n");
 	socket.write("| .version - gives you information regarding the software this talker runs   |\r\n");
+	socket.write("| .tell    - tells someone something, in private. Only both of you will know |\r\n");
 	socket.write("+----------------------------------------------------------------------------+\r\n");
 	socket.write("| Remember: all commands start with a dot (.), like .help                    |\r\n");
 	socket.write("+----------------------------------------------------------------------------+\r\n");
@@ -188,6 +198,30 @@ function help(socket) {
 
 function show_version(socket) {
 	socket.write("TalkerNode, version " + version + "\r\n");
+}
+
+function tell(from, to, message) {
+	if ((typeof to === 'undefined') || (typeof message === 'undefined') || to.length < 1 || message.length < 1) {
+		from.write("You have to use it this way: .tell someone something\r\n");
+	} else if (from.username.toLowerCase() === to.toLowerCase()) {
+		from.write("Talking to yourself is the first sign of madness.\r\n");
+	} else {
+		var s = getOnlineUser(to);
+		if (s) {
+			from.write("You tell " + to + ": " + message + "\r\n");
+			s.write(from.username + " tells you: " + message + "\r\n");
+		} else {
+			from.write("There is no one of that name logged on.\r\n");
+		}
+	}
+}
+
+// returns socket for the user, or false if he doesn't exist
+function getOnlineUser(name) {
+		for (var i = 0; i < sockets.length; i++) {
+			if (name.toLowerCase() === sockets[i].username.toLowerCase()) return sockets[i];
+		}
+		return false;
 }
 
 /* 
