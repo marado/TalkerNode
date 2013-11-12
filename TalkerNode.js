@@ -22,7 +22,6 @@ function cleanInput(data) {
  */
 function receiveData(socket, data) {
 
-
 	var cleanData = cleanInput(data);
 	
 	if(cleanData.length == 0)
@@ -65,13 +64,8 @@ function receiveData(socket, data) {
 	if(cleanData === ".quit") {
 		socket.end('Goodbye!\n');
 	} else {
-		for(var i = 0; i<sockets.length; i++) {
-			if (sockets[i] !== socket) {
-				if (typeof sockets[i].username != 'undefined') sockets[i].write(socket.username + ": " + data);
-			} else {
-				socket.write("You said: " + data);
-			}
-		}
+		allButMe(socket,function(me,to){to.write(me.username + ": " + data);});
+		socket.write("You said: " + data);
 	}
 }
 
@@ -97,6 +91,17 @@ function newSocket(socket) {
 	socket.on('end', function() {
 		closeSocket(socket);
 	})
+}
+
+/*
+ * Execute function to all connected users *but* the triggering one
+ */
+function allButMe(socket,fn) {
+	for(var i = 0; i<sockets.length; i++) {
+		if (sockets[i] !== socket) {
+			if (typeof sockets[i].username != 'undefined') fn(socket,sockets[i]);
+		}
+	}
 }
 
 // Create a new server and provide a callback for when a connection occurs
