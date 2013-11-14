@@ -2,11 +2,17 @@
 
 "use strict";
 var net = require('net');
+var crypto = require('crypto');
 
 var sockets = [];
 var port = process.env.PORT || 8888;
 var talkername = "Moosville";
-var version = "0.0.2";
+var version = "0.1.0";
+
+// Instanciates the users database
+var dirty = require('dirty');
+var usersdb = dirty('user.db');
+usersdb.on('error', function(err) { console.log("USERS DB ERROR! "+err); });
 
 /*
  * Cleans the input of carriage return, newline and control characters
@@ -61,11 +67,55 @@ function receiveData(socket, data) {
 			if (allButMe(socket,function(me,to){if(to.username.toLowerCase()===cleanData.toLowerCase()){return true;}})) 
 				return socket.write("\r\nThat user is already connected!\r\nGive me a name:  ");
 			socket.username = cleanData.toLowerCase().charAt(0).toUpperCase() + cleanData.toLowerCase().slice(1); // Capitalized name
-			allButMe(socket,function(me,to){to.write("[Entering is: "+ me.username + " ]\r\n");});
-			socket.write("\r\nWelcome " + socket.username + "\r\n");
+			socket.loggedin = false;
+			socket.db = usersdb.get(socket.username);
+			if (typeof socket.db === 'undefined') {
+				socket.write("\r\nNew user, welcome! Please choose a password: ");
+				socket.registering=true;
+			} else {
+				socket.write("\r\nGive me your password: ");
+				socket.registering=false;
+			}
+			return;
 		} else {
 			socket.write("\r\nInvalid username: it can only contain letters, have at least two characters and be no longer than 16 characters.\r\nGive me a name:  ");
 		}
+		return;
+	} else if (socket.loggedin == false) {
+		// this is the password
+		if (socket.registering) {
+			if (typeof socket.password === 'undefined') {
+				socket.password = crypto.createHash('sha512').update(cleanData).digest('hex');
+				socket.write("\r\nConfirm the chosen password: ");
+				return;
+			} else {
+				if (socket.password === crypto.createHash('sha512').update(cleanData).digest('hex')) {
+					// password confirmed
+					socket.db={"password":crypto.createHash('sha512').update(cleanData).digest('hex')};
+					usersdb.set(socket.username, socket.db);
+					delete socket.password;
+					delete socket.registering;
+				} else {
+					// wrong confirmation password
+					delete socket.password;
+					delete socket.registering;
+					delete socket.username;
+					delete socket.db;
+					socket.write("\r\nPasswords don't match! Let's start from the beggining... Tell me your name:  ");
+					return;
+				}
+			}
+		} else if (socket.db.password !== crypto.createHash('sha512').update(cleanData).digest('hex')) {
+			delete socket.username;
+			delete socket.db;
+			socket.write("\r\nWrong password! Let's start from the beggining... Tell me your name:  ");
+			return;
+		}
+
+		// entering the talker
+		allButMe(socket,function(me,to){to.write("[Entering is: "+ me.username + " ]\r\n");});
+		socket.write("\r\nWelcome " + socket.username + "\r\n");
+		socket.loggedin = true;
 		return;
 	}
 
@@ -82,31 +132,65 @@ function receiveData(socket, data) {
  * Method for commands. In future this should be elsewhere, but for now we must start already separating this from the rest...
  */
 function doCommand(socket, command) {
-	switch(command.split(' ')[0]) {
-		case ".quit":
-			allButMe(socket,function(me,to){to.write("[Leaving is: "+ me.username + " ]\r\n");});
-			socket.end('Goodbye!\n');
-			break;
-		case ".say":
-			allButMe(socket,function(me,to){to.write(me.username + ": " + command.split(' ').slice(1).join(" ") + "\r\n");});
-			socket.write("You said: " + command.split(' ').slice(1).join(" ") + "\r\n");
-			break;
+	switch(command.split(' ')[0].toLowerCase()) {
+		case ".e":
+		case ".em":
+		case ".emo":
+		case ".emot":
 		case ".emote":
 			var send = socket.username + " " + command.split(' ').slice(1).join(" ") + "\r\n";
 			allButMe(socket,function(me,to){to.write(send);}); 
 			socket.write(send);
 			break;
-		case ".who":
-			who(socket);
-			break;	
+		case ".h":
+		case ".he":
+		case ".hel":
 		case ".help":
 			help(socket);
 			break;	
+		case ".p":
+		case ".pa":
+		case ".pas":
+		case ".pass":
+		case ".passw":
+		case ".passwd":
+		case ".passwo":
+		case ".passwor":
+		case ".password":
+			password(socket, command.split(' ').slice(1).join(" "));
+			break;
+		case ".q":
+		case ".qu":
+		case ".qui":
+		case ".quit":
+			allButMe(socket,function(me,to){to.write("[Leaving is: "+ me.username + " ]\r\n");});
+			socket.end('Goodbye!\n');
+			break;
+		case ".s":
+		case ".sa":
+		case ".say":
+			allButMe(socket,function(me,to){to.write(me.username + ": " + command.split(' ').slice(1).join(" ") + "\r\n");});
+			socket.write("You said: " + command.split(' ').slice(1).join(" ") + "\r\n");
+			break;
+		case ".t":
+		case ".te":
+		case ".tel":
+		case ".tell": 
+			tell(socket, command.split(' ')[1], command.split(' ').slice(2).join(" "));
+			break;
+		case ".v":
+		case ".ve":
+		case ".ver":
+		case ".vers":
+		case ".versi":
+		case ".versio":
 		case ".version":
 			show_version(socket);
 			break;	
-		case ".tell": 
-			tell(socket, command.split(' ')[1], command.split(' ').slice(2).join(" "));
+		case ".w":
+		case ".wh":
+		case ".who":
+			who(socket);
 			break;
 		default:
 			socket.write("There's no such thing as a " + command.split(' ')[0] + " command.\r\n");
@@ -145,7 +229,7 @@ function newSocket(socket) {
 function allButMe(socket,fn) {
 	for(var i = 0; i<sockets.length; i++) {
 		if (sockets[i] !== socket) {
-			if (typeof sockets[i].username != 'undefined') {
+			if ((typeof sockets[i].loggedin != 'undefined') && sockets[i].loggedin){
 				if(fn(socket,sockets[i])) return true;
 			}
 		}
@@ -166,7 +250,7 @@ function who(socket) {
 	socket.write("  Name              Server              Family\tClient    \r\n");
 	socket.write("+----------------------------------------------------------------------------+\r\n");
 	for (var i = 0; i < sockets.length; i++) {
-		if (typeof sockets[i].username === 'undefined') {
+		if ((typeof sockets[i].loggedin === 'undefined') || !sockets[i].loggedin ){
 			connecting++;
 		} else {
 			connected++;
@@ -200,11 +284,21 @@ function show_version(socket) {
 	socket.write("TalkerNode, version " + version + "\r\n");
 }
 
+function password(from, oldpass, newpass) {
+	if ((typeof newpass === 'undefined') || newpass.length < 1) {
+		from.write(":: Usage: .password NewPasswordYouWant\r\n");
+	} else {
+		from.db.password = crypto.createHash('sha512').update(newpass).digest('hex');
+		usersdb.set(from.username, from.db);
+		from.write(":: You password has been changed!\r\n");
+	}
+}
+
 function tell(from, to, message) {
 	if ((typeof to === 'undefined') || (typeof message === 'undefined') || to.length < 1 || message.length < 1) {
-		from.write("You have to use it this way: .tell someone something\r\n");
+		from.write(":: You have to use it this way: .tell someone something\r\n");
 	} else if (from.username.toLowerCase() === to.toLowerCase()) {
-		from.write("Talking to yourself is the first sign of madness.\r\n");
+		from.write(":: Talking to yourself is the first sign of madness.\r\n");
 	} else {
 		var s = getOnlineUser(to);
 		if (s) {
@@ -219,7 +313,7 @@ function tell(from, to, message) {
 // returns socket for the user, or false if he doesn't exist
 function getOnlineUser(name) {
 		for (var i = 0; i < sockets.length; i++) {
-			if (name.toLowerCase() === sockets[i].username.toLowerCase()) return sockets[i];
+			if (name.toLowerCase() === sockets[i].username.toLowerCase() && sockets[i].loggedin) return sockets[i];
 		}
 		return false;
 }

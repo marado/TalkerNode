@@ -1,7 +1,10 @@
 Lot's of things to do. Here's one list, so I don't forget all of it:
 
-* users database (to have autentication) - use node-dirty, perhaps?
-* session takeover (only after having an user database)
+* .password should be interactive, ask for the old password before changing to
+  the new one. Interactive is a must, because we actually allow passphrases...
+* send the ANSI character of noecho and echo to wrap around the password input
+  events
+* session takeover
 * user connected time (and show on .who)
 * user idle time (and show on .who)
 * user total time (save on database)
