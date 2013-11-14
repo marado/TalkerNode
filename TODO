@@ -5,8 +5,11 @@ Lot's of things to do. Here's one list, so I don't forget all of it:
 * send the ANSI character of noecho and echo to wrap around the password input
   events
 * session takeover
+* configuration settings in a separate .js
+* Localization for all the strings
 * user connected time (and show on .who)
 * user idle time (and show on .who)
 * user total time (save on database)
 * user registration date (save on database)
 * .examine
+* create space (x,y,z)
