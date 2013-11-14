@@ -281,7 +281,7 @@ function help(socket) {
 }
 
 function show_version(socket) {
-	socket.write("TalkerNode, version " + version + "\r\n");
+	socket.write("+------------------------------------+\r\n TalkerNode, version " + version + "\r\n https://github.com/marado/TalkerNode\r\n+------------------------------------+\r\n");
 }
 
 function password(from, oldpass, newpass) {
