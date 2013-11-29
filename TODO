@@ -12,4 +12,12 @@ Lot's of things to do. Here's one list, so I don't forget all of it:
 * user total time (save on database)
 * user registration date (save on database)
 * .examine
-* create space (x,y,z)
+* create space (x,y,z):
+ - z size: 20; x size: 200000; y size: 200000
+ - wraparound: x; y
+ - commands all use relative coordinates, to a "center" command-defined
+ - people enter in their last coords, if none, they enter in "center"
+ - adapt existing commands to be localized (say, emote) and create new ones to maintain functionality (shout...)
+ - .dig
+ - .destroy
+* ranks - 'cause you don't want everyone to have .dig and .destroy, right?
