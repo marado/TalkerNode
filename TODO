@@ -1,17 +1,6 @@
 Lot's of things to do. Here's one list, so I don't forget all of it:
 
-* .password should be interactive, ask for the old password before changing to
-  the new one. Interactive is a must, because we actually allow passphrases...
-* send the ANSI character of noecho and echo to wrap around the password input
-  events
 * session takeover
-* configuration settings in a separate .js
-* Localization for all the strings
-* user connected time (and show on .who)
-* user idle time (and show on .who)
-* user total time (save on database)
-* user registration date (save on database)
-* .examine
 * create space (x,y,z):
  - z size: 20; x size: 200000; y size: 200000
  - wraparound: x; y
@@ -21,3 +10,13 @@ Lot's of things to do. Here's one list, so I don't forget all of it:
  - .dig
  - .destroy
 * ranks - 'cause you don't want everyone to have .dig and .destroy, right?
+* configuration settings in a separate .js
+* Localization for all the strings
+* user connected time (and show on .who)
+* user idle time (and show on .who)
+* user total time (save on database)
+* user registration date (save on database)
+* .examine
+* send the ANSI character of noecho and echo to wrap around the password input
+  events
+* Weak passwords shouldn't be allowed

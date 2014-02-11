@@ -7,7 +7,7 @@ var crypto = require('crypto');
 var sockets = [];
 var port = process.env.PORT || 8888;
 var talkername = "Moosville";
-var version = "0.1.0";
+var version = "0.1.1";
 
 // Instanciates the users database
 var dirty = require('dirty');
@@ -117,6 +117,35 @@ function receiveData(socket, data) {
 		socket.write("\r\nWelcome " + socket.username + "\r\n");
 		socket.loggedin = true;
 		return;
+	} else if (typeof socket.interactive !== 'undefined') {
+		switch (socket.interactive.type) {
+			case "password":
+				socket.db = usersdb.get(socket.username);
+				if (socket.interactive.state === "old") {
+					// let's confirm the password
+					if (socket.db.password !== crypto.createHash('sha512').update(cleanData).digest('hex')) {
+						 socket.write("\r\n:: Wrong password!\r\n");
+						delete socket.interactive;
+					} else {
+						// password is correct
+						socket.write("\r\n:: Tell me the new password: ");
+						socket.interactive.state = "new";
+					}
+				} else {
+					// let's set cleanData as the new password
+					socket.db.password = crypto.createHash('sha512').update(cleanData).digest('hex');
+					usersdb.set(socket.username, socket.db);
+					socket.write("\r\n:: Password changed, now don't you forget your new password!\r\n");
+					delete socket.interactive;
+				}
+				delete socket.db;
+				break;
+			default:
+				socket.write("\r\n:: Something really weird just happened... let's try to recover from it...\r\n");
+				delete socket.interactive;
+				break;
+		}
+		return;
 	}
 
 	// if we have a command...
@@ -157,7 +186,7 @@ function doCommand(socket, command) {
 		case ".passwo":
 		case ".passwor":
 		case ".password":
-			password(socket, command.split(' ').slice(1).join(" "));
+			password(socket);
 			break;
 		case ".q":
 		case ".qu":
@@ -285,14 +314,9 @@ function show_version(socket) {
 	socket.write("+------------------------------------+\r\n TalkerNode, version " + version + "\r\n https://github.com/marado/TalkerNode\r\n+------------------------------------+\r\n");
 }
 
-function password(from, oldpass, newpass) {
-	if ((typeof newpass === 'undefined') || newpass.length < 1) {
-		from.write(":: Usage: .password NewPasswordYouWant\r\n");
-	} else {
-		from.db.password = crypto.createHash('sha512').update(newpass).digest('hex');
-		usersdb.set(from.username, from.db);
-		from.write(":: You password has been changed!\r\n");
-	}
+function password(from) {
+	from.write(":: Tell me your old password: ");
+	from.interactive = {type:"password", state:"old"};
 }
 
 function tell(from, to, message) {
