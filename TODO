@@ -1,17 +1,20 @@
-Lot's of things to do. Here's one list, so I don't forget all of it:
+Lot's of things to do. Here's a list, so I don't forget all of it:
 
 * session takeover
-* create space (x,y,z):
- - z size: 20; x size: 200000; y size: 200000
- - wraparound: x; y
- - commands all use relative coordinates, to a "center" command-defined
- - people enter in their last coords, if none, they enter in "center"
+* create space (a new project, "Nodiverse, a 3D universe in Node.js"?):
+ - universe is a graph
+  - center of universe is pointer to one node
+  - each node can have three links (x,y,z) to other nodes, each link has a distance associated
+ - "walkable" connections is a list of connections
+  - each connection links two nodes, in a certain distance
+  - the universe and connections are enough to set up a finit size universe on either coordinate, 
+  - it is also enough to define if it wraps around in any of them
+ - a function is needed to check all connections for a certain node
+ - people enter in their last node; if none, they enter in "center"
  - adapt existing commands to be localized (say, emote) and create new ones to maintain functionality (shout...)
  - .dig
  - .destroy
 * ranks - 'cause you don't want everyone to have .dig and .destroy, right?
-* configuration settings in a separate .js
-* Localization for all the strings
 * user connected time (and show on .who)
 * user idle time (and show on .who)
 * user total time (save on database)
@@ -20,3 +23,6 @@ Lot's of things to do. Here's one list, so I don't forget all of it:
 * send the ANSI character of noecho and echo to wrap around the password input
   events
 * Weak passwords shouldn't be allowed
+* .map
+* configuration settings in a separate .js
+* Localization for all the strings
