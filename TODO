@@ -2,14 +2,14 @@ Lot's of things to do. Here's a list, so I don't forget all of it:
 
 * session takeover
 * create space (a new project, "Nodiverse, a 3D universe in Node.js"?):
- - universe is a graph
-  - center of universe is pointer to one node
-  - each node can have three links (x,y,z) to other nodes, each link has a distance associated
- - "walkable" connections is a list of connections
-  - each connection links two nodes, in a certain distance
-  - the universe and connections are enough to set up a finit size universe on either coordinate, 
-  - it is also enough to define if it wraps around in any of them
- - a function is needed to check all connections for a certain node
+ - universe is an octree (see https://www.npmjs.org/package/octree )
+ - each place can have:
+  - name (mandatory)
+  - description
+  - paths
+ - the universe and connections are enough to set up a finit size universe on either coordinate, 
+ - it is also enough to define if it wraps around in any of them
+ - a function is needed to check universe consistency; if operation changes universe state, raise warning
  - people enter in their last node; if none, they enter in "center"
  - adapt existing commands to be localized (say, emote) and create new ones to maintain functionality (shout...)
  - .dig
