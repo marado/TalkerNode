@@ -7,7 +7,7 @@ var crypto = require('crypto');
 var sockets = [];
 var port = process.env.PORT || 8888;
 var talkername = "Moosville";
-var version = "0.1.1";
+var version = "0.1.2";
 
 // Instanciates the users database
 var dirty = require('dirty');
@@ -64,8 +64,6 @@ function receiveData(socket, data) {
 			socket.write("\r\nThat username is reserved, you cannot have it.\r\nGive me a name:  ");
 		}
 		else if ((cleanData.match(/^[a-zA-Z]+$/) !== null) && (1 < cleanData.length) && (cleanData.length < 17)) {
-			if (allButMe(socket,function(me,to){if(to.username.toLowerCase()===cleanData.toLowerCase()){return true;}})) 
-				return socket.write("\r\nThat user is already connected!\r\nGive me a name:  ");
 			socket.username = cleanData.toLowerCase().charAt(0).toUpperCase() + cleanData.toLowerCase().slice(1); // Capitalized name
 			socket.loggedin = false;
 			socket.db = usersdb.get(socket.username);
@@ -113,7 +111,12 @@ function receiveData(socket, data) {
 		}
 
 		// entering the talker
-		allButMe(socket,function(me,to){to.write("[Entering is: "+ me.username + " ]\r\n");});
+		if (allButMe(socket,function(me,to){if(to.username.toLowerCase()===me.username.toLowerCase()){return true;}})) {
+			var old = allButMe(socket,function(me,to){if(to.username.toLowerCase()===me.username.toLowerCase()){to.end('Session is being taken over...\n');}});
+			socket.write('Taking over session...\n');
+		} else {
+			allButMe(socket,function(me,to){to.write("[Entering is: "+ me.username + " ]\r\n");});
+		}
 		socket.write("\r\nWelcome " + socket.username + "\r\n");
 		socket.loggedin = true;
 		return;

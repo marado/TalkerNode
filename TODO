@@ -1,6 +1,5 @@
 Lot's of things to do. Here's a list, so I don't forget all of it:
 
-* session takeover
 * create space (a new project, "Nodiverse, a 3D universe in Node.js"?):
  - universe is an octree (see https://www.npmjs.org/package/octree )
  - each place can have:
