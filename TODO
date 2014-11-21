@@ -1,22 +1,6 @@
 Lot's of things to do. Here's a list, so I don't forget all of it:
 
-* create space (a new project, "Nodiverse, a 3D universe in Node.js"):
- - v1: 
-  - universe consists of places and (non-mandatory) initial parameters
-  - places are defined by (coords, exits)
-   - coords: x, y, z
-   - exits: bitmask (NW & N & NE & W & E & SW & S & SE)
-  - places can have other non-mandatory fields (name, description, ...)
-  - non-mandatory initial parameters: 
-   - geometry (plane, sphere, ...)
-   - default place
-  - methods
-   - new universe; edit universe (non-mandatory initial parameters)
-   - create place; destroy place; edit place
-   - ascii map
- - v2:
-  - universe is an octree (see https://www.npmjs.org/package/octree )
-* adapt TalkerNode to use Nodiverse
+* adapt TalkerNode to use Nodiverse - https://github.com/marado/Nodiverse/
  - people enter in their last node; if none, they enter in default place (mandatory for TalkerNode)
  - adapt existing commands to be localized (say, emote) and create new ones to maintain functionality (shout...)
  - .dig
