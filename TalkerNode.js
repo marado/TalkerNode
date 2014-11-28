@@ -9,7 +9,7 @@ var port = process.env.PORT || 8888;
 var talkername = "Moosville";
 var version = "0.1.2";
 
-// Instanciates the users database
+// Instantiates the users database
 var dirty = require('dirty');
 var usersdb = dirty('user.db');
 usersdb.on('error', function(err) { console.log("USERS DB ERROR! "+err); });
