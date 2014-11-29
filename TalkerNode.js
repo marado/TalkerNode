@@ -5,14 +5,24 @@ var net = require('net');
 var crypto = require('crypto');
 
 var sockets = [];
-var port = process.env.PORT || 8888;
-var talkername = "Moosville";
-var version = "0.1.2";
+var port = process.env.PORT || 8888; // TODO: move to talker settings database
+var talkername = "Moosville";        // TODO: move to the talker settings database
+var version = "0.1.3";
 
 // Instantiates the users database
 var dirty = require('dirty');
 var usersdb = dirty('user.db');
 usersdb.on('error', function(err) { console.log("USERS DB ERROR! "+err); });
+
+// Instantiates the talker settings database
+var talkerdb = dirty('talker.db');
+talkerdb.on('error', function(err) { console.log("TALKER DB ERROR! "+err); });
+var ranks = talkerdb.get("ranks");
+if (typeof ranks === 'undefined') {
+	ranks = {list:["Jailed", "Newcomer", "Newbie", "Juvie", "Learner", "Adult", "Wiseman", "Hero", "Mage", "Imortal", "God"], entrylevel: 10};
+	talkerdb.set("ranks", ranks);
+}
+
 
 /*
  * Cleans the input of carriage return, newline and control characters
@@ -89,7 +99,15 @@ function receiveData(socket, data) {
 			} else {
 				if (socket.password === crypto.createHash('sha512').update(cleanData).digest('hex')) {
 					// password confirmed
-					socket.db={"password":crypto.createHash('sha512').update(cleanData).digest('hex')};
+					socket.db={"password":crypto.createHash('sha512').update(cleanData).digest('hex'), "rank":ranks.entrylevel};
+					if (ranks.list.length - 1 == ranks.entrylevel) {
+						if (ranks.list.length == 1) {
+							ranks.entrylevel = 0;
+						} else {
+							ranks.entrylevel = 1;
+						}
+						talkerdb.set("ranks", ranks);
+					}
 					usersdb.set(socket.username, socket.db);
 					delete socket.password;
 					delete socket.registering;

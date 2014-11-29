@@ -1,11 +1,18 @@
 Lot's of things to do. Here's a list, so I don't forget all of it:
 
+* Make TalkerNode behave properly with recent versions of node-dirty (the new events like load...)
 * adapt TalkerNode to use Nodiverse - https://github.com/marado/Nodiverse/
  - people enter in their last node; if none, they enter in default place (mandatory for TalkerNode)
  - adapt existing commands to be localized (say, emote) and create new ones to maintain functionality (shout...)
  - .dig
  - .destroy
 * ranks - 'cause you don't want everyone to have .dig and .destroy, right?
+ - .ranks (lists ranks, points out yourse)
+ - promote (if you're level ... 2?)
+ - demote (if you're level = promote's level)
+ - .who shows rank
+ - .wizlist shows list of users in n top ranks
+ - list of commands to manipulate ranks' list
 * user connected time (and show on .who)
 * user idle time (and show on .who)
 * user total time (save on database)
@@ -17,3 +24,4 @@ Lot's of things to do. Here's a list, so I don't forget all of it:
 * .map
 * configuration settings in a separate .js
 * Localization for all the strings
+* Check out code's TODO's 
