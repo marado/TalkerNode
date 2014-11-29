@@ -23,3 +23,7 @@ millions can I get a pint please?"
 * TalkerNode depends on node-dirty. You can install it from your regular
   distribution (eg: aptitude install node-dirty), npm (npm install dirty),
   or directly grabbing the code: https://github.com/felixge/node-dirty .
+  Unfortunately, the code isn't quite compliant with the newest versions of
+  node-dirty, and I can't really tell which was the latest known good version.
+  I know it was < 0.9.6. Work to make TalkerNode behave properly with recent
+  node-dirty versions is on its way.
