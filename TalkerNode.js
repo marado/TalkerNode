@@ -7,7 +7,7 @@ var crypto = require('crypto');
 var sockets = [];
 var port = process.env.PORT || 8888; // TODO: move to talker settings database
 var talkername = "Moosville";        // TODO: move to the talker settings database
-var version = "0.1.3";
+var version = "0.1.4";
 
 // Instantiates the users database
 var dirty = require('dirty');
@@ -15,14 +15,34 @@ var usersdb = dirty('user.db');
 usersdb.on('error', function(err) { console.log("USERS DB ERROR! "+err); });
 
 // Instantiates the talker settings database
-var talkerdb = dirty('talker.db');
-talkerdb.on('error', function(err) { console.log("TALKER DB ERROR! "+err); });
-var ranks = talkerdb.get("ranks");
-if (typeof ranks === 'undefined') {
-	ranks = {list:["Jailed", "Newcomer", "Newbie", "Juvie", "Learner", "Adult", "Wiseman", "Hero", "Mage", "Imortal", "God"], entrylevel: 10};
-	talkerdb.set("ranks", ranks);
-}
+var ranks;
+var talkerdb = dirty('talker.db').on('load', function() {
+    talkerdb.on('error', function(err) { console.log("TALKER DB ERROR! "+err); });
+    ranks = talkerdb.get("ranks");
+    if (typeof ranks === 'undefined') {
+        ranks = {list:["Jailed", "Newcomer", "Newbie", "Juvie", "Learner", "Adult", "Wiseman", "Hero", "Mage", "Imortal", "God"], entrylevel: 10};
+        talkerdb.set("ranks", ranks);
+    }
+});
 
+// Instantiates the universe
+var nodiverse = require('nodiverse');
+var universe;
+var universedb = dirty('universe.db').on('load', function() {
+    universedb.on('error', function(err) { console.log("UNIVERSE DB ERROR! "+err); });
+    universe = universedb.get("universe");
+    if (typeof universe === 'undefined') {
+        universe = nodiverse(); // new universe
+        universe.create([0,0,0],0);
+        var limbo = universe.get([0,0,0]);
+        limbo.name = "Limbo"; // at the beginning there was just the limbo
+        universe.update(limbo);
+        universe.entrypoint=[0,0,0]; // where everyone was meant to be
+        universedb.set("universe", universe);
+    }
+});
+
+// TODO: we should only start the talker when all databases are loaded
 
 /*
  * Cleans the input of carriage return, newline and control characters
