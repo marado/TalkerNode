@@ -39,7 +39,12 @@ var universedb = dirty('universe.db').on('load', function() {
         universe.update(limbo);
         universe.entrypoint=[0,0,0]; // where everyone was meant to be
         universedb.set("universe", universe);
-    }
+    } else {
+		// assign the correct prototype to universe
+		// TODO: use Object.setPrototypeOf to make 'universe' a Nodiverse object
+		//       (method available in nodejs >= 0.11.14)
+	}
+	// console.log(Object.getPrototypeOf(universe));
 });
 
 // TODO: we should only start the talker when all databases are loaded
@@ -119,7 +124,7 @@ function receiveData(socket, data) {
 			} else {
 				if (socket.password === crypto.createHash('sha512').update(cleanData).digest('hex')) {
 					// password confirmed
-					socket.db={"password":crypto.createHash('sha512').update(cleanData).digest('hex'), "rank":ranks.entrylevel};
+					socket.db={"password":crypto.createHash('sha512').update(cleanData).digest('hex'), "rank":ranks.entrylevel, "where":universe.entrypoint};
 					if (ranks.list.length - 1 == ranks.entrylevel) {
 						if (ranks.list.length == 1) {
 							ranks.entrylevel = 0;
@@ -148,12 +153,19 @@ function receiveData(socket, data) {
 			return;
 		}
 
-		// entering the talker
+		// entering the talker...
+		if (universe.get(socket.db.where) === null) { // there's no where, or that place doesn't exist anymore
+			socket.db.where = universe.entrypoint;
+			// save changes into the database
+			var tmp = usersdb.get(socket.username);
+			tmp.where = socket.db.where;
+			usersdb.set(socket.username, tmp);
+		}
 		if (allButMe(socket,function(me,to){if(to.username.toLowerCase()===me.username.toLowerCase()){return true;}})) {
 			var old = allButMe(socket,function(me,to){if(to.username.toLowerCase()===me.username.toLowerCase()){to.end('Session is being taken over...\n');}});
 			socket.write('Taking over session...\n');
 		} else {
-			allButMe(socket,function(me,to){to.write("[Entering is: "+ me.username + " ]\r\n");});
+			allButMe(socket,function(me,to){to.write("[Entering is: "+ me.username + " (" + me.db.where + ") ]\r\n");});
 		}
 		socket.write("\r\nWelcome " + socket.username + "\r\n");
 		socket.loggedin = true;
