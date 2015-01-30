@@ -1,26 +1,2 @@
-Lot's of things to do. Here's a list, so I don't forget all of it:
-
-* Use the universe:
- - people enter in their last node; if none, they enter in default place (mandatory for TalkerNode)
- - adapt existing commands to be localized (say, emote) and create new ones to maintain functionality (shout...)
- - .dig
- - .destroy
-* ranks - 'cause you don't want everyone to have .dig and .destroy, right?
- - .ranks (lists ranks, points out yourse)
- - promote (if you're level ... 2?)
- - demote (if you're level = promote's level)
- - .who shows rank
- - .wizlist shows list of users in n top ranks
- - list of commands to manipulate ranks' list
-* user connected time (and show on .who)
-* user idle time (and show on .who)
-* user total time (save on database)
-* user registration date (save on database)
-* .examine
-* send the ANSI character of noecho and echo to wrap around the password input
-  events
-* Weak passwords shouldn't be allowed
-* .map
-* configuration settings in a separate .js
-* Localization for all the strings
-* Check out code's TODO's 
+For now, a list of things that need to be done is at
+https://github.com/marado/TalkerNode/issues
