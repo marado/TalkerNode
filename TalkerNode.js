@@ -154,12 +154,16 @@ function receiveData(socket, data) {
 		}
 
 		// entering the talker...
+		try {
 		if (universe.get(socket.db.where) === null) { // there's no where, or that place doesn't exist anymore
 			socket.db.where = universe.entrypoint;
 			// save changes into the database
 			var tmp = usersdb.get(socket.username);
 			tmp.where = socket.db.where;
 			usersdb.set(socket.username, tmp);
+		}
+		} catch (e) {
+			// Universe loading not implemented yet
 		}
 		if (allButMe(socket,function(me,to){if(to.username.toLowerCase()===me.username.toLowerCase()){return true;}})) {
 			var old = allButMe(socket,function(me,to){if(to.username.toLowerCase()===me.username.toLowerCase()){to.end('Session is being taken over...\n');}});
@@ -247,6 +251,13 @@ function doCommand(socket, command) {
 		case ".quit":
 			allButMe(socket,function(me,to){to.write("[Leaving is: "+ me.username + " ]\r\n");});
 			socket.end('Goodbye!\n');
+			break;
+		case ".r":
+		case ".ra":
+		case ".ran":
+		case ".rank":
+		case ".ranks":
+			list_ranks(socket);
 			break;
 		case ".s":
 		case ".sa":
@@ -360,6 +371,16 @@ function help(socket) {
 	socket.write("| .password - use this if you want to change your password                    |\r\n");
 	socket.write("+-----------------------------------------------------------------------------+\r\n");
 	socket.write("| Remember: all commands start with a dot (.), like .help                     |\r\n");
+	socket.write("+-----------------------------------------------------------------------------+\r\n");
+}
+
+function list_ranks(socket) {
+	socket.write("+-----------------------------------------------------------------------------+\r\n");
+	for (var r = 0 ; r < ranks.list.length; r++) {
+		var text = ("  " + r).slice(-3) + "\t: " + (ranks.list[r] + "            ").substr(0,11);
+		if (socket.db.rank == r) text += "\t<- you";
+		socket.write(text+"\r\n");
+	}
 	socket.write("+-----------------------------------------------------------------------------+\r\n");
 }
 
