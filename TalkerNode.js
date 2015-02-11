@@ -178,7 +178,6 @@ function receiveData(socket, data) {
 	} else if (typeof socket.interactive !== 'undefined') {
 		switch (socket.interactive.type) {
 			case "password":
-				socket.db = usersdb.get(socket.username);
 				if (socket.interactive.state === "old") {
 					// let's confirm the password
 					if (socket.db.password !== crypto.createHash('sha512').update(cleanData).digest('hex')) {
@@ -196,7 +195,6 @@ function receiveData(socket, data) {
 					socket.write("\r\n:: Password changed, now don't you forget your new password!\r\n");
 					delete socket.interactive;
 				}
-				delete socket.db;
 				break;
 			default:
 				socket.write("\r\n:: Something really weird just happened... let's try to recover from it...\r\n");
