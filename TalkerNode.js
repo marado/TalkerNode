@@ -243,15 +243,15 @@ function loadCommands() {
  * Method for commands. In future this should be elsewhere, but for now we must start already separating this from the rest...
  */
 function doCommand(socket, command) {
-
 	try {
 		var c = command.split(' ')[0].toLowerCase().substring(1);
-		if(commands[c]) {
+		var userRank = socket.db.rank;
+		if(commands[c] && userRank >= commands[c].min_rank) {
 			commands[c].execute(socket, command.split(' ').slice(1).join(" "), command_utility)
 		} else {
 			var results = [];
 			for (var cmd in commands) {
-		    	if(cmd.substr(0, c.length) == c)  {
+		    	if(cmd.substr(0, c.length) == c && userRank >= commands[cmd].min_rank)  {
 					results.push(cmd);
 		    	} 
 			}

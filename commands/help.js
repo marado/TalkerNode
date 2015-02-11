@@ -9,7 +9,7 @@ exports.command = {
 	execute: function(socket, command, command_access) {
 
 
-		var userRank = command_access.getOnlineUser(socket.username).db.rank;
+		var userRank = socket.db.rank;
 
 	    socket.write("+-----------------------------------------------------------------------------+\r\n");
 	    socket.write("   Helpful commands on " + command_access.talkername + "\r\n");
