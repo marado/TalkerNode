@@ -7,6 +7,8 @@ exports.command = {
 	help: "",
 
 	execute: function(socket, command, command_access) {
+        if (command === 'undefined' || command.length < 1)
+            return socket.write("What are you trying to do?\r\n");
 		var send = socket.username + " " + command + "\r\n";
 		command_access.allButMe(socket,function(me,to){to.write(send);}); 
 		socket.write(send);

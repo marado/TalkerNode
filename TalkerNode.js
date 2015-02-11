@@ -7,7 +7,7 @@ var crypto = require('crypto');
 var sockets = [];
 var port = process.env.PORT || 8888; // TODO: move to talker settings database
 var talkername = "Moosville";        // TODO: move to the talker settings database
-var version = "0.1.6";
+var version = "0.1.7";
 
 // Instantiates the users database
 var dirty = require('dirty');
@@ -330,7 +330,24 @@ function command_utility() {
 	    		if (name.toLowerCase() === sockets[i].username.toLowerCase() && sockets[i].loggedin) return sockets[i];
 	    	}
 	    	return false;
-	    }
+	    },
+
+        // returns the user object, in all its db glory
+        // TODO: Let's give just a subset of data from the user, OK? I mean, we
+        // don't want any command to have access to other users' passwords, do
+        // we?
+        getUser: function getUser(name) {
+            name = name.toLowerCase().charAt(0).toUpperCase() + name.toLowerCase().slice(1);
+            console.log("D: getUser: " + name);
+            return usersdb.get(name);
+        },
+
+        // updates a user in the database
+        // TODO: argh, we surely don't want this! harden it!
+        updateUser: function updateUser(username, userObj) {
+            username = username.toLowerCase().charAt(0).toUpperCase() + username.toLowerCase().slice(1);
+            usersdb.set(username,userObj);
+        },
     };
     return ret;
 };
