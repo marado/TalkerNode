@@ -93,8 +93,8 @@ function receiveData(socket, data) {
 
 	if(socket.username == undefined) {
 		if (cleanData.toLowerCase() === "quit") return socket.end('Goodbye!\n');
-		if (cleanData.toLowerCase() === "who") { who(socket); return socket.write("Give me a name:  "); }
-		if (cleanData.toLowerCase() === "version") { show_version(socket); return socket.write("Give me a name:  "); }
+		if (cleanData.toLowerCase() === "who") { socket.db={rank:0}; doCommand(socket, ".who"); return socket.write("Give me a name:  "); }
+		if (cleanData.toLowerCase() === "version") { socket.db={rank:0}; doCommand(socket, ".version"); return socket.write("Give me a name:  "); }
 		var reservedNames=["who","quit","version"];
 		if (reservedNames.indexOf(cleanData.toLowerCase()) > -1) {
 			socket.write("\r\nThat username is reserved, you cannot have it.\r\nGive me a name:  ");
