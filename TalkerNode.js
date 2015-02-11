@@ -306,6 +306,7 @@ var command_utility = {
 	version: version,
 	talkername: talkername,
 	sockets: sockets,
+	commands: commands,
 	
 	/*
 	 * Execute function to all connected users *but* the triggering one. 
