@@ -16,6 +16,7 @@ usersdb.on('error', function(err) { console.log("USERS DB ERROR! "+err); });
 
 // Instantiates the talker settings database
 var ranks;
+var commands = {};
 var talkerdb = dirty('talker.db').on('load', function() {
     talkerdb.on('error', function(err) { console.log("TALKER DB ERROR! "+err); });
     ranks = talkerdb.get("ranks");
@@ -165,11 +166,11 @@ function receiveData(socket, data) {
 		} catch (e) {
 			// Universe loading not implemented yet
 		}
-		if (allButMe(socket,function(me,to){if(to.username.toLowerCase()===me.username.toLowerCase()){return true;}})) {
-			var old = allButMe(socket,function(me,to){if(to.username.toLowerCase()===me.username.toLowerCase()){to.end('Session is being taken over...\n');}});
+		if (command_utility.allButMe(socket,function(me,to){if(to.username.toLowerCase()===me.username.toLowerCase()){return true;}})) {
+			var old = command_utility.allButMe(socket,function(me,to){if(to.username.toLowerCase()===me.username.toLowerCase()){to.end('Session is being taken over...\n');}});
 			socket.write('Taking over session...\n');
 		} else {
-			allButMe(socket,function(me,to){to.write("[Entering is: "+ me.username + " (" + me.db.where + ") ]\r\n");});
+			command_utility.allButMe(socket,function(me,to){to.write("[Entering is: "+ me.username + " (" + me.db.where + ") ]\r\n");});
 		}
 		socket.write("\r\nWelcome " + socket.username + "\r\n");
 		socket.loggedin = true;
@@ -215,79 +216,58 @@ function receiveData(socket, data) {
 }
 
 /*
+ * Load all commands from the command subdirectory
+ */
+function loadCommands() {
+
+	// Loop through all files, trying to load them
+	var normalizedPath = require("path").join(__dirname, "commands");
+	require("fs").readdirSync(normalizedPath).forEach(function(file) {
+
+		var cmd_load = require('./commands/' + file);
+		var cmd = cmd_load.command;
+
+		// Only load the command if it's set to Autoload
+		if(cmd.autoload) {
+			console.log("Loading Command: Command '" + cmd.name + "' loaded (from '" + file + "')");
+			cmd.loaded_date = new Date();
+			commands[cmd.name] = cmd;
+		} else {
+			console.log("Loading Command: Skipping " + cmd.name + " (from '" + file + "'). Autoload = false");
+		}
+	});
+}
+
+
+/*
  * Method for commands. In future this should be elsewhere, but for now we must start already separating this from the rest...
  */
 function doCommand(socket, command) {
-	switch(command.split(' ')[0].toLowerCase()) {
-		case ".e":
-		case ".em":
-		case ".emo":
-		case ".emot":
-		case ".emote":
-			var send = socket.username + " " + command.split(' ').slice(1).join(" ") + "\r\n";
-			allButMe(socket,function(me,to){to.write(send);}); 
-			socket.write(send);
-			break;
-		case ".h":
-		case ".he":
-		case ".hel":
-		case ".help":
-			help(socket);
-			break;	
-		case ".p":
-		case ".pa":
-		case ".pas":
-		case ".pass":
-		case ".passw":
-		case ".passwd":
-		case ".passwo":
-		case ".passwor":
-		case ".password":
-			password(socket);
-			break;
-		case ".q":
-		case ".qu":
-		case ".qui":
-		case ".quit":
-			allButMe(socket,function(me,to){to.write("[Leaving is: "+ me.username + " ]\r\n");});
-			socket.end('Goodbye!\n');
-			break;
-		case ".r":
-		case ".ra":
-		case ".ran":
-		case ".rank":
-		case ".ranks":
-			list_ranks(socket);
-			break;
-		case ".s":
-		case ".sa":
-		case ".say":
-			allButMe(socket,function(me,to){to.write(me.username + ": " + command.split(' ').slice(1).join(" ") + "\r\n");});
-			socket.write("You said: " + command.split(' ').slice(1).join(" ") + "\r\n");
-			break;
-		case ".t":
-		case ".te":
-		case ".tel":
-		case ".tell": 
-			tell(socket, command.split(' ')[1], command.split(' ').slice(2).join(" "));
-			break;
-		case ".v":
-		case ".ve":
-		case ".ver":
-		case ".vers":
-		case ".versi":
-		case ".versio":
-		case ".version":
-			show_version(socket);
-			break;	
-		case ".w":
-		case ".wh":
-		case ".who":
-			who(socket);
-			break;
-		default:
-			socket.write("There's no such thing as a " + command.split(' ')[0] + " command.\r\n");
-			break;
+	try {
+		var c = command.split(' ')[0].toLowerCase().substring(1);
+		var userRank = socket.db.rank;
+		if(commands[c] && userRank >= commands[c].min_rank) {
+			commands[c].execute(socket, command.split(' ').slice(1).join(" "), command_utility)
+		} else {
+			var results = [];
+			for (var cmd in commands) {
+		    	if(cmd.substr(0, c.length) == c && userRank >= commands[cmd].min_rank)  {
+					results.push(cmd);
+		    	} 
+			}
+			if(results.length == 1) {
+				var x = commands[results[0]];
+				x.execute(socket, command.split(' ').slice(1).join(" "), command_utility)
+			} else if(results.length > 1) {
+				socket.write("Found " + results.length + " possible commands (" + results.toString() + ").  Be more specific.\r\n")
+			} else {
+				socket.write("There's no such thing as a " + c + " command.\r\n");
+			}
+		}
+	}
+	catch(err) {
+		socket.write("Error executing command '" + c + "': " + err + "\r\n");
+		console.error("Error executing command '" + c + "': " + err + "\r\n");
 	}
 }
 
@@ -315,108 +295,42 @@ function newSocket(socket) {
 	})
 }
 
+
 /*
- * Execute function to all connected users *but* the triggering one. 
- * It stops at the first connected user to which the function returns true, returning true.
+ * COMMAND UTILITY  -  Should probably be moved to own module
+ * Object passed to commands.  Gives them access to specific server properties, methods 
  */
-function allButMe(socket,fn) {
-	for(var i = 0; i<sockets.length; i++) {
-		if (sockets[i] !== socket) {
-			if ((typeof sockets[i].loggedin != 'undefined') && sockets[i].loggedin){
-				if(fn(socket,sockets[i])) return true;
+
+// 
+var command_utility = {
+	version: version,
+	talkername: talkername,
+	sockets: sockets,
+	commands: commands,
+	
+	/*
+	 * Execute function to all connected users *but* the triggering one. 
+	 * It stops at the first connected user to which the function returns true, returning true.
+	 */
+	allButMe: function allButMe(socket,fn) {
+		for(var i = 0; i<sockets.length; i++) {
+			if (sockets[i] !== socket) {
+				if ((typeof sockets[i].loggedin != 'undefined') && sockets[i].loggedin){
+					if(fn(socket,sockets[i])) return true;
+				}
 			}
 		}
-	}
-}
+	},
 
-
-/*
- * COMMANDS!
- */
-
-function who(socket) {
-	var connected = 0;
-	var connecting = 0;
-	socket.write("+----------------------------------------------------------------------------+\r\n");
-	socket.write("   Current users on " + talkername + " at " + new Date().toLocaleDateString() +", " + new Date().toLocaleTimeString() +"\r\n");
-	socket.write("+----------------------------------------------------------------------------+\r\n");
-	socket.write("  Name              Server              Family\tClient    \r\n");
-	socket.write("+----------------------------------------------------------------------------+\r\n");
-	for (var i = 0; i < sockets.length; i++) {
-		if ((typeof sockets[i].loggedin === 'undefined') || !sockets[i].loggedin ){
-			connecting++;
-		} else {
-			connected++;
-			var name = sockets[i].username; for (var pad = sockets[i].username.length; pad < 16; pad++) name+=" ";
-			socket.write("  " + name + "  " + sockets[i].server.address().address + ":" + sockets[i].server.address().port + "\t" + sockets[i].server.address().family + "\t" + sockets[i].remoteAddress + ":" + sockets[i].remotePort + "\r\n");
-		}
-	}
-	socket.write("+----------------------------------------------------------------------------+\r\n");
-	socket.write("     Total of " + connected + " connected users"); if (connecting > 0) { socket.write(" and " + connecting + " still connecting"); }
-	socket.write("\r\n+----------------------------------------------------------------------------+\r\n");
-
-}
-
-function help(socket) {
-	socket.write("+-----------------------------------------------------------------------------+\r\n");
-	socket.write("   Helpful commands on " + talkername + "\r\n");
-	socket.write("+-----------------------------------------------------------------------------+\r\n");
-	socket.write("| .help     - shows you this list of commands and what do they do             |\r\n");
-	socket.write("| .say      - lets you talk with other people. Just .say something!           |\r\n");
-	socket.write("| .emote    - lets you pose something, as if you were acting.                 |\r\n");
-	socket.write("| .tell     - tells someone something, in private. Only both of you will know |\r\n");
-	socket.write("| .who      - lets you know who is connected in the talker at this moment     |\r\n");
-	socket.write("| .ranks    - list the talker's ranks, and points out which one is yourse     |\r\n");
-	socket.write("| .version  - gives you information regarding the software this talker runs   |\r\n");
-	socket.write("| .password - use this if you want to change your password                    |\r\n");
-	socket.write("| .quit     - leaving us, are you? Then .quit !                               |\r\n");
-	socket.write("+-----------------------------------------------------------------------------+\r\n");
-	socket.write("| Remember: all commands start with a dot (.), like .help                     |\r\n");
-	socket.write("+-----------------------------------------------------------------------------+\r\n");
-}
-
-function list_ranks(socket) {
-	socket.write("+-----------------------------------------------------------------------------+\r\n");
-	for (var r = 0 ; r < ranks.list.length; r++) {
-		var text = ("  " + r).slice(-3) + "\t: " + (ranks.list[r] + "            ").substr(0,11);
-		if (socket.db.rank == r) text += "\t<- you";
-		socket.write(text+"\r\n");
-	}
-	socket.write("+-----------------------------------------------------------------------------+\r\n");
-}
-
-function show_version(socket) {
-	socket.write("+------------------------------------+\r\n TalkerNode, version " + version + "\r\n https://github.com/marado/TalkerNode\r\n+------------------------------------+\r\n");
-}
-
-function password(from) {
-	from.write(":: Tell me your old password: ");
-	from.interactive = {type:"password", state:"old"};
-}
-
-function tell(from, to, message) {
-	if ((typeof to === 'undefined') || (typeof message === 'undefined') || to.length < 1 || message.length < 1) {
-		from.write(":: You have to use it this way: .tell someone something\r\n");
-	} else if (from.username.toLowerCase() === to.toLowerCase()) {
-		from.write(":: Talking to yourself is the first sign of madness.\r\n");
-	} else {
-		var s = getOnlineUser(to);
-		if (s) {
-			from.write("You tell " + to + ": " + message + "\r\n");
-			s.write(from.username + " tells you: " + message + "\r\n");
-		} else {
-			from.write("There is no one of that name logged on.\r\n");
-		}
-	}
-}
-
-// returns socket for the user, or false if he doesn't exist
-function getOnlineUser(name) {
+	// returns socket for the user, or false if he doesn't exist
+	getOnlineUser: function getOnlineUser(name) {
 		for (var i = 0; i < sockets.length; i++) {
 			if (name.toLowerCase() === sockets[i].username.toLowerCase() && sockets[i].loggedin) return sockets[i];
 		}
 		return false;
-}
+	}
+};
+
 
 /* 
  * AND FINALLY... THE ACTUAL main()!
@@ -428,3 +342,4 @@ var server = net.createServer(newSocket);
 // Listen on defined port
 server.listen(port);
 console.log(talkername + " initialized on port "+ port);
+loadCommands();
