@@ -219,23 +219,25 @@ function receiveData(socket, data) {
  * Load all commands from the command subdirectory
  */
 function loadCommands() {
+    // Loop through all files, trying to load them
+    var normalizedPath = require("path").join(__dirname, "commands");
+    require("fs").readdirSync(normalizedPath).forEach(function(file) {
+        if (file.substr(file.length-3, 3) === ".js") {
+            var cmd_load = require('./commands/' + file);
+            var cmd = cmd_load.command;
 
-	// Loop through all files, trying to load them
-	var normalizedPath = require("path").join(__dirname, "commands");
-	require("fs").readdirSync(normalizedPath).forEach(function(file) {
-
-		var cmd_load = require('./commands/' + file);
-		var cmd = cmd_load.command;
-
-		// Only load the command if it's set to Autoload
-		if(cmd.autoload) {
-			console.log("Loading Command: Command '" + cmd.name + "' loaded (from '" + file + "')");
-			cmd.loaded_date = new Date();
-			commands[cmd.name] = cmd;
-		} else {
-			console.log("Loading Command: Skipping " + cmd.name + " (from '" + file + "'). Autoload = false");
-		}
-	});
+            // Only load the command if it's set to Autoload
+            if(cmd.autoload) {
+                console.log("Loading Command: Command '" + cmd.name + "' loaded (from '" + file + "')");
+                cmd.loaded_date = new Date();
+                commands[cmd.name] = cmd;
+            } else {
+                console.log("Loading Command: Skipping " + cmd.name + " (from '" + file + "'). Autoload = false");
+            }
+        } else {
+            console.log("Skipping " + file + ": file extension is not 'js'");
+        }
+    });
 }
 
 
