@@ -7,7 +7,7 @@ var crypto = require('crypto');
 var sockets = [];
 var port = process.env.PORT || 8888; // TODO: move to talker settings database
 var talkername = "Moosville";        // TODO: move to the talker settings database
-var version = "0.1.5";
+var version = "0.1.6";
 
 // Instantiates the users database
 var dirty = require('dirty');
@@ -166,11 +166,11 @@ function receiveData(socket, data) {
 		} catch (e) {
 			// Universe loading not implemented yet
 		}
-		if (command_utility.allButMe(socket,function(me,to){if(to.username.toLowerCase()===me.username.toLowerCase()){return true;}})) {
-			var old = command_utility.allButMe(socket,function(me,to){if(to.username.toLowerCase()===me.username.toLowerCase()){to.end('Session is being taken over...\n');}});
+		if (command_utility().allButMe(socket,function(me,to){if(to.username.toLowerCase()===me.username.toLowerCase()){return true;}})) {
+			var old = command_utility().allButMe(socket,function(me,to){if(to.username.toLowerCase()===me.username.toLowerCase()){to.end('Session is being taken over...\n');}});
 			socket.write('Taking over session...\n');
 		} else {
-			command_utility.allButMe(socket,function(me,to){to.write("[Entering is: "+ me.username + " (" + me.db.where + ") ]\r\n");});
+			command_utility().allButMe(socket,function(me,to){to.write("[Entering is: "+ me.username + " (" + me.db.where + ") ]\r\n");});
 		}
 		socket.write("\r\nWelcome " + socket.username + "\r\n");
 		socket.loggedin = true;
@@ -247,7 +247,7 @@ function doCommand(socket, command) {
 		var c = command.split(' ')[0].toLowerCase().substring(1);
 		var userRank = socket.db.rank;
 		if(commands[c] && userRank >= commands[c].min_rank) {
-			commands[c].execute(socket, command.split(' ').slice(1).join(" "), command_utility)
+			commands[c].execute(socket, command.split(' ').slice(1).join(" "), command_utility())
 		} else {
 			var results = [];
 			for (var cmd in commands) {
@@ -257,7 +257,7 @@ function doCommand(socket, command) {
 			}
 			if(results.length == 1) {
 				var x = commands[results[0]];
-				x.execute(socket, command.split(' ').slice(1).join(" "), command_utility)
+				x.execute(socket, command.split(' ').slice(1).join(" "), command_utility())
 			} else if(results.length > 1) {
 				socket.write("Found " + results.length + " possible commands (" + results.toString() + ").  Be more specific.\r\n")
 			} else {
@@ -302,33 +302,37 @@ function newSocket(socket) {
  */
 
 // 
-var command_utility = {
-	version: version,
-	talkername: talkername,
-	sockets: sockets,
-	commands: commands,
-	
-	/*
-	 * Execute function to all connected users *but* the triggering one. 
-	 * It stops at the first connected user to which the function returns true, returning true.
-	 */
-	allButMe: function allButMe(socket,fn) {
-		for(var i = 0; i<sockets.length; i++) {
-			if (sockets[i] !== socket) {
-				if ((typeof sockets[i].loggedin != 'undefined') && sockets[i].loggedin){
-					if(fn(socket,sockets[i])) return true;
-				}
-			}
-		}
-	},
+function command_utility() {
+    var ret = {
+	    version: version,
+	    talkername: talkername,
+	    sockets: sockets,
+	    commands: commands,
+        ranks: ranks,
+	    
+	    /*
+	     * Execute function to all connected users *but* the triggering one. 
+	     * It stops at the first connected user to which the function returns true, returning true.
+	     */
+	    allButMe: function allButMe(socket,fn) {
+	    	for(var i = 0; i<sockets.length; i++) {
+	    		if (sockets[i] !== socket) {
+	    			if ((typeof sockets[i].loggedin != 'undefined') && sockets[i].loggedin){
+	    				if(fn(socket,sockets[i])) return true;
+	    			}
+	    		}
+	    	}
+	    },
 
-	// returns socket for the user, or false if he doesn't exist
-	getOnlineUser: function getOnlineUser(name) {
-		for (var i = 0; i < sockets.length; i++) {
-			if (name.toLowerCase() === sockets[i].username.toLowerCase() && sockets[i].loggedin) return sockets[i];
-		}
-		return false;
-	}
+	    // returns socket for the user, or false if he doesn't exist
+	    getOnlineUser: function getOnlineUser(name) {
+	    	for (var i = 0; i < sockets.length; i++) {
+	    		if (name.toLowerCase() === sockets[i].username.toLowerCase() && sockets[i].loggedin) return sockets[i];
+	    	}
+	    	return false;
+	    }
+    };
+    return ret;
 };
 
 
