@@ -7,7 +7,7 @@ var crypto = require('crypto');
 var sockets = [];
 var port = process.env.PORT || 8888; // TODO: move to talker settings database
 var talkername = "Moosville";        // TODO: move to the talker settings database
-var version = "0.1.7";
+var version = "0.1.8";
 
 // Instantiates the users database
 var dirty = require('dirty');
@@ -338,7 +338,6 @@ function command_utility() {
         // we?
         getUser: function getUser(name) {
             name = name.toLowerCase().charAt(0).toUpperCase() + name.toLowerCase().slice(1);
-            console.log("D: getUser: " + name);
             return usersdb.get(name);
         },
 
