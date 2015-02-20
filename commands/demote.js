@@ -26,11 +26,11 @@ exports.command = {
             var rankName;
             if (online) {
                 online.db.rank = online.db.rank-1;
-                rankName = online.db.rank; // TODO: turn rank number into rank name
+                rankName = command_access.ranks.list[online.db.rank];
                 command_access.updateUser(online.username, online.db);
             } else {
                 w.rank = w.rank-1;
-                rankName = w.rank; // TODO: turn rank number into rank name
+                rankName = command_access.ranks.list[w.rank];
                 command_access.updateUser(whom, w);
             }
             whom = whom.toLowerCase().charAt(0).toUpperCase() + whom.toLowerCase().slice(1);
