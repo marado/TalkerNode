@@ -259,7 +259,7 @@ function doCommand(socket, command) {
 				var x = commands[results[0]];
 				x.execute(socket, command.split(' ').slice(1).join(" "), command_utility())
 			} else if(results.length > 1) {
-				socket.write("Found " + results.length + " possible commands (" + results.toString() + ").  Be more specific.\r\n")
+				socket.write("Found " + results.length + " possible commands (" + results.toString().replace(/,/g,", ") + "). Please be more specific.\r\n")
 			} else {
 				socket.write("There's no such thing as a " + c + " command.\r\n");
 			}
@@ -347,6 +347,17 @@ function command_utility() {
             username = username.toLowerCase().charAt(0).toUpperCase() + username.toLowerCase().slice(1);
             usersdb.set(username,userObj);
         },
+
+		// get users list, only insensitive information
+		getUsersList: function getUsersList() {
+			var list = [];
+		    usersdb.forEach(function(key, val) {
+				// retrieving username and rank. If needed, we can allways add stuff later
+				list.push({username:key, rank:val.rank});
+			});
+			return list;
+		},
+
     };
     return ret;
 };
