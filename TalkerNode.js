@@ -7,7 +7,7 @@ var crypto = require('crypto');
 var sockets = [];
 var port = process.env.PORT || 8888; // TODO: move to talker settings database
 var talkername = "Moosville";        // TODO: move to the talker settings database
-var version = "0.1.9";
+var version = "0.1.10";
 
 // Instantiates the users database
 var dirty = require('dirty');
@@ -42,10 +42,13 @@ var universedb = dirty('universe.db').on('load', function() {
         universedb.set("universe", universe);
     } else {
 		// assign the correct prototype to universe
-		// TODO: use Object.setPrototypeOf to make 'universe' a Nodiverse object
-		//       (method available in nodejs >= 0.11.14)
+		// this is somewhat ugly, since we're falling back from Object.?etPrototypeOf to __proto__ in order not to depend on nodejs 0.12
+		var setProtoOf = function(obj, proto) { obj.__proto__ = proto; };
+		var mixinProperties = function(obj, proto) { for (var prop in proto) { obj[prop] = proto[prop]; } };
+		var setPrototypeOf = Object.setPrototypeOf || {__proto__:[]} instanceof Array ? setProtoOf : mixinProperties;
+		var getPrototypeOf = Object.getPrototypeOf || function(obj) { return obj.__proto__; };
+		setPrototypeOf(universe, getPrototypeOf(nodiverse()));
 	}
-	// console.log(Object.getPrototypeOf(universe));
 });
 
 // TODO: we should only start the talker when all databases are loaded
@@ -155,16 +158,12 @@ function receiveData(socket, data) {
 		}
 
 		// entering the talker...
-		try {
 		if (universe.get(socket.db.where) === null) { // there's no where, or that place doesn't exist anymore
 			socket.db.where = universe.entrypoint;
 			// save changes into the database
 			var tmp = usersdb.get(socket.username);
 			tmp.where = socket.db.where;
 			usersdb.set(socket.username, tmp);
-		}
-		} catch (e) {
-			// Universe loading not implemented yet
 		}
 		if (command_utility().allButMe(socket,function(me,to){if(to.username.toLowerCase()===me.username.toLowerCase()){return true;}})) {
 			var old = command_utility().allButMe(socket,function(me,to){if(to.username.toLowerCase()===me.username.toLowerCase()){to.end('Session is being taken over...\n');}});
