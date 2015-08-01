@@ -7,7 +7,7 @@ var crypto = require('crypto');
 var sockets = [];
 var port = process.env.PORT || 8888; // TODO: move to talker settings database
 var talkername = "Moosville";        // TODO: move to the talker settings database
-var version = "0.1.11";
+var version = "0.1.12";
 
 // Instantiates the users database
 var dirty = require('dirty');
@@ -169,7 +169,7 @@ function receiveData(socket, data) {
 			var old = command_utility().allButMe(socket,function(me,to){if(to.username.toLowerCase()===me.username.toLowerCase()){to.end('Session is being taken over...\n');}});
 			socket.write('Taking over session...\n');
 		} else {
-			command_utility().allButMe(socket,function(me,to){to.write("[Entering is: "+ me.username + " (" + me.db.where + ") ]\r\n");});
+			command_utility().allButMe(socket,function(me,to){to.write("[Entering is: "+ me.username + " (" + universe.get(me.db.where).name + " " + me.db.where + ") ]\r\n");});
 		}
 		socket.write("\r\nWelcome " + socket.username + "\r\n");
 		socket.loggedin = true;
@@ -323,6 +323,21 @@ function command_utility() {
 	    	}
 	    },
 
+		// same as allButMe, but only for those in the same room as me
+		allHereButMe: function allHereButMe(socket,fn) {
+			for(var i = 0 ; i < sockets.length; i++) {
+				if (sockets[i] !== socket) {
+	    			if ((typeof sockets[i].loggedin != 'undefined') && sockets[i].loggedin && 
+							(sockets[i].db.where[0] == socket.db.where[0]) &&
+							(sockets[i].db.where[1] == socket.db.where[1]) &&
+							(sockets[i].db.where[2] == socket.db.where[2])
+					){
+	    				if(fn(socket,sockets[i])) return true;
+					}
+	    		}
+	    	}
+	    },
+
 	    // returns socket for the user, or false if he doesn't exist
 	    getOnlineUser: function getOnlineUser(name) {
 	    	for (var i = 0; i < sockets.length; i++) {
@@ -356,6 +371,9 @@ function command_utility() {
 			});
 			return list;
 		},
+
+		// gives a full view of the universe; TODO: we surely don't want this
+		getUniverse: function getUniverse() {return universe; },
 
     };
     return ret;

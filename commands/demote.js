@@ -2,7 +2,7 @@ exports.command = {
 	name: "demote", 			// Name of command to be executed (Max 10 chars)
 	autoload: true, 			// Should the command be autoloaded at startup
 	unloadable: true,			// Can the command be unloaded dynamically
-	min_rank: 2,				// Minimum rank to use to execute the command
+	min_rank: 3,				// Minimum rank to use to execute the command
 	display: "Lower someone's rank!",		// Summary help text to show in the .help command (Max 60 chars)
 	help: ".demote <user>, Lower someone's rank!",    // Full help text when .help <command> is used
 
