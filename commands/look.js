@@ -10,11 +10,16 @@ exports.command = {
 	execute: function(socket, command, command_access) {
 		socket.write("You look around...\r\n");
 		socket.write("You notice you are at " + command_access.getUniverse().get(socket.db.where).name + ".\r\n");
-		// TODO: convert this into a Nodiverse feature request. Yes, I have one number telling me all I need to know. But I need to math it!
-		for (var i = 0; i < 26; i++) {
-			if (command_access.getUniverse().get(socket.db.where).passages & Math.pow(2, i)) {
-				socket.write("Oh, there's a passage... somewhere!\r\n"); // TODO... we need more info!
+
+		var neighbours = command_access.getUniverse().get_neighbours(command_access.getUniverse().get(socket.db.where));
+		if (neighbours.length == 0) {
+			socket.write("You don't see anywhere to go to.\r\n");
+		} else {
+			socket.write("You see " + neighbours.length + " passages:\r\n   ");
+			for (var i=0; i < neighbours.length; i++) {
+				socket.write(neighbours[i].name + "  ");
 			}
+			socket.write("\r\n");
 		}
 	}
 }
