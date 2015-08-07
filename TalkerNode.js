@@ -7,7 +7,7 @@ var crypto = require('crypto');
 var sockets = [];
 var port = process.env.PORT || 8888; // TODO: move to talker settings database
 var talkername = "Moosville";        // TODO: move to the talker settings database
-var version = "0.2.0";
+var version = "0.2.1";
 
 // Instantiates the users database
 var dirty = require('dirty');
@@ -169,6 +169,7 @@ function receiveData(socket, data) {
 			var old = command_utility().allButMe(socket,function(me,to){if(to.username.toLowerCase()===me.username.toLowerCase()){to.end('Session is being taken over...\n');}});
 			socket.write('Taking over session...\n');
 		} else {
+			socket.loginTime = Date.now();
 			command_utility().allButMe(socket,function(me,to){to.write("[Entering is: "+ me.username + " (" + universe.get(me.db.where).name + " " + me.db.where + ") ]\r\n");});
 		}
 		socket.write("\r\nWelcome " + socket.username + "\r\n");

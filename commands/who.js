@@ -6,13 +6,30 @@ exports.command = {
 	display: "lets you know who is connected in the talker at this moment",
 	help: "",
 
+	// helper functions that should probably be global, instead of stuck here in the command file
+	spaces: function(howMany) {
+		ret = "";
+		for (var i = 0; i < howMany; i++) {
+			ret += " ";
+		}
+		return ret;
+	},
+	stringPadding: function(what, howMuch) {
+		return (what + this.spaces(howMuch-1)).substr(0,howMuch);
+	},
+	timeString: function(time) {
+		var hh = Math.floor(time/1000/60/60);
+		var mm = Math.floor((time/1000/60) % 60);
+		return (hh > 9 ? "" + hh : "0" + hh) + ":" + (mm > 9 ? "" + mm : "0" + mm);
+	},
+
 	execute: function(socket, command, command_access) {
 		var connected = 0;
 		var connecting = 0;
 		socket.write("+----------------------------------------------------------------------------+\r\n");
 		socket.write("   Current users on " + command_access.talkername + " at " + new Date().toLocaleDateString() +", " + new Date().toLocaleTimeString() +"\r\n");
 		socket.write("+----------------------------------------------------------------------------+\r\n");
-		socket.write("  Name              Server              Rank            Where                 \r\n");
+		socket.write("  Name              Server              Rank            Where          Time   \r\n");
 		socket.write("+----------------------------------------------------------------------------+\r\n");
 		for (var i = 0; i < command_access.sockets.length; i++) {
 			if ((typeof command_access.sockets[i].loggedin === 'undefined') || !command_access.sockets[i].loggedin ){
@@ -20,11 +37,12 @@ exports.command = {
 			} else {
 				connected++;
 				socket.write(
-                    "  " + (command_access.sockets[i].username + "               ").substr(0,16) +
-                    "  " + (command_access.sockets[i].server.address().address + ":" + command_access.sockets[i].server.address().port + "                ").substr(0,18) +
-                    "  " + (command_access.ranks.list[command_access.sockets[i].db.rank] + "             ").substr(0,14) +
-                    "  " + command_access.getUniverse().get(command_access.sockets[i].db.where).name + " " + command_access.sockets[i].db.where +
-                    "\r\n");
+					"  " + this.stringPadding(command_access.sockets[i].username, 16) +
+					"  " + this.stringPadding((command_access.sockets[i].server.address().address + ":" + command_access.sockets[i].server.address().port), 18)+
+					"  " + this.stringPadding(command_access.ranks.list[command_access.sockets[i].db.rank], 14) +
+					"  " + this.stringPadding(command_access.getUniverse().get(command_access.sockets[i].db.where).name, 13) +
+					"  " + this.timeString(Date.now() - command_access.sockets[i].loginTime) +
+					"\r\n");
 			}
 		}
 		socket.write("+----------------------------------------------------------------------------+\r\n");
