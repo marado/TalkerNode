@@ -7,7 +7,7 @@ var crypto = require('crypto');
 var sockets = [];
 var port = process.env.PORT || 8888; // TODO: move to talker settings database
 var talkername = "Moosville";        // TODO: move to the talker settings database
-var version = "0.2.1";
+var version = "0.2.2";
 
 // Instantiates the users database
 var dirty = require('dirty');
@@ -170,6 +170,7 @@ function receiveData(socket, data) {
 			socket.write('Taking over session...\n');
 		} else {
 			socket.loginTime = Date.now();
+			socket.activityTime = Date.now();
 			command_utility().allButMe(socket,function(me,to){to.write("[Entering is: "+ me.username + " (" + universe.get(me.db.where).name + " " + me.db.where + ") ]\r\n");});
 		}
 		socket.write("\r\nWelcome " + socket.username + "\r\n");
@@ -243,6 +244,7 @@ function loadCommands() {
  * Method for commands. In future this should be elsewhere, but for now we must start already separating this from the rest...
  */
 function doCommand(socket, command) {
+	socket.activityTime = Date.now();
 	try {
 		var c = command.split(' ')[0].toLowerCase().substring(1);
 		var userRank = socket.db.rank;
