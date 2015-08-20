@@ -279,6 +279,16 @@ function doCommand(socket, command) {
 function closeSocket(socket) {
 	var i = sockets.indexOf(socket);
 	if (i != -1) {
+		// write total time on socket db
+		sockets[i].db = usersdb.get(sockets[i].username);
+		if (typeof sockets[i].db !== 'undefined') {
+		    if (typeof sockets[i].db.totalTime === 'undefined') {
+			sockets[i].db.totalTime = (Date.now() - sockets[i].loginTime);
+		    } else {
+			sockets[i].db.totalTime += (Date.now() - sockets[i].loginTime);
+		    }
+		    usersdb.set(sockets[i].username, sockets[i].db);
+		}
 		sockets.splice(i, 1);
 	}
 }
