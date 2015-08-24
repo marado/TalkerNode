@@ -128,7 +128,12 @@ function receiveData(socket, data) {
 			} else {
 				if (socket.password === crypto.createHash('sha512').update(cleanData).digest('hex')) {
 					// password confirmed
-					socket.db={"password":crypto.createHash('sha512').update(cleanData).digest('hex'), "rank":ranks.entrylevel, "where":universe.entrypoint};
+					socket.db={
+					    "password":crypto.createHash('sha512').update(cleanData).digest('hex'),
+					    "rank":ranks.entrylevel,
+					    "where":universe.entrypoint,
+					    "registerTime":Date.now(),
+					};
 					if (ranks.list.length - 1 == ranks.entrylevel) {
 						if (ranks.list.length == 1) {
 							ranks.entrylevel = 0;
