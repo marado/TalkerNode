@@ -7,7 +7,7 @@ var crypto = require('crypto');
 var sockets = [];
 var port = process.env.PORT || 8888; // TODO: move to talker settings database
 var talkername = "Moosville";        // TODO: move to the talker settings database
-var version = "0.2.3";
+var version = "0.2.4";
 
 // Instantiates the users database
 var dirty = require('dirty');
@@ -63,6 +63,17 @@ function cleanInput(data) {
 }
 
 /*
+ * Turns client's echo on or off. echo off is usually wanted on passwords
+ */
+function echo(bool) {
+    var bytes = Array(3);
+    bytes[0] = 0xFF;
+    bytes[1] = bool ? 0xFC : 0xFB; //  0xFF 0xFC 0x01 for off,  0xFF 0xFB 0x01 for on
+    bytes[2] = 0x01;
+    return new Buffer(bytes);
+}
+
+/*
  * Method executed when data is received from a socket
  */
 function receiveData(socket, data) {
@@ -86,16 +97,18 @@ function receiveData(socket, data) {
 		31, // Telnet IAC - Window Size
 		33, // Telnet IAC - Remote Flow Control
 		34, // Telnet IAC - Linemode
-		36  // Telnet IAC - Environment Variables
+		36, // Telnet IAC - Environment Variables
+		65533 // reply to echo off
 	];
 	if (IAC.indexOf(cleanData.charCodeAt(0)) !== -1) {
 		// This is IAC, not an user input
-		console.log("Moo: IAC: [" + cleanData.charCodeAt(0) +"]");
+		// console.log("Moo: IAC: [" + cleanData.charCodeAt(0) +"]");
 		return;
 	}
 
+	socket.write(echo(true));
 	if(socket.username == undefined) {
-		if (cleanData.toLowerCase() === "quit") return socket.end('Goodbye!\n');
+		if (cleanData.toLowerCase() === "quit") return socket.end('Goodbye!\r\n');
 		if (cleanData.toLowerCase() === "who") { socket.db={rank:0}; doCommand(socket, ".who"); return socket.write("Give me a name:  "); }
 		if (cleanData.toLowerCase() === "version") { socket.db={rank:0}; doCommand(socket, ".version"); return socket.write("Give me a name:  "); }
 		var reservedNames=["who","quit","version"];
@@ -108,9 +121,11 @@ function receiveData(socket, data) {
 			socket.db = usersdb.get(socket.username);
 			if (typeof socket.db === 'undefined') {
 				socket.write("\r\nNew user, welcome! Please choose a password: ");
+				socket.write(echo(false));
 				socket.registering=true;
 			} else {
 				socket.write("\r\nGive me your password: ");
+				socket.write(echo(false));
 				socket.registering=false;
 			}
 			return;
@@ -123,6 +138,7 @@ function receiveData(socket, data) {
 		if (socket.registering) {
 			if (typeof socket.password === 'undefined') {
 				socket.password = crypto.createHash('sha512').update(cleanData).digest('hex');
+				socket.write(echo(false));
 				socket.write("\r\nConfirm the chosen password: ");
 				return;
 			} else {
@@ -192,6 +208,7 @@ function receiveData(socket, data) {
 					} else {
 						// password is correct
 						socket.write("\r\n:: Tell me the new password: ");
+						socket.write(echo(false));
 						socket.interactive.state = "new";
 					}
 				} else {
@@ -325,7 +342,8 @@ function command_utility() {
 	    talkername: talkername,
 	    sockets: sockets,
 	    commands: commands,
-        ranks: ranks,
+	    ranks: ranks,
+	    echo: echo,
 	    
 	    /*
 	     * Execute function to all connected users *but* the triggering one. 
