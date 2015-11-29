@@ -29,3 +29,6 @@ millions can I get a pint please?"
 * TalkerNode depends on Nodiverse (>= 0.0.3). You can install it from npm
   (npm install nodiverse) or directly grabbing the code:
   https://github.com/marado/Nodiverse .
+* It also depends on password-strength. You can install it from npm
+  (npm install password-strength) or directly grabbing the code:
+  https://github.com/yuehu/password-strength .

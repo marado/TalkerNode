@@ -3,11 +3,12 @@
 "use strict";
 var net = require('net');
 var crypto = require('crypto');
+var valid = require('password-strength');
 
 var sockets = [];
 var port = process.env.PORT || 8888; // TODO: move to talker settings database
 var talkername = "Moosville";        // TODO: move to the talker settings database
-var version = "0.2.4";
+var version = "0.2.5";
 
 // Instantiates the users database
 var dirty = require('dirty');
@@ -137,6 +138,16 @@ function receiveData(socket, data) {
 		// this is the password
 		if (socket.registering) {
 			if (typeof socket.password === 'undefined') {
+				if (!valid(cleanData).valid) {
+				    socket.write("\r\nThat password is not valid");
+				    if (valid(cleanData).hint !== null) socket.write(" (" + valid(cleanData).hint + ")");
+				    socket.write(". Let's try again...\r\nGive me a name: ");
+				    delete socket.registering;
+				    delete socket.username;
+				    delete socket.loggedin;
+				    delete socket.db;
+				    return;
+				}
 				socket.password = crypto.createHash('sha512').update(cleanData).digest('hex');
 				socket.write(echo(false));
 				socket.write("\r\nConfirm the chosen password: ");
@@ -213,6 +224,13 @@ function receiveData(socket, data) {
 					}
 				} else {
 					// let's set cleanData as the new password
+					if (!valid(cleanData).valid) {
+					    socket.write("\r\nThat password is not valid");
+					    if (valid(cleanData).hint !== null) socket.write(" (" + valid(cleanData).hint + ")");
+					    socket.write(". Password not changed.\r\n");
+					    delete socket.interactive;
+					    return;
+					}
 					socket.db.password = crypto.createHash('sha512').update(cleanData).digest('hex');
 					usersdb.set(socket.username, socket.db);
 					socket.write("\r\n:: Password changed, now don't you forget your new password!\r\n");
