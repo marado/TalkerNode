@@ -8,7 +8,7 @@ var valid = require('password-strength');
 var sockets = [];
 var port = process.env.PORT || 8888; // TODO: move to talker settings database
 var talkername = "Moosville";        // TODO: move to the talker settings database
-var version = "0.2.5";
+var version = "0.2.6";
 
 // Instantiates the users database
 var dirty = require('dirty');
@@ -138,7 +138,7 @@ function receiveData(socket, data) {
 		// this is the password
 		if (socket.registering) {
 			if (typeof socket.password === 'undefined') {
-				if (!valid(cleanData).valid) {
+				if ((cleanData.toLowerCase() === socket.username.toLowerCase()) || !valid(cleanData).valid) {
 				    socket.write("\r\nThat password is not valid");
 				    if (valid(cleanData).hint !== null) socket.write(" (" + valid(cleanData).hint + ")");
 				    socket.write(". Let's try again...\r\nGive me a name: ");
@@ -224,7 +224,7 @@ function receiveData(socket, data) {
 					}
 				} else {
 					// let's set cleanData as the new password
-					if (!valid(cleanData).valid) {
+					if ((cleanData.toLowerCase() === socket.username.toLowerCase()) || !valid(cleanData).valid) {
 					    socket.write("\r\nThat password is not valid");
 					    if (valid(cleanData).hint !== null) socket.write(" (" + valid(cleanData).hint + ")");
 					    socket.write(". Password not changed.\r\n");
