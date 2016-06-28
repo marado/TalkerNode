@@ -18,7 +18,7 @@ exports.command = {
 			if (neighbours[i].name.toLowerCase() == to.toLowerCase()) toId = i;
 		}
 		if (toId == null) return socket.write("I don't know where " + to + " is...\r\n");
-		command_access.allHereButMe(socket,function(me,t){t.write(": " + me.username + " starts waking towards " + to.toLowerCase() + "...\r\n");});
+		command_access.allHereButMe(socket,function(me,t){t.write(": " + me.username + " starts walking towards " + to.toLowerCase() + "...\r\n");});
 		socket.write(": You start walking towards " + to.toLowerCase() + "...\r\n");
 		socket.db.where = neighbours[toId].coords;
 		var tmp = command_access.getUser(socket.username);
