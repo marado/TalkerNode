@@ -26,7 +26,7 @@ millions can I get a pint please?"
 * TalkerNode depends on node-dirty. You can install it from your regular
   distribution (eg: aptitude install node-dirty), npm (npm install dirty),
   or directly grabbing the code: https://github.com/felixge/node-dirty .
-* TalkerNode depends on Nodiverse (>= 0.0.3). You can install it from npm
+* TalkerNode depends on Nodiverse (>= 0.2.0). You can install it from npm
   (npm install nodiverse) or directly grabbing the code:
   https://github.com/marado/Nodiverse .
 * It also depends on password-strength. You can install it from npm
