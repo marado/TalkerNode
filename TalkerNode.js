@@ -8,7 +8,7 @@ var valid = require('password-strength');
 var sockets = [];
 var port = process.env.PORT || 8888; // TODO: move to talker settings database
 var talkername = "Moosville";        // TODO: move to the talker settings database
-var version = "0.2.8";
+var version = "0.2.9";
 
 // Instantiates the users database
 var dirty = require('dirty');
@@ -246,7 +246,10 @@ function receiveData(socket, data) {
 	}
 
 	// if we have a command...
-	if (cleanData.charAt(0) === ".") {
+	if (cleanData === ".") {
+		if ((typeof socket.lastcommand) !== 'undefined')
+			doCommand(socket, socket.lastcommand);
+	} else if (cleanData.charAt(0) === ".") {
 		doCommand(socket, cleanData);
 	} else {
 		doCommand(socket, ".say " + cleanData);
@@ -281,7 +284,8 @@ function loadCommands() {
 
 
 /*
- * Method for commands. In future this should be elsewhere, but for now we must start already separating this from the rest...
+ * Method for commands. In future this should be elsewhere, but for now we must
+ * start already separating this from the rest...
  */
 function doCommand(socket, command) {
 	socket.activityTime = Date.now();
@@ -289,6 +293,7 @@ function doCommand(socket, command) {
 		var c = command.split(' ')[0].toLowerCase().substring(1);
 		var userRank = socket.db.rank;
 		if(commands[c] && userRank >= commands[c].min_rank) {
+			socket.lastcommand = command;
 			commands[c].execute(socket, command.split(' ').slice(1).join(" "), command_utility())
 		} else {
 			// when we have more than one possible command, we
@@ -319,6 +324,7 @@ function doCommand(socket, command) {
 			}
 			if(results.length == 1) {
 				var x = commands[results[0]];
+				socket.lastcommand = command;
 				x.execute(socket, command.split(' ').slice(1).join(" "), command_utility());
 			} else if(results.length > 1) {
 				socket.write("Found " + results.length + " possible commands (" + results.toString().replace(/,/g,", ") + "). Please be more specific.\r\n");
