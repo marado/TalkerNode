@@ -5,6 +5,7 @@ exports.command = {
 	min_rank: 0,
 	display: "lets you pose something, as if you were acting",
 	help: "",
+	weigth: 10,
 
 	execute: function(socket, command, command_access) {
         if (command === 'undefined' || command.length < 1)

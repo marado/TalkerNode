@@ -8,7 +8,7 @@ var valid = require('password-strength');
 var sockets = [];
 var port = process.env.PORT || 8888; // TODO: move to talker settings database
 var talkername = "Moosville";        // TODO: move to the talker settings database
-var version = "0.2.7";
+var version = "0.2.8";
 
 // Instantiates the users database
 var dirty = require('dirty');
@@ -291,17 +291,37 @@ function doCommand(socket, command) {
 		if(commands[c] && userRank >= commands[c].min_rank) {
 			commands[c].execute(socket, command.split(' ').slice(1).join(" "), command_utility())
 		} else {
+			// when we have more than one possible command, we
+			// choose the most heavier from the one with lower
+			// min_rank
 			var results = [];
+			var weigth = 0;
+			var rank = ranks.entrylevel;
 			for (var cmd in commands) {
-		    	if(cmd.substr(0, c.length) == c && userRank >= commands[cmd].min_rank)  {
-					results.push(cmd);
-		    	} 
+				if(cmd.substr(0, c.length) == c && userRank >= commands[cmd].min_rank) {
+					var cweigth = 0;
+					var crank = ranks.entrylevel;
+					if (typeof commands[cmd].weigth !== 'undefined')
+						cweigth = commands[cmd].weigth;
+					if (commands[cmd].min_rank < rank) {
+						rank = rank.entrylevel;
+						weigth = cweigth;
+						results = [cmd];
+					} else if (commands[cmd].min_rank === crank) {
+						if (cweigth > weigth) {
+							weigth = commands[cmd].weigth;
+							results = [cmd];
+						} else if (cweigth === weigth) {
+							results.push(cmd);
+						}
+					}
+				}
 			}
 			if(results.length == 1) {
 				var x = commands[results[0]];
-				x.execute(socket, command.split(' ').slice(1).join(" "), command_utility())
+				x.execute(socket, command.split(' ').slice(1).join(" "), command_utility());
 			} else if(results.length > 1) {
-				socket.write("Found " + results.length + " possible commands (" + results.toString().replace(/,/g,", ") + "). Please be more specific.\r\n")
+				socket.write("Found " + results.length + " possible commands (" + results.toString().replace(/,/g,", ") + "). Please be more specific.\r\n");
 			} else {
 				socket.write("There's no such thing as a " + c + " command.\r\n");
 			}

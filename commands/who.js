@@ -5,6 +5,7 @@ exports.command = {
 	min_rank: 0,
 	display: "lets you know who is connected in the talker at this moment",
 	help: "",
+	weigth: 10,
 
 	// helper functions that should probably be global, instead of stuck here in the command file
 	spaces: function(howMany) {
