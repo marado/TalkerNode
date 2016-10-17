@@ -12,12 +12,36 @@ exports.command = {
 		var toShow = command_access.ranks.list.length;
 		if (toShow > 3) toShow = 3;
 		socket.write("+----------------------------------------------------------------------------+\r\n");
+		var someone = false;
+		var online = "";
 		for (var level = command_access.ranks.list.length-1; level > command_access.ranks.list.length-1-toShow; level--) {
 			socket.write(command_access.ranks.list[level] + "\t: ");
+			online += command_access.ranks.list[level] + "\t: ";
+			var counter = 0;
+			var ocounter = 0;
 			for (var u = 0; u < users.length; u++) {
-				if (users[u].rank === level) socket.write(users[u].username + "\t");
+				if (users[u].rank === level) {
+					if (command_access.getOnlineUser(users[u].username)) {
+						someone = true;
+						ocounter++;
+						if (ocounter !== 0 && ocounter % 8 === 0)
+							online += "\n\t  ";
+						online += users[u].username + "\t";
+					}
+					if (counter !== 0 && counter % 8 === 0)
+						socket.write("\n\t  ");
+					socket.write(users[u].username + "\t");
+					counter++;
+				}
 			}
 			socket.write("\r\n");
+			online += "\r\n";
+		}
+		socket.write("+----------------------------------------------------------------------------+\r\n");
+		if (someone) {
+			socket.write("Of which, these are online:\r\n" + online);
+		} else {
+			socket.write("None of them online at this moment.\r\n");
 		}
 		socket.write("+----------------------------------------------------------------------------+\r\n");
 	}
