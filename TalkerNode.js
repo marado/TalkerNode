@@ -88,6 +88,7 @@ function receiveData(socket, data) {
 	// console.log("Moo [" + cleanData + "]");
 
 	// TODO: We're just filtering out IAC commands. We should be dealing with them instead...
+	//       See: https://github.com/marado/TalkerNode/issues/34
 	// IAC commands
 	var IAC = [
 		1 , // Telnet IAC - Echo
@@ -302,15 +303,15 @@ function doCommand(socket, command) {
 			// min_rank
 			var results = [];
 			var weigth = 0;
-			var rank = ranks.entrylevel;
+			var rank = ranks.list.length - 1;
 			for (var cmd in commands) {
 				if(cmd.substr(0, c.length) == c && userRank >= commands[cmd].min_rank) {
 					var cweigth = 0;
-					var crank = ranks.entrylevel;
+					var crank = ranks.list.length - 1;
 					if (typeof commands[cmd].weigth !== 'undefined')
 						cweigth = commands[cmd].weigth;
 					if (commands[cmd].min_rank < rank) {
-						rank = rank.entrylevel;
+						rank = commands[cmd].min_rank;
 						weigth = cweigth;
 						results = [cmd];
 					} else if (commands[cmd].min_rank === crank) {
