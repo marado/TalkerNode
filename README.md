@@ -4,7 +4,7 @@ TalkerNode
 TalkerNode is a Talker base, written in Node.js .
 
 The original source code was written by sam, from the talker Hades:
-```
+```bash
 telnet hades-talker.org 6660
 ```
 
@@ -17,7 +17,7 @@ https://github.com/marado/TalkerNode .
 
 ```bash
 > git clone https://github.com/marado/TalkerNode
-> yarn # or `npm install`, if you're still in, like, two weeks ago... pffft... 
+> yarn # or `npm install`
 ```
 
 ## License
