@@ -50,7 +50,7 @@ exports.command = {
 			var command_to_show = command_access.commands[command];
 
 			if (!command_to_show) {
-				socket.write("Sorry, there is no help on that topic.");
+				socket.write("Sorry, there is no help on that topic.\r\n");
 				return;
 			}
 
