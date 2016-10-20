@@ -3,8 +3,9 @@ exports.command = {
 	autoload: true,			
 	unloadable: false,
 	min_rank: 0,
-	display: "shows you this list of commands and what do they do",
-	help: "",
+	display: "leaves this world",
+	help: "Leaves this world.",
+	usage: ".quit",
 
 	execute: function(socket, command, command_access) {
 		command_access.allButMe(socket,function(me,to){to.write("[Leaving is: "+ me.username + " ]\r\n");});

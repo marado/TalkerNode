@@ -3,8 +3,9 @@ exports.command = {
 	autoload: true,				// Should the command be autoloaded at startup
 	unloadable: true,			// Can the command be unloaded dynamically
 	min_rank: 0,				// Minimum rank to use to execute the command
-	display: "List of Wizzards",// Summary help text to show in the .help command (Max 60 chars)
-	help: "List of Wizzards", 	// Full help text when .help <command> is used
+	display: "list of Wizzards",// Summary help text to show in the .help command (Max 60 chars)
+	help: "List of Wizzards.", 	// Full help text when .help <command> is used
+	usage: ".wizlist",
 
 	// Function to execute the command
 	execute: function(socket, command, command_access) {

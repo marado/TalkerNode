@@ -3,8 +3,9 @@ exports.command = {
 	autoload: true,			
 	unloadable: false,
 	min_rank: 2,
-	display: "You shout, anyone listens, even if they're not in the same place as you!",
-	help: "",
+	display: "you shout, anyone listens, even if they're not in the same place as you!",
+	help: "You shout, anyone listens, even if they're not in the same place as you!",
+	usage: ".shout <text>",
 
 	execute: function(socket, command, command_access) {
         if (command === 'undefined' || command.length < 1)

@@ -4,7 +4,8 @@ exports.command = {
 	unloadable: false,
 	min_rank: 0,
 	display: "use this if you want to change your password",
-	help: "",
+	help: "Use this if you want to change your password.",
+	usage: ".password",
 
 	execute: function(socket, command, command_access) {
 		socket.write(":: Tell me your old password: ");

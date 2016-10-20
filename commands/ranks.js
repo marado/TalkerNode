@@ -4,7 +4,8 @@ exports.command = {
 	unloadable: false,
 	min_rank: 0,
 	display: "list the talker's ranks, and points out which one is yours",
-	help: "",
+	help: "List the talker's ranks, and points out which one is yours.",
+	usage: ".ranks",
 
 	execute: function(socket, command, command_access) {
         var ranks = command_access.ranks;
