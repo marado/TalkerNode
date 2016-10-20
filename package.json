@@ -10,8 +10,8 @@
   "author": "Marcos Marado <mindboosternoori@gmail.com>",
   "license": "UNLICENSE",
   "dependencies": {
-    "dirty": "^0.9.9",
-    "nodiverse": "^0.2.0",
-    "password-strength": "^0.0.1"
+    "dirty": ">=0.9.9",
+    "nodiverse": ">=0.2.0",
+    "password-strength": ""
   }
 }
