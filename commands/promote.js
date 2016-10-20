@@ -3,9 +3,9 @@ exports.command = {
 	autoload: true, 			// Should the command be autoloaded at startup
 	unloadable: true,			// Can the command be unloaded dynamically
 	min_rank: 3,				// Minimum rank to use to execute the command
-	display: "make one of your friends get a better rank!",		// Summary help text to show in the .help command (Max 60 chars)
-	help: "Make one of your friends get a better rank!",    // Full help text when .help <command> is used
-    usage: ".promote <user>",
+	display: "make one of your friends get a better rank!",
+	help: "Make one of your friends get a better rank!",
+	usage: ".promote <user>",
 
 	// Function to execute the command
 	execute: function(socket, command, command_access) {
