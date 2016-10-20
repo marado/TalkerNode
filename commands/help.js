@@ -55,7 +55,7 @@ exports.command = {
 			}
 
 			socket.write("Command : " + command_to_show.name + "\r\n");
-			// socket.write("Usage   : " + command_to_show.usage + "\r\n");
+			socket.write("Usage   : " + command_to_show.usage + "\r\n");
 			socket.write("" + "\r\n");
 			socket.write(formatters.text_wrap(command_to_show.help) + "\r\n");
 			socket.write("" + "\r\n");

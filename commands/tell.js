@@ -4,7 +4,8 @@ exports.command = {
 	unloadable: false,
 	min_rank: 0,
 	display: "tells someone something, in private. Only both of you will know",
-	help: "",
+	help: "Tells someone something, in private. Only both of you will know...",
+	usage: ".tell <user> <text>",
 
 	execute: function(socket, command, command_access) {
 

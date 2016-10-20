@@ -5,6 +5,7 @@ exports.command = {
 	min_rank: 0,				// Minimum rank to use to execute the command
 	display: "You look.",
 	help: "You figure out where you are and where to can you go.",
+	usage: ".look",
 
 	// Function to execute the command
 	execute: function(socket, command, command_access) {

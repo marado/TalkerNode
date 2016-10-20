@@ -5,6 +5,7 @@ exports.command = {
 	min_rank: 0,				// Minimum rank to use to execute the command
 	display: "go somewhere else",	// Summary help text to show in the .help command (Max 60 chars)
 	help: "After you .look you'll know where you can go to. Then, you'll just have to .go <place>.",	// Full help text when .help <command> is used
+	usage: ".go <place>",
 
 	// Function to execute the command
 	execute: function(socket, command, command_access) {

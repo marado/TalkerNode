@@ -4,7 +4,8 @@ exports.command = {
 	unloadable: false,
 	min_rank: 0,
 	display: "lets you talk with other people. Just .say something!",
-	help: "",
+	help: "Lets you talk with other people. Just .say something!",
+	usage: ".say <text>",
 
 	execute: function(socket, command, command_access) {
         if (command === 'undefined' || command.length < 1)

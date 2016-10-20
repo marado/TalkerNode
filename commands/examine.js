@@ -7,7 +7,7 @@ exports.command = {
 	help: "Shows information about a user.\r\n" + 
 		"Without arguments, it will give you information about yourself.\r\n" + 
 		"If you add another user as an argument, it will show you info about him/her instead.",			// Full help text when .help <command> is used
-
+	usage: ".examine <user>",
 
 	friendlyTime: function(ms) {
 		if (ms < 1000) {
