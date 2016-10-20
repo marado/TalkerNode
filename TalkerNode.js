@@ -261,25 +261,26 @@ function receiveData(socket, data) {
  * Load all commands from the command subdirectory
  */
 function loadCommands() {
-    // Loop through all files, trying to load them
-    var normalizedPath = require("path").join(__dirname, "commands");
-    require("fs").readdirSync(normalizedPath).forEach(function(file) {
-        if (file.substr(file.length-3, 3) === ".js") {
-            var cmd_load = require('./commands/' + file);
-            var cmd = cmd_load.command;
+	// Loop through all files, trying to load them
+	var normalizedPath = require("path").join(__dirname, "commands");
+	require("fs").readdirSync(normalizedPath).forEach(function(file) {
+		if (file.substr(file.length-3, 3) === ".js") {
+			delete require.cache[require.resolve('./commands/' + file)]
+			var cmd_load = require('./commands/' + file);
+			var cmd = cmd_load.command;
 
-            // Only load the command if it's set to Autoload
-            if(cmd.autoload) {
-                console.log("Loading Command: Command '" + cmd.name + "' loaded (from '" + file + "')");
-                cmd.loaded_date = new Date();
-                commands[cmd.name] = cmd;
-            } else {
-                console.log("Loading Command: Skipping " + cmd.name + " (from '" + file + "'). Autoload = false");
-            }
-        } else {
-            console.log("Skipping " + file + ": file extension is not 'js'");
-        }
-    });
+			// Only load the command if it's set to Autoload
+			if(cmd.autoload) {
+				console.log("Loading Command: Command '" + cmd.name + "' loaded (from '" + file + "')");
+				cmd.loaded_date = new Date();
+				commands[cmd.name] = cmd;
+			} else {
+				console.log("Loading Command: Skipping " + cmd.name + " (from '" + file + "'). Autoload = false");
+			}
+		} else {
+			console.log("Skipping " + file + ": file extension is not 'js'");
+		}
+	});
 }
 
 
@@ -459,6 +460,40 @@ function command_utility() {
     return ret;
 };
 
+/*
+ * PROMPT UTILITY - adds a command prompt to the server.
+ * Implemented commands:
+ *     rc: Reload commands. Useful for development/debug. Allows
+ *         you to reload the commands on the fly!
+ */
+function setPrompt() {
+	var readline = require('readline');
+	var rl = readline.createInterface({
+	  input: process.stdin,
+	  output: process.stdout,
+	  prompt: 'OHAI> '
+	});
+
+	rl.prompt();
+
+	rl.on('line', function(line) {
+	  switch(line.trim()) {
+	    case 'rc':
+	      loadCommands();
+	      break;
+	    default:
+	      console.log("Available commands: ");
+	      console.log("    rc: Reload commands. Useful for development/debug. Allows");
+	      console.log("            you to reload the commands on the fly!");
+	      break;
+	  }
+	  rl.prompt();
+	}).on('close', function() {
+	  console.log('Bye!');
+	  process.exit(0);
+	});
+}
+
 
 /* 
  * AND FINALLY... THE ACTUAL main()!
@@ -471,3 +506,5 @@ var server = net.createServer(newSocket);
 server.listen(port);
 console.log(talkername + " initialized on port "+ port);
 loadCommands();
+setPrompt();
+
