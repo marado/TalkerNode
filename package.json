@@ -11,7 +11,7 @@
   "license": "UNLICENSE",
   "dependencies": {
     "dirty": ">=0.9.9",
-    "nodiverse": ">=0.2.0",
+    "nodiverse": ">=0.2.1",
     "password-strength": ""
   }
 }
