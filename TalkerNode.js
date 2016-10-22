@@ -8,7 +8,7 @@ var valid = require('password-strength');
 var sockets = [];
 var port = process.env.PORT || 8888; // TODO: move to talker settings database
 var talkername = "Moosville";        // TODO: move to the talker settings database
-var version = "0.2.10";
+var version = require('./package.json').version;
 
 // Instantiates the users database
 var dirty = require('dirty');
