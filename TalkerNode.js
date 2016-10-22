@@ -456,6 +456,10 @@ function command_utility() {
 
 		// gives a full view of the universe; TODO: we surely don't want this
 		getUniverse: function getUniverse() {return universe; },
+		// update universe's database
+		saveUniverse: function setUniverse() {
+			return universedb.set("universe", universe);
+		},
 
     };
     return ret;
