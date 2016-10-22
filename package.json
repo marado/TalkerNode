@@ -1,0 +1,17 @@
+{
+  "name": "TalkerNode",
+  "version": "0.0.1",
+  "description": "TalkerNode is a Talker base, written in Node.js.",
+  "main": "TalkerNode.js",
+  "repository": {
+    "url": "https://github.com/marado/TalkerNode.git",
+    "type": "git"
+  },
+  "author": "Marcos Marado <mindboosternoori@gmail.com>",
+  "license": "UNLICENSE",
+  "dependencies": {
+    "dirty": "^1.1.0",
+    "nodiverse": "^0.2.0",
+    "password-strength": "^0.0.1"
+  }
+}
