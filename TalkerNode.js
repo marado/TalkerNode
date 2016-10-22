@@ -4,11 +4,12 @@
 var net = require('net');
 var crypto = require('crypto');
 var valid = require('password-strength');
+var pkg = require('./package.json');
 
 var sockets = [];
 var port = process.env.PORT || 8888; // TODO: move to talker settings database
 var talkername = "Moosville";        // TODO: move to the talker settings database
-var version = "0.2.10";
+var version = pkg.version;
 
 // Instantiates the users database
 var dirty = require('dirty');
@@ -80,7 +81,7 @@ function echo(bool) {
 function receiveData(socket, data) {
 
 	var cleanData = cleanInput(data);
-	
+
 	if(cleanData.length == 0)
 		return;
 
@@ -255,7 +256,7 @@ function receiveData(socket, data) {
 	} else {
 		doCommand(socket, ".say " + cleanData);
 	}
-		
+
 }
 
 /*
@@ -378,10 +379,10 @@ function newSocket(socket) {
 
 /*
  * COMMAND UTILITY  -  Should probably be moved to own module
- * Object passed to commands.  Gives them access to specific server properties, methods 
+ * Object passed to commands.  Gives them access to specific server properties, methods
  */
 
-// 
+//
 function command_utility() {
     var ret = {
 	    version: version,
@@ -390,9 +391,9 @@ function command_utility() {
 	    commands: commands,
 	    ranks: ranks,
 	    echo: echo,
-	    
+
 	    /*
-	     * Execute function to all connected users *but* the triggering one. 
+	     * Execute function to all connected users *but* the triggering one.
 	     * It stops at the first connected user to which the function returns true, returning true.
 	     */
 	    allButMe: function allButMe(socket,fn) {
@@ -409,7 +410,7 @@ function command_utility() {
 		allHereButMe: function allHereButMe(socket,fn) {
 			for(var i = 0 ; i < sockets.length; i++) {
 				if (sockets[i] !== socket) {
-	    			if ((typeof sockets[i].loggedin != 'undefined') && sockets[i].loggedin && 
+	    			if ((typeof sockets[i].loggedin != 'undefined') && sockets[i].loggedin &&
 							(sockets[i].db.where[0] == socket.db.where[0]) &&
 							(sockets[i].db.where[1] == socket.db.where[1]) &&
 							(sockets[i].db.where[2] == socket.db.where[2])
@@ -500,7 +501,7 @@ function setPrompt() {
 }
 
 
-/* 
+/*
  * AND FINALLY... THE ACTUAL main()!
  */
 
@@ -512,4 +513,3 @@ server.listen(port);
 console.log(talkername + " initialized on port "+ port);
 loadCommands();
 setPrompt();
-
