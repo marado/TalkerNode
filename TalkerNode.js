@@ -4,12 +4,11 @@
 var net = require('net');
 var crypto = require('crypto');
 var valid = require('password-strength');
-var pkg = require('./package.json');
 
 var sockets = [];
 var port = process.env.PORT || 8888; // TODO: move to talker settings database
 var talkername = "Moosville";        // TODO: move to the talker settings database
-var version = pkg.version;
+var version = require('./package.json').version;
 
 // Instantiates the users database
 var dirty = require('dirty');
