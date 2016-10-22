@@ -8,7 +8,7 @@
     "type": "git"
   },
   "author": "Marcos Marado <mindboosternoori@gmail.com>",
-  "license": "UNLICENSE",
+  "license": "Unlicense",
   "dependencies": {
     "dirty": ">=0.9.9",
     "nodiverse": ">=0.2.1",
