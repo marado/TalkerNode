@@ -1,3 +1,5 @@
+var formatters = require('../utils/formatters.js');
+
 exports.command = {
 	name: "dig",
 	autoload: true,
@@ -61,7 +63,7 @@ exports.command = {
 		// data entry validated, let's now see if we can dig this:
 		// * if nothing's there, fine
 		// * if something's there..
-		//   - with the same name? we just open a door
+		//   - with the same name? we just open a passage
 		//   - with another name? we can't .dig it!
 		target = socket.db.where.slice(0);
 		if (direction.search("W") !== -1) target[0]--;
@@ -71,13 +73,34 @@ exports.command = {
 		if (direction.search("U") !== -1) target[2]++;
 		if (direction.search("D") !== -1) target[2]--;
 		targObj = command_access.getUniverse().get(target);
+		// if the target place is already occupied...
 		if (targObj !== null) {
-			// there's something there
-			// FIXME: implement this: are we seeing the same place the user wants to
-			//        dig to? If so, we should open a passage from here to there.
-			socket.write("there's something there. " +
-				"I should know how to deal with it, but I don't. " +
-				"Deal with it.\r\n");
+			// deal with situations where the place is not the same
+			if (targObj.name !== name) {
+				socket.write(formatters.text_wrap("You're trying to create a " +
+					"place called " + name + " where there's already another " +
+					"place called " + targObj.name + "! Maybe you want to " +
+					".destroy that one first, or recheck your .map and make " +
+					"sure of what you're trying to do?\r\n"));
+				return;
+			}
+			var updateMe = command_access.getUniverse().get(socket.db.where);
+			// deal with situations where the passage already exists
+			var newPassage = eval("command_access.getUniverse()."+direction);
+			if ((updateMe.passages & newPassage) === newPassage) {
+				socket.write("You cannot create a passage that already exists!\r\n");
+				return;
+			}
+			updateMe.passages += newPassage;
+			if (!command_access.getUniverse().update(updateMe)) {
+				socket.write("You should have been able to create a passage to " +
+					name + ". However, that didn't work. Please let an " +
+					command_access.ranks.list[
+						command_access.ranks.list.length - 1
+					] + " know about this!\r\n");
+			} else {
+				socket.write("You just created a passage to " + name + ".\r\n");
+			}
 			return;
 		}
 		// nothing there, let's create
@@ -88,7 +111,7 @@ exports.command = {
 			// we shouldn't be able to get here. Is this a Nodiverse bug?
 			socket.write("You should have been able to dig towards " + direction +
 				" from here and create a place called " + name +
-				". however, that didn't work. Please let an " +
+				". However, that didn't work. Please let an " +
 				command_access.ranks.list[command_access.ranks.list.length - 1] +
 				" know about this!\r\n");
 			return;
