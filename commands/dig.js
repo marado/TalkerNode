@@ -101,34 +101,39 @@ exports.command = {
 			} else {
 				socket.write("You just created a passage to " + name + ".\r\n");
 			}
-			return;
-		}
-		// nothing there, let's create
-		var opposite = command_access.getUniverse().opposites[
-			Math.log(eval("command_access.getUniverse()."+direction)) / Math.log(2)
-		][1];
-		if (!command_access.getUniverse().create(target, opposite)) {
-			// we shouldn't be able to get here. Is this a Nodiverse bug?
-			socket.write("You should have been able to dig towards " + direction +
-				" from here and create a place called " + name +
-				". However, that didn't work. Please let an " +
-				command_access.ranks.list[command_access.ranks.list.length - 1] +
-				" know about this!\r\n");
-			return;
-		}
-		done = command_access.getUniverse().get(target);
-		if (done !== null) done.name = name;
-		if (!command_access.getUniverse().update(done)) {
-			// we shouldn't be able to get here. Is this a Nodiverse bug?
-			socket.write("You dug, but you weren't able to make the new place how you" +
-				"wanted it to be. It's not your fault... and you should warn an " +
-				command_access.ranks.list[command_access.ranks.list.length - 1] +
-				"about this!\r\n");
-			return;
+		} else {
+			// nothing there, let's create
+			var opposite = command_access.getUniverse().opposites[Math.log(
+				eval("command_access.getUniverse()."+direction)
+			) / Math.log(2)][1];
+			if (!command_access.getUniverse().create(target, opposite)) {
+				// we shouldn't be able to get here. Is this a Nodiverse bug?
+				socket.write("You should have been able to dig towards " +
+					direction + " from here and create a place called " + name +
+					". However, that didn't work. Please let an " +
+					command_access.ranks.list[
+						command_access.ranks.list.length - 1
+					] +
+					" know about this!\r\n");
+				return;
+			}
+			done = command_access.getUniverse().get(target);
+			if (done !== null) done.name = name;
+			if (!command_access.getUniverse().update(done)) {
+				// we shouldn't be able to get here. Is this a Nodiverse bug?
+				socket.write("You dug, but you weren't able to make the new place " +
+					"how you wanted it to be. It's not your fault... and you " +
+					"should warn an " +
+					command_access.ranks.list[
+						command_access.ranks.list.length - 1
+					] +
+					"about this!\r\n");
+				return;
+			}
+			socket.write(":: You dig towards " + direction +
+				", and create a new place called " + name + ".\r\n");
 		}
 		// saving the altered universe
 		command_access.saveUniverse();
-		socket.write(":: You dig towards " + direction +
-			", and create a new place called " + name + ".\r\n");
 	}
 }
