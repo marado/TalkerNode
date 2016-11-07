@@ -6,53 +6,74 @@ var crypto = require('crypto');
 var valid = require('password-strength');
 
 var sockets = [];
-var port = process.env.PORT || 8888; // TODO: move to talker settings database
-var talkername = "Moosville";        // TODO: move to the talker settings database
+var port = process.env.PORT || 8888;
 var version = require('./package.json').version;
 
 // Instantiates the users database
 var dirty = require('dirty');
+var loadeddb = 0; // number of databases loaded so far
 var usersdb = dirty('user.db');
+usersdb.on('load', function() { loadeddb++; });
 usersdb.on('error', function(err) { console.log("USERS DB ERROR! "+err); });
 
 // Instantiates the talker settings database
 var ranks;
 var commands = {};
 var talkerdb = dirty('talker.db').on('load', function() {
-    talkerdb.on('error', function(err) { console.log("TALKER DB ERROR! "+err); });
-    ranks = talkerdb.get("ranks");
-    if (typeof ranks === 'undefined') {
-        ranks = {list:["Jailed", "Newcomer", "Newbie", "Juvie", "Learner", "Adult", "Wiseman", "Hero", "Mage", "Imortal", "God"], entrylevel: 10};
-        talkerdb.set("ranks", ranks);
-    }
+	ranks = talkerdb.get("ranks");
+	if (typeof ranks === 'undefined') {
+		ranks = {list:[
+				"Jailed",
+				"Newcomer",
+				"Newbie",
+				"Juvie",
+				"Learner",
+				"Adult",
+				"Wiseman",
+				"Hero",
+				"Mage",
+				"Imortal",
+				"God"
+			], entrylevel: 10};
+		talkerdb.set("ranks", ranks);
+	}
+	loadeddb++;
 });
+talkerdb.on('error', function(err) { console.log("TALKER DB ERROR! "+err); });
 
 // Instantiates the universe
 var nodiverse = require('nodiverse');
 var universe;
+var talkername = "Moosville"; // TODO: make this configurable
 var universedb = dirty('universe.db').on('load', function() {
-    universedb.on('error', function(err) { console.log("UNIVERSE DB ERROR! "+err); });
-    universe = universedb.get("universe");
-    if (typeof universe === 'undefined') {
-        universe = nodiverse(); // new universe
-        universe.create([0,0,0],0);
-        var limbo = universe.get([0,0,0]);
-        limbo.name = "Limbo"; // at the beginning there was just the limbo
-        universe.update(limbo);
-        universe.entrypoint=[0,0,0]; // where everyone was meant to be
-        universedb.set("universe", universe);
-    } else {
+	universedb.on('error', function(err) { console.log("UNIVERSE DB ERROR! "+err); });
+	universe = universedb.get("universe");
+	if (typeof universe === 'undefined') {
+		universe = nodiverse(); // new universe
+		universe.create([0,0,0],0);
+		var limbo = universe.get([0,0,0]);
+		limbo.name = "Limbo"; // at the beginning there was just the limbo
+		universe.update(limbo);
+		universe.entrypoint=[0,0,0]; // where everyone was meant to be
+		universedb.set("universe", universe);
+	} else {
 		// assign the correct prototype to universe
-		// this is somewhat ugly, since we're falling back from Object.?etPrototypeOf to __proto__ in order not to depend on nodejs 0.12
+		// this is somewhat ugly, since we're falling back from
+		// Object.?etPrototypeOf to __proto__ in order not to depend on
+		// nodejs 0.12
 		var setProtoOf = function(obj, proto) { obj.__proto__ = proto; };
-		var mixinProperties = function(obj, proto) { for (var prop in proto) { obj[prop] = proto[prop]; } };
-		var setPrototypeOf = Object.setPrototypeOf || {__proto__:[]} instanceof Array ? setProtoOf : mixinProperties;
-		var getPrototypeOf = Object.getPrototypeOf || function(obj) { return obj.__proto__; };
+		var mixinProperties = function(obj, proto) {
+			for (var prop in proto) { obj[prop] = proto[prop]; }
+		};
+		var setPrototypeOf = Object.setPrototypeOf ||
+			{__proto__:[]} instanceof Array ? setProtoOf : mixinProperties;
+		var getPrototypeOf = Object.getPrototypeOf ||
+			function(obj) { return obj.__proto__; };
 		setPrototypeOf(universe, getPrototypeOf(nodiverse()));
 	}
+	if (typeof universe.name !== 'undefined') talkername = universe.name;
+	loadeddb++;
 });
-
-// TODO: we should only start the talker when all databases are loaded
 
 /*
  * Cleans the input of carriage return, newline and control characters
@@ -461,6 +482,11 @@ function command_utility() {
 			return universedb.set("universe", universe);
 		},
 
+		// reloads Talker Name
+		reloadTalkerName: function reloadTalkerName() {
+			talkername = universe.name;
+		},
+
     };
     return ret;
 };
@@ -504,11 +530,20 @@ function setPrompt() {
  * AND FINALLY... THE ACTUAL main()!
  */
 
-// Create a new server and provide a callback for when a connection occurs
-var server = net.createServer(newSocket);
+function main() {
+	if (loadeddb !== 3) {
+		console.log("Waiting for databases to load: " + loadeddb + "/3");
+		setTimeout(main, 100);
+	} else {
+		// Create a new server and provide a callback for when a connection occurs
+		var server = net.createServer(newSocket);
 
-// Listen on defined port
-server.listen(port);
-console.log(talkername + " initialized on port "+ port);
-loadCommands();
-setPrompt();
+		// Listen on defined port
+		server.listen(port);
+		console.log(talkername + " initialized on port "+ port);
+		loadCommands();
+		setPrompt();
+	}
+}
+
+main();
