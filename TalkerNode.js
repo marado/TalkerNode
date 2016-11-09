@@ -305,6 +305,27 @@ function loadCommands() {
 	});
 }
 
+/*
+ * Method that returns the command rank.
+ * If a custom one exists, use it. Else, use the hardcoded one.
+ * In any case, validate if there's a rank as higher as the one of the command.
+ * If not, assign it to the highest rank available.
+ * If the command doesn't exist at all, return null.
+ */
+function getCmdRank(command) {
+	var r;
+	var cmdRanks = talkerdb.get("commands");
+	if (typeof (cmdRanks) !== 'undefined' && typeof (cmdRanks[command]) !== 'undefined') {
+		r = cmdRanks[command];
+	} else if (commands[command]) {
+		r = commands[command].min_rank;
+	} else {
+		console.log("going to return null");
+		return null;
+	}
+	if (r >= ranks.list.length) r = ranks.list.length - 1;
+	return r;
+}
 
 /*
  * Method for commands. In future this should be elsewhere, but for now we must
@@ -315,27 +336,27 @@ function doCommand(socket, command) {
 	try {
 		var c = command.split(' ')[0].toLowerCase().substring(1);
 		var userRank = socket.db.rank;
-		if(commands[c] && userRank >= commands[c].min_rank) {
+		if(commands[c] && userRank >= getCmdRank(c)) {
 			socket.lastcommand = command;
 			commands[c].execute(socket, command.split(' ').slice(1).join(" "), command_utility())
 		} else {
 			// when we have more than one possible command, we
 			// choose the most heavier from the one with lower
-			// min_rank
+			// getCmdRank
 			var results = [];
 			var weigth = 0;
 			var rank = ranks.list.length - 1;
 			for (var cmd in commands) {
-				if(cmd.substr(0, c.length) == c && userRank >= commands[cmd].min_rank) {
+				if(cmd.substr(0, c.length) == c && userRank >= getCmdRank(cmd)) {
 					var cweigth = 0;
 					var crank = ranks.list.length - 1;
 					if (typeof commands[cmd].weigth !== 'undefined')
 						cweigth = commands[cmd].weigth;
-					if (commands[cmd].min_rank < rank) {
-						rank = commands[cmd].min_rank;
+					if (getCmdRank(cmd) < rank) {
+						rank = getCmdRank(cmd);
 						weigth = cweigth;
 						results = [cmd];
-					} else if (commands[cmd].min_rank === crank) {
+					} else if (getCmdRank(cmd) === crank) {
 						if (cweigth > weigth) {
 							weigth = commands[cmd].weigth;
 							results = [cmd];
@@ -411,6 +432,7 @@ function command_utility() {
 	    commands: commands,
 	    ranks: ranks,
 	    echo: echo,
+	    getCmdRank: getCmdRank,
 
 	    /*
 	     * Execute function to all connected users *but* the triggering one.
@@ -476,6 +498,7 @@ function command_utility() {
 		},
 
 		// gives a full view of the universe; TODO: we surely don't want this
+		// TODO: in the meantime, we don't need to define a function for this!
 		getUniverse: function getUniverse() {return universe; },
 		// update universe's database
 		saveUniverse: function setUniverse() {
