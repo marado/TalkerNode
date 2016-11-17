@@ -1,8 +1,8 @@
 var formatters = require('../utils/formatters.js');
 
 exports.command = {
-	name: "help", 			
-	autoload: true,			
+	name: "help",
+	autoload: true,
 	unloadable: false,
 	min_rank: 0,
 	display: "Shows you this list of commands or detailed help for a particular command.",
