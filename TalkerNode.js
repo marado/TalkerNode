@@ -341,7 +341,7 @@ function doCommand(socket, command) {
 			commands[c].execute(socket, command.split(' ').slice(1).join(" "), command_utility())
 		} else {
 			// when we have more than one possible command, we
-			// choose the most heavier from the one with lower
+			// choose the most heavier from the ones with lower
 			// getCmdRank
 			var results = [];
 			var weigth = 0;
@@ -349,14 +349,13 @@ function doCommand(socket, command) {
 			for (var cmd in commands) {
 				if(cmd.substr(0, c.length) == c && userRank >= getCmdRank(cmd)) {
 					var cweigth = 0;
-					var crank = ranks.list.length - 1;
 					if (typeof commands[cmd].weigth !== 'undefined')
 						cweigth = commands[cmd].weigth;
 					if (getCmdRank(cmd) < rank) {
 						rank = getCmdRank(cmd);
 						weigth = cweigth;
 						results = [cmd];
-					} else if (getCmdRank(cmd) === crank) {
+					} else if (getCmdRank(cmd) === rank) {
 						if (cweigth > weigth) {
 							weigth = commands[cmd].weigth;
 							results = [cmd];
