@@ -3,7 +3,7 @@ exports.command = {
 	autoload: false,
 	unloadable: false,
 	min_rank: 10,
-	display: "Changes the minimum rank necessary to use a particular command.",
+	display: "Changes the rank needed to execute a command.",
 	help: "This command is used to change the minimum rank an user must have to be able to " +
 		"use a particular command.",
 	usage: "." + this.name + " <command> <rank number>",

@@ -5,7 +5,7 @@ exports.command = {
 	autoload: true,
 	unloadable: false,
 	min_rank: 0,
-	display: "Shows you this list of commands or detailed help for a particular command.",
+	display: "Shows all commands or information about one of them.",
 	help: "Shows you this list of commands or detailed help for a particular command.",
 	usage: ".help, .help <command>",
 

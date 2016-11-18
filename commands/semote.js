@@ -3,7 +3,7 @@ exports.command = {
 	autoload: true,			
 	unloadable: false,
 	min_rank: 2,
-	display: "lets you pose something, as if you were acting, for everyone (even those not here) to see",
+	display: "pose something for everyone (even those not here) to see",
 	help: "Lets you pose something, as if you were acting, for everyone (even those not here) to see.",
 	usage: ".semote <text>",
 

@@ -3,7 +3,7 @@ exports.command = {
 	autoload: true,			
 	unloadable: false,
 	min_rank: 0,
-	display: "tells someone something, in private. Only both of you will know",
+	display: "tells someone something, in private.",
 	help: "Tells someone something, in private. Only both of you will know...",
 	usage: ".tell <user> <text>",
 
