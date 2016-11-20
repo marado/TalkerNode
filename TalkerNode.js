@@ -320,11 +320,28 @@ function getCmdRank(command) {
 	} else if (commands[command]) {
 		r = commands[command].min_rank;
 	} else {
-		console.log("going to return null");
 		return null;
 	}
 	if (r >= ranks.list.length) r = ranks.list.length - 1;
 	return r;
+}
+
+/*
+ * Method that changes the command rank.
+ */
+function setCmdRank(command, rank) {
+	var cmdRanks = talkerdb.get("commands");
+	if (typeof(cmdRanks) === 'undefined') cmdRanks = {};
+	if (commands[command]) {
+		var old = commands[command].min_rank;
+		if (typeof (cmdRanks[command]) !== 'undefined') {
+			old = cmdRanks[command];
+		}
+		if (rank != old) {
+			cmdRanks[command] = rank;
+		    talkerdb.set("commands", cmdRanks);
+		}
+	}
 }
 
 /*
@@ -432,6 +449,7 @@ function command_utility() {
 	    ranks: ranks,
 	    echo: echo,
 	    getCmdRank: getCmdRank,
+	    setCmdRank: setCmdRank,
 
 	    /*
 	     * Execute function to all connected users *but* the triggering one.

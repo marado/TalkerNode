@@ -1,6 +1,6 @@
 exports.command = {
 	name: "setcmdlev",
-	autoload: false,
+	autoload: true,
 	unloadable: false,
 	min_rank: 10,
 	display: "Changes the rank needed to execute a command.",
@@ -34,7 +34,7 @@ exports.command = {
 			socket.write("There aren't those many ranks!\r\n");
 			return;
 		}
-		socket.write("TODO: we should change " + c + " to rank " + rank_number +
-				".\r\n");
+		command_access.setCmdRank(c,rank_number);
+		socket.write("Changed " + c + " to rank " + rank_number + ".\r\n");
 	}
 }
