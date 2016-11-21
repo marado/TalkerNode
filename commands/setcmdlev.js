@@ -6,7 +6,7 @@ exports.command = {
 	display: "Changes the rank needed to execute a command.",
 	help: "This command is used to change the minimum rank an user must have to be able to " +
 		"use a particular command.",
-	usage: "." + this.name + " <command> <rank number>",
+	usage: ".setcmdlev <command> <rank number>",
 
 	execute: function(socket, command, command_access) {
 		if (command.split(' ').length !== 2) {
@@ -32,6 +32,16 @@ exports.command = {
 		}
 		if (rank_number >= command_access.ranks.list.length) {
 			socket.write("There aren't those many ranks!\r\n");
+			return;
+		}
+		if (command_access.getCmdRank(c) > socket.db.rank) {
+			socket.write("What a joker you are... " +
+				"You don't even have access to that command!\r\n");
+			return;
+		}
+		if (rank_number > socket.db.rank) {
+			socket.write("Let the grown-ups decide if they want that command " +
+				"only to themselves...\r\n");
 			return;
 		}
 		command_access.setCmdRank(c,rank_number);
