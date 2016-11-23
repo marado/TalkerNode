@@ -4,7 +4,6 @@ exports.command = {
 	unloadable: true,
 	min_rank: 10,
 	display: "renames the talker!",
-	// TODO: enhance 'help' by letting you know a list of possible directions
 	help: ".rntalker <new-name> will change this talker name to <new-name>.",
 	usage: ".rntalker <new-name>",
 	weigth: 0,
