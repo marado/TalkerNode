@@ -522,6 +522,12 @@ function command_utility() {
 			return universedb.set("universe", universe);
 		},
 
+		// updates the ranks object, both in memory and on the database
+		updateRanks: function updateRanks(updated) {
+			ranks = updated;
+			return talkerdb.set("ranks", ranks);
+		},
+
 		// reloads Talker Name
 		reloadTalkerName: function reloadTalkerName() {
 			talkername = universe.name;
