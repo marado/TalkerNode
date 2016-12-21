@@ -17,12 +17,19 @@ exports.command = {
 		} else if (socket.username.toLowerCase() === to.toLowerCase()) {
 			socket.write(":: Talking to yourself is the first sign of madness.\r\n");
 		} else {
-			var s = command_access.getOnlineUser(to);
-			if (s) {
-				socket.write("You tell " + to + ": " + message + "\r\n");
-				s.write(socket.username + " tells you: " + message + "\r\n");
-			} else {
+			var s = command_access.getAproxOnlineUser(to);
+			if (s.length === 1) {
+				socket.write("You tell " + s[0].username + ": " + message + "\r\n");
+				s[0].write(socket.username + " tells you: " + message + "\r\n");
+			} else if (s.length === 0) {
 				socket.write("There is no one of that name logged on.\r\n");
+			} else {
+				var possibilities = "";
+				for (var p = 0; p < s.length - 1; p++) {
+					possibilities += s[p].username + ", ";
+				}
+				possibilities += s[s.length - 1].username;
+				socket.write("Be more explicit: whom do you want to talk to ("+possibilities+")?\r\n");
 			}
 		}
 	}

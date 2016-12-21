@@ -488,6 +488,30 @@ function command_utility() {
 	    	return false;
 	    },
 
+	    // returns array of sockets of the 'approximate' online users
+	    // While 'getOnlineUser' is the correct function to use if you want
+	    // to know if 'username' is online or not, sometimes users want to
+	    // refer to another user in an 'human' way, abbreviating.
+	    // Eg.: .wizlist tries to find if each wiz is online or not. Since
+	    // the username is fully and correctly known, 'getOnlineUser' should be
+	    // used. On the other hand, .tell gets an username as an argument. On
+	    // that case, an user can type '.tell mr hello', meaning '.tell MrMe
+	    // hello'. On that case, 'getAproxOnlineUser' should be used.
+	    getAproxOnlineUser: function getOnlineUser(name) {
+		if (this.getOnlineUser(name) !== false) return [this.getOnlineUser(name)];
+		var possibilities;
+		for (var chars = 1; chars <= name.length; chars++) {
+		    possibilities = [];
+		    for (var i = 0; i < sockets.length; i++) {
+			if (name.toLowerCase().substr(0,chars) === sockets[i].username.toLowerCase().substr(0,chars) && sockets[i].loggedin && (name.length < sockets[i].username.length))
+			    possibilities.push(sockets[i]);
+		    }
+		    if (possibilities.length === 0) return [];
+		    if (possibilities.length === 1) return possibilities;
+		}
+		return possibilities;
+	    },
+
         // returns the user object, in all its db glory
         // TODO: Let's give just a subset of data from the user, OK? I mean, we
         // don't want any command to have access to other users' passwords, do

@@ -44,7 +44,8 @@ exports.command = {
 			socket.write(":: " + whom + " was registered at " + new Date(w.registerTime).toString() + ".\r\n");
 		}
 		if (typeof (w.totalTime) === 'undefined') {
-			// it either is his/her first time online, or it's an old user that didn't log on recently
+			// it either is his/her first time online, or it's an old user that
+			// didn't log on recently
 			if (command_access.getOnlineUser(whom) !== false) {
 				socket.write(":: " + whom + " is online for the first time.\r\n");
 			} else {
