@@ -1,6 +1,6 @@
 {
   "name": "TalkerNode",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "TalkerNode is a Talker base, written in Node.js.",
   "main": "TalkerNode.js",
   "repository": {
@@ -11,7 +11,7 @@
   "license": "Unlicense",
   "dependencies": {
     "dirty": ">=0.9.9",
-    "nodiverse": ">=0.2.2",
+    "nodiverse": ">=0.3.0",
     "password-strength": ""
   }
 }
