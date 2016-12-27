@@ -10,14 +10,24 @@ exports.command = {
 	// Function to execute the command
 	execute: function(socket, command, command_access) {
         var me = socket;
-		var whom = command.split(' ')[0];
+        var whom = command.split(' ')[0];
         var w = null;
         // check if we got an whom
         if (typeof whom === 'undefined' || whom.length < 1) {
             return me.write("Demote whom?\r\n");
         } else { // check if it's an user
-            w = command_access.getUser(whom); 
-            if (!w) return me.write("Demote whom?\r\n");
+            var wArr = command_access.getAproxUser(whom);
+            if (wArr.length === 0) return me.write("Demote whom?\r\n");
+            if (wArr.length > 1) {
+                var possibilities = "";
+                for (var p = 0; p < wArr.length - 1; p++) {
+		    possibilities += wArr[p] + ", ";
+		}
+                possibilities += wArr[wArr.length - 1];
+                return me.write("Be more explicit: whom do you want to demote ("+possibilities+")?\r\n");
+            }
+            whom = wArr[0];
+            w = command_access.getUser(whom);
         }
 		if (w.rank == 0) {
 			socket.write("How low do you think someone can be?\r\n");

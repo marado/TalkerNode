@@ -1,6 +1,6 @@
 {
   "name": "TalkerNode",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "description": "TalkerNode is a Talker base, written in Node.js.",
   "main": "TalkerNode.js",
   "repository": {

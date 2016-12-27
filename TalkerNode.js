@@ -521,6 +521,26 @@ function command_utility() {
             return usersdb.get(name);
         },
 
+	// returns the username of an "aproximate" user
+	// read 'getAproxOnlineUser' to understand the difference between
+	// 'getOnlineUser' and it, same happens here between 'getUser' and
+	// 'getAproxUser'.
+	getAproxUser: function getAproxUser(name) {
+		if (this.getUser(name) !== undefined) return [name];
+		var possibilities;
+		for (var chars = 1; chars <= name.length; chars++) {
+		    possibilities = [];
+		    usersdb.forEach(function(key,val) {
+			if (name.toLowerCase().substr(0,chars) === key.toLowerCase().substr(0,chars) && (name.length < key.length)) {
+			    possibilities.push(key);
+			}
+		    });
+		    if (possibilities.length === 0) return [];
+		    if (possibilities.length === 1) return possibilities;
+		}
+		return possibilities;
+	},
+
         // updates a user in the database
         // TODO: argh, we surely don't want this! harden it!
         updateUser: function updateUser(username, userObj) {
