@@ -14,11 +14,12 @@ exports.command = {
 
 		if ((typeof to === 'undefined') || (typeof message === 'undefined') || to.length < 1 || message.length < 1) {
 			socket.write(":: You have to use it this way: .tell someone something\r\n");
-		} else if (socket.username.toLowerCase() === to.toLowerCase()) {
-			socket.write(":: Talking to yourself is the first sign of madness.\r\n");
 		} else {
 			var s = command_access.getAproxOnlineUser(to);
 			if (s.length === 1) {
+				if (socket.username.toLowerCase() === s[0].username.toLowerCase()) {
+					return socket.write(":: Talking to yourself is the first sign of madness.\r\n");
+				}
 				socket.write("You tell " + s[0].username + ": " + message + "\r\n");
 				s[0].write(socket.username + " tells you: " + message + "\r\n");
 			} else if (s.length === 0) {

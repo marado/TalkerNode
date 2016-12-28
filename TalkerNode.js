@@ -499,15 +499,10 @@ function command_utility() {
 	    // hello'. On that case, 'getAproxOnlineUser' should be used.
 	    getAproxOnlineUser: function getOnlineUser(name) {
 		if (this.getOnlineUser(name) !== false) return [this.getOnlineUser(name)];
-		var possibilities;
-		for (var chars = 1; chars <= name.length; chars++) {
-		    possibilities = [];
-		    for (var i = 0; i < sockets.length; i++) {
-			if (name.toLowerCase().substr(0,chars) === sockets[i].username.toLowerCase().substr(0,chars) && sockets[i].loggedin && (name.length < sockets[i].username.length))
-			    possibilities.push(sockets[i]);
-		    }
-		    if (possibilities.length === 0) return [];
-		    if (possibilities.length === 1) return possibilities;
+		var possibilities = [];
+		for (var i = 0; i < sockets.length; i++) {
+		    if (name.toLowerCase() === sockets[i].username.toLowerCase().substr(0,name.length) && sockets[i].loggedin && (name.length < sockets[i].username.length))
+			possibilities.push(sockets[i]);
 		}
 		return possibilities;
 	    },
@@ -527,17 +522,13 @@ function command_utility() {
 	// 'getAproxUser'.
 	getAproxUser: function getAproxUser(name) {
 		if (this.getUser(name) !== undefined) return [name];
-		var possibilities;
-		for (var chars = 1; chars <= name.length; chars++) {
-		    possibilities = [];
-		    usersdb.forEach(function(key,val) {
-			if (name.toLowerCase().substr(0,chars) === key.toLowerCase().substr(0,chars) && (name.length < key.length)) {
+		var possibilities = [];
+		usersdb.forEach(function(key,val) {
+		    if (name.toLowerCase() === key.toLowerCase().substr(0,name.length) && (name.length < key.length)) {
 			    possibilities.push(key);
-			}
-		    });
-		    if (possibilities.length === 0) return [];
-		    if (possibilities.length === 1) return possibilities;
-		}
+		    }
+		});
+		if (possibilities.length === 0) return [];
 		return possibilities;
 	},
 

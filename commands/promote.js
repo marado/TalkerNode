@@ -16,9 +16,19 @@ exports.command = {
         if (typeof whom === 'undefined' || whom.length < 1) {
             return me.write("Promote whom?\r\n");
         } else { // check if it's an user
-            w = command_access.getUser(whom); 
-            if (!w) return me.write("Promote whom?\r\n");
+            var wArr = command_access.getAproxUser(whom);
+            if (wArr.length === 0) return me.write("Promote whom?\r\n");
+            if (wArr.length > 1) {
+                var possibilities = "";
+                for (var p = 0; p < wArr.length - 1; p++) {
+		    possibilities += wArr[p] + ", ";
+		}
+                possibilities += wArr[wArr.length - 1];
+                return me.write("Be more explicit: whom do you want to promote ("+possibilities+")?\r\n");
+            }
         }
+        whom = wArr[0];
+        w = command_access.getUser(whom);
         if (me.db.rank > w.rank) {
             // if user is online, do it via sockets
             var online = command_access.getOnlineUser(whom);
