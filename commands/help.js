@@ -49,12 +49,20 @@ exports.command = {
 			socket.write("+-----------------------------------------------------------------------------+\r\n");
 		} else {
 			// if command called with parameters
-			var command_to_show = command_access.commands[command];
-
-			if (!command_to_show) {
+			var commands = command_access.findCommand(socket, command);
+			if (commands.length === 0) {
 				socket.write("Sorry, there is no help on that topic.\r\n");
 				return;
 			}
+			if (commands.length > 1) {
+				var possibilities = "";
+				for (var p = 0; p < commands.length - 1; p++) {
+					possibilities += commands[p].name + ", ";
+				}
+				possibilities += commands[commands.length - 1].name;
+				return socket.write("Found " + commands.length + " possible help files (" + possibilities + "). Please be more specific.\r\n");
+			}
+			var command_to_show = commands[0];
 
 			socket.write("Command : " + command_to_show.name + "\r\n");
 			socket.write("Usage   : " + command_to_show.usage + "\r\n");

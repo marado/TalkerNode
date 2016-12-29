@@ -345,52 +345,65 @@ function setCmdRank(command, rank) {
 }
 
 /*
- * Method for commands. In future this should be elsewhere, but for now we must
- * start already separating this from the rest...
+ * Method to find a command
+ */
+function findCommand(socket, command) {
+    var c = command;
+    var userRank = socket.db.rank;
+    if(commands[c] && userRank >= getCmdRank(c)) {
+	return [commands[c]];
+    } else {
+	// when we have more than one possible command, we
+	// choose the most heavier from the ones with lower
+	// getCmdRank
+	var results = [];
+	var weigth = 0;
+	var rank = ranks.list.length - 1;
+	for (var cmd in commands) {
+	    if(cmd.substr(0, c.length) == c && userRank >= getCmdRank(cmd)) {
+		var cweigth = 0;
+		if (typeof commands[cmd].weigth !== 'undefined')
+		    cweigth = commands[cmd].weigth;
+		if (getCmdRank(cmd) < rank) {
+		    rank = getCmdRank(cmd);
+		    weigth = cweigth;
+		    results = [commands[cmd]];
+		} else if (getCmdRank(cmd) === rank) {
+		    if (cweigth > weigth) {
+			weigth = commands[cmd].weigth;
+			results = [commands[cmd]];
+		    } else if (cweigth === weigth) {
+			results.push(commands[cmd]);
+		    }
+		}
+	    }
+	}
+	return results;
+    }
+}
+
+/*
+ * Method to execute commands.
  */
 function doCommand(socket, command) {
 	socket.activityTime = Date.now();
 	try {
 		var c = command.split(' ')[0].toLowerCase().substring(1);
 		var userRank = socket.db.rank;
-		if(commands[c] && userRank >= getCmdRank(c)) {
+		var cArr = findCommand(socket, c);
+		if (cArr.length === 1) {
 			socket.lastcommand = command;
-			commands[c].execute(socket, command.split(' ').slice(1).join(" "), command_utility())
+			return cArr[0].execute(socket, command.split(' ').slice(1).join(" "), command_utility())
+		}
+		if (cArr.length > 1) {
+			var possibilities = "";
+			for (var p = 0; p < cArr.length - 1; p++) {
+			    possibilities += cArr[p].name + ", ";
+			}
+			possibilities += cArr[cArr.length - 1].name;
+			return socket.write("Found " + cArr.length + " possible commands (" + possibilities + "). Please be more specific.\r\n");
 		} else {
-			// when we have more than one possible command, we
-			// choose the most heavier from the ones with lower
-			// getCmdRank
-			var results = [];
-			var weigth = 0;
-			var rank = ranks.list.length - 1;
-			for (var cmd in commands) {
-				if(cmd.substr(0, c.length) == c && userRank >= getCmdRank(cmd)) {
-					var cweigth = 0;
-					if (typeof commands[cmd].weigth !== 'undefined')
-						cweigth = commands[cmd].weigth;
-					if (getCmdRank(cmd) < rank) {
-						rank = getCmdRank(cmd);
-						weigth = cweigth;
-						results = [cmd];
-					} else if (getCmdRank(cmd) === rank) {
-						if (cweigth > weigth) {
-							weigth = commands[cmd].weigth;
-							results = [cmd];
-						} else if (cweigth === weigth) {
-							results.push(cmd);
-						}
-					}
-				}
-			}
-			if(results.length == 1) {
-				var x = commands[results[0]];
-				socket.lastcommand = command;
-				x.execute(socket, command.split(' ').slice(1).join(" "), command_utility());
-			} else if(results.length > 1) {
-				socket.write("Found " + results.length + " possible commands (" + results.toString().replace(/,/g,", ") + "). Please be more specific.\r\n");
-			} else {
-				socket.write("There's no such thing as a " + c + " command.\r\n");
-			}
+			return socket.write("There's no such thing as a " + c + " command.\r\n");
 		}
 	}
 	catch(err) {
@@ -450,6 +463,7 @@ function command_utility() {
 	    echo: echo,
 	    getCmdRank: getCmdRank,
 	    setCmdRank: setCmdRank,
+	    findCommand: findCommand,
 
 	    /*
 	     * Execute function to all connected users *but* the triggering one.
