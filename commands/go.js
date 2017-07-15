@@ -15,12 +15,25 @@ exports.command = {
 		var neighbours = command_access.getUniverse().get_neighbours(command_access.getUniverse().get(socket.db.where));
 		if (neighbours.length == 0) return socket.write("You don't see anywhere to go to.\r\n");
 		var toId = null;
+		var abrev = [];
 		for (var i=0; i < neighbours.length; i++) {
 			if (neighbours[i].name.toLowerCase() == to.toLowerCase()) toId = i;
+			if (neighbours[i].name.toLowerCase().substring(0,to.length) == to.toLowerCase()) abrev.push(i);
 		}
-		if (toId == null) return socket.write("I don't know where " + to + " is...\r\n");
+		if (toId == null) {
+			if (abrev.length === 0) return socket.write("I don't know where " + to + " is...\r\n");
+			if (abrev.length > 1) {
+				possibilities = "";
+				for (var p = 0; p < abrev.length-1; p++) {
+					possibilities += neighbours[p].name + ", ";
+				}
+				possibilities += neighbours[abrev[abrev.length-1]].name;
+				return socket.write("There are several possible exits you might mean: " + possibilities + ". Can you be more specific?\r\n");
+			}
+			toId = abrev[0];
+		}
 		command_access.allHereButMe(socket,function(me,t){t.write(": " + me.username + " starts walking towards " + to.toLowerCase() + "...\r\n");});
-		socket.write(": You start walking towards " + to.toLowerCase() + "...\r\n");
+		socket.write(": You start walking towards " + neighbours[toId].name + "...\r\n");
 		socket.db.where = neighbours[toId].coords;
 		var tmp = command_access.getUser(socket.username);
 		tmp.where = socket.db.where;
