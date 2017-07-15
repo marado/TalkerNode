@@ -15,18 +15,27 @@ exports.command = {
 		}
 		var c = command.split(' ')[0];
 		var r = command.split(' ')[1];
-		var command_to_change = command_access.commands[c];
-		if (!command_to_change) {
+		var commands = command_access.findCommand(socket, c);
+		if (commands.length === 0) {
 			socket.write("Sorry, there is no command called " + c + ".\r\n");
 			return;
 		}
+		if (commands.length > 1) {
+			var possibilities = "";
+			for (var p = 0; p < commands.length - 1; p++) {
+				possibilities += commands[p].name + ", ";
+			}
+			possibilities += commands[commands.length - 1].name;
+			return socket.write("Found " + commands.length + " possible commands (" + possibilities + "). Please be more specific.\r\n");
+		}
+		var command_to_change = commands[0];
 		var rank_number = parseInt(r,10);
 		if (Number(r) !== rank_number || rank_number < 0) {
 			socket.write(r + " is no rank number.\r\n");
 			return;
 		}
-		if (rank_number === command_access.getCmdRank(c)) {
-			socket.write("Command " + c + " is already of rank level " +
+		if (rank_number === command_access.getCmdRank(command_to_change.name)) {
+			socket.write("Command " + command_to_change.name + " is already of rank level " +
 				rank_number + "!\r\n");
 			return;
 		}
@@ -34,7 +43,7 @@ exports.command = {
 			socket.write("There aren't those many ranks!\r\n");
 			return;
 		}
-		if (command_access.getCmdRank(c) > socket.db.rank) {
+		if (command_access.getCmdRank(command_to_change.name) > socket.db.rank) {
 			socket.write("What a joker you are... " +
 				"You don't even have access to that command!\r\n");
 			return;
@@ -44,7 +53,7 @@ exports.command = {
 				"only to themselves...\r\n");
 			return;
 		}
-		command_access.setCmdRank(c,rank_number);
-		socket.write("Changed " + c + " to rank " + rank_number + ".\r\n");
+		command_access.setCmdRank(command_to_change.name,rank_number);
+		socket.write("Changed " + command_to_change.name + " to rank " + rank_number + ".\r\n");
 	}
 }
