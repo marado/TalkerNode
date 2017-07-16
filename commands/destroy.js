@@ -4,8 +4,7 @@ exports.command = {
 	unloadable: true,
 	min_rank: 6,
 	display: "destroys a nearby place",
-	// TODO: enhance 'help' by letting you know a list of possible directions
-	help: ".destroy <direction> will destroy a nearby place, in <direction>'s direction.",
+	help: ".destroy <direction> will destroy a nearby place, in <direction>'s direction. More info about directions in .file directions.",
 	usage: ".destroy <direction>",
 	weigth: 0,
 

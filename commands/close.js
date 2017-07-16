@@ -4,8 +4,7 @@ exports.command = {
 	unloadable: true,
 	min_rank: 6,
 	display: "closes an existent passage",
-	// TODO: enhance 'help' by letting you know a list of possible directions
-	help: ".close <direction> will close the passage in that direction.",
+	help: ".close <direction> will close the passage in that direction. More info about directions in .file directions.",
 	usage: ".close <direction>",
 	weigth: 0,
 

@@ -6,10 +6,9 @@ exports.command = {
 	unloadable: true,
 	min_rank: 5,
 	display: "creates a new place, next to where you are",
-	// TODO: enhance 'help' by letting you know a list of possible directions
 	help: ".dig <direction> <name> will create a new place next to here, " +
 		"called <name>, in <direction>'s direction. If that place already exists, " +
-		"but a passage doesn't, just create the passage.",
+		"but a passage doesn't, just create the passage. More info about directions in .file directions.",
 	usage: ".dig <direction> <name>",
 	weigth: 0,
 

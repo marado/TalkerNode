@@ -1,0 +1,14 @@
+This talker uses a 3D coordinates system. Thus, these are the available
+directions:
+
+   UNW UN UNE           Subtitles:
+   UW      UE           * U - up
+   USW US USE           * D - down
+                        * N - north
+    NW  N  NE           * S - south
+    W       E           * E - east
+    SW  S  SE           * W - west
+
+   DNW DN DNE
+   DW      DE
+   DSW DS DSE
