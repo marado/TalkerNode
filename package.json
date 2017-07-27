@@ -9,9 +9,11 @@
   },
   "author": "Marcos Marado <mindboosternoori@gmail.com>",
   "license": "Unlicense",
+  "engines" : { "node" : ">=0.1.92" },
   "dependencies": {
     "dirty": ">=0.9.9",
     "nodiverse": ">=0.3.0",
     "password-strength": ""
   }
 }
+
