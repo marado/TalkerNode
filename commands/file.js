@@ -2,7 +2,7 @@ exports.command = {
 	name: "file",
 	autoload: true,
 	unloadable: false,
-	min_rank: 4,
+	min_rank: 0,
 	display: "Show a list of files, or a the content of one",
 	help: "There can be a number of files available for you to read. This is the command used to either list or read them.",
 	usage: ".file, .file <filename>",

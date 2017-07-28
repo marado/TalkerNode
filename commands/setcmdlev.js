@@ -2,7 +2,7 @@ exports.command = {
 	name: "setcmdlev",
 	autoload: true,
 	unloadable: false,
-	min_rank: 8,
+	min_rank: 7,
 	display: "Changes the rank needed to execute a command.",
 	help: "This command is used to change the minimum rank an user must have to be able to " +
 		"use a particular command.",
