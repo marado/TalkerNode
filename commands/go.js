@@ -32,8 +32,22 @@ exports.command = {
 			}
 			toId = abrev[0];
 		}
-		command_access.allHereButMe(socket,function(me,t){t.write(": " + me.username + " starts walking towards " + to.toLowerCase() + "...\r\n");});
-		socket.write(": You start walking towards " + neighbours[toId].name + "...\r\n");
+
+		var math=require('mathjs');
+		var movement = math.subtract(socket.db.where,neighbours[toId].coords);
+		var direction = "";
+		if (movement[2] > 0) direction = "down";
+		if (movement[2] < 0) direction = "up";
+		if ((movement[0] !== 0 || movement[1] !== 0) && movement[2] != 0) {
+			direction += " and ";
+		}
+		if (movement[1] > 0) direction += "south";
+		if (movement[1] < 0) direction += "north";
+		if (movement[0] > 0) direction += "west";
+		if (movement[0] < 0) direction += "east";
+
+		command_access.allHereButMe(socket,function(me,t){t.write(": " + me.username + " starts walking to " + direction + " towards " + to.toLowerCase() + "...\r\n");});
+		socket.write(": You start walking to " + direction + " towards " + neighbours[toId].name + "...\r\n");
 		socket.db.where = neighbours[toId].coords;
 		var tmp = command_access.getUser(socket.username);
 		tmp.where = socket.db.where;
