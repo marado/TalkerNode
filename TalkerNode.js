@@ -436,6 +436,7 @@ function closeSocket(socket) {
  * Callback method executed when a new TCP socket is opened.
  */
 function newSocket(socket) {
+	socket.setKeepAlive(true);
 	sockets.push(socket);
 	socket.write('Welcome to the '+talkername+'!\r\n\r\nGive me a name:  ');
 	socket.on('data', function(data) {
