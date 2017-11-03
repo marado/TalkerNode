@@ -75,5 +75,8 @@ exports.command = {
 			":: " + whom + " is of rank " + command_access.ranks.list[w.rank] +
 				", and was last seen at " + command_access.getUniverse().get(w.where).name + ".\r\n"
 		);
+		if (typeof w.loginTime !== 'undefined') {
+			socket.write(":: " + whom + " last logged in at " + new Date(w.loginTime).toString() + ".\r\n");
+		}
 	}
 }

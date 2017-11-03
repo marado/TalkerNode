@@ -43,7 +43,7 @@ exports.command = {
 					"  " + this.stringPadding((typeof command_access.sockets[i].db.desc !== "undefined") ? command_access.sockets[i].db.desc : "has no .desc yet!", 18)+
 					"  " + this.stringPadding(command_access.ranks.list[command_access.sockets[i].db.rank], 14) +
 					"  " + this.stringPadding(command_access.getUniverse().get(command_access.sockets[i].db.where).name, 8) +
-					"  " + this.timeString(Date.now() - command_access.sockets[i].loginTime) + "/" + this.timeString(Date.now() - command_access.sockets[i].activityTime) +
+					"  " + this.timeString(Date.now() - command_access.sockets[i].db.loginTime) + "/" + this.timeString(Date.now() - command_access.sockets[i].activityTime) +
 					"\r\n");
 			}
 		}

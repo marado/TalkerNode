@@ -223,7 +223,7 @@ function receiveData(socket, data) {
 			var old = command_utility().allButMe(socket,function(me,to){if(to.username.toLowerCase()===me.username.toLowerCase()){to.end('Session is being taken over...\n');}});
 			socket.write('Taking over session...\n');
 		} else {
-			socket.loginTime = Date.now();
+			socket.db.loginTime = Date.now();
 			socket.activityTime = Date.now();
 			command_utility().allButMe(socket,function(me,to){to.write("[Entering is: "+ me.username + " (" + universe.get(me.db.where).name + " " + me.db.where + ") ]\r\n");});
 		}
@@ -422,9 +422,9 @@ function closeSocket(socket) {
 		sockets[i].db = usersdb.get(sockets[i].username);
 		if (typeof sockets[i].db !== 'undefined') {
 		    if (typeof sockets[i].db.totalTime === 'undefined') {
-			sockets[i].db.totalTime = (Date.now() - sockets[i].loginTime);
+			sockets[i].db.totalTime = (Date.now() - sockets[i].db.loginTime);
 		    } else {
-			sockets[i].db.totalTime += (Date.now() - sockets[i].loginTime);
+			sockets[i].db.totalTime += (Date.now() - sockets[i].db.loginTime);
 		    }
 		    usersdb.set(sockets[i].username, sockets[i].db);
 		}
