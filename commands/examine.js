@@ -8,7 +8,7 @@ exports.command = {
 		"Without arguments, it will give you information about yourself.\r\n" + 
 		"If you add another user as an argument, it will show you info about him/her " +
 		"instead.",
-	usage: ".examine <user>",
+	usage: ".examine [<user>]",
 
 	friendlyTime: function(ms) {
 		if (ms < 1000) {
