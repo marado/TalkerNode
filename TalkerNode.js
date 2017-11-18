@@ -558,8 +558,8 @@ function command_utility() {
 		getUsersList: function getUsersList() {
 			var list = [];
 		    usersdb.forEach(function(key, val) {
-				// retrieving username and rank. If needed, we can allways add stuff later
-				list.push({username:key, rank:val.rank});
+				// retrieving username, rank and loginTime. If needed, we can always add stuff later
+				list.push({username:key, rank:val.rank, loginTime:val.loginTime});
 			});
 			return list;
 		},
