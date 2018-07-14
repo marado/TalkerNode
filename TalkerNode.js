@@ -4,6 +4,7 @@
 var net = require('net');
 var crypto = require('crypto');
 var valid = require('password-strength');
+var colorize = require('colorize');
 
 var sockets = [];
 var port = process.env.PORT || 8888;
@@ -132,28 +133,31 @@ function receiveData(socket, data) {
 	socket.write(echo(true));
 	if(socket.username == undefined) {
 		if (cleanData.toLowerCase() === "quit") return socket.end('Goodbye!\r\n');
-		if (cleanData.toLowerCase() === "who") { socket.db={rank:0}; doCommand(socket, ".who"); return socket.write("Give me a name:  "); }
-		if (cleanData.toLowerCase() === "version") { socket.db={rank:0}; doCommand(socket, ".version"); return socket.write("Give me a name:  "); }
+		if (cleanData.toLowerCase() === "who") { socket.db={rank:0}; doCommand(socket, ".who"); return socket.write(colorize.ansify("#cyan[Give me a name:]  ")); }
+		if (cleanData.toLowerCase() === "version") { socket.db={rank:0}; doCommand(socket, ".version"); return socket.write(colorize.ansify("#cyan[Give me a name:]  ")); }
 		var reservedNames=["who","quit","version"];
 		if (reservedNames.indexOf(cleanData.toLowerCase()) > -1) {
-			socket.write("\r\nThat username is reserved, you cannot have it.\r\nGive me a name:  ");
+			socket.write(colorize.ansify("\r\nThat username is reserved, you cannot have it.\r\n#cyan[Give me a name:]  "));
 		}
 		else if ((cleanData.match(/^[a-zA-Z]+$/) !== null) && (1 < cleanData.length) && (cleanData.length < 17)) {
 			socket.username = cleanData.toLowerCase().charAt(0).toUpperCase() + cleanData.toLowerCase().slice(1); // Capitalized name
 			socket.loggedin = false;
 			socket.db = usersdb.get(socket.username);
 			if (typeof socket.db === 'undefined') {
-				socket.write("\r\nNew user, welcome! Please choose a password: ");
+				socket.write(colorize.ansify("\r\n#cyan[New user, welcome! Please choose a password:] "));
 				socket.write(echo(false));
 				socket.registering=true;
 			} else {
-				socket.write("\r\nGive me your password: ");
+				socket.write(colorize.ansify("\r\n#cyan[Give me your password:] "));
 				socket.write(echo(false));
 				socket.registering=false;
 			}
 			return;
 		} else {
-			socket.write("\r\nInvalid username: it can only contain letters, have at least two characters and be no longer than 16 characters.\r\nGive me a name:  ");
+			socket.write(colorize.ansify(
+			    "\r\n#red[Invalid username: it can only contain letters, have at least two characters and be no longer than 16 characters.]\r\n" +
+			    "#cyan[Give me a name:]  "
+			));
 		}
 		return;
 	} else if (socket.loggedin == false) {
@@ -161,9 +165,9 @@ function receiveData(socket, data) {
 		if (socket.registering) {
 			if (typeof socket.password === 'undefined') {
 				if ((cleanData.toLowerCase() === socket.username.toLowerCase()) || !valid(cleanData).valid) {
-				    socket.write("\r\nThat password is not valid");
+				    socket.write(colorize.ansify("\r\n#red[That password is not valid]"));
 				    if (valid(cleanData).hint !== null) socket.write(" (" + valid(cleanData).hint + ")");
-				    socket.write(". Let's try again...\r\nGive me a name: ");
+				    socket.write(colorize.ansify("#red[.] Let's try again...\r\n#cyan[Give me a name:]  "));
 				    delete socket.registering;
 				    delete socket.username;
 				    delete socket.loggedin;
@@ -172,7 +176,7 @@ function receiveData(socket, data) {
 				}
 				socket.password = crypto.createHash('sha512').update(cleanData).digest('hex');
 				socket.write(echo(false));
-				socket.write("\r\nConfirm the chosen password: ");
+				socket.write(colorize.ansify("\r\n#cyan[Confirm the chosen password:] "));
 				return;
 			} else {
 				if (socket.password === crypto.createHash('sha512').update(cleanData).digest('hex')) {
@@ -200,14 +204,14 @@ function receiveData(socket, data) {
 					delete socket.registering;
 					delete socket.username;
 					delete socket.db;
-					socket.write("\r\nPasswords don't match! Let's start from the beggining... Tell me your name:  ");
+					socket.write(colorize.ansify("\r\n#red[Passwords don't match!] Let's start from the beggining... #cyan[Tell me your name:]  "));
 					return;
 				}
 			}
 		} else if (socket.db.password !== crypto.createHash('sha512').update(cleanData).digest('hex')) {
 			delete socket.username;
 			delete socket.db;
-			socket.write("\r\nWrong password! Let's start from the beggining... Tell me your name:  ");
+			socket.write(colorize.ansify("\r\n#red[Wrong password!] Let's start from the beggining... #cyan[Tell me your name:]  "));
 			return;
 		}
 
@@ -241,26 +245,26 @@ function receiveData(socket, data) {
 				if (socket.interactive.state === "old") {
 					// let's confirm the password
 					if (socket.db.password !== crypto.createHash('sha512').update(cleanData).digest('hex')) {
-						 socket.write("\r\n:: Wrong password!\r\n");
+						 socket.write(colorize.ansify("\r\n:: #red[Wrong password!]\r\n"));
 						delete socket.interactive;
 					} else {
 						// password is correct
-						socket.write("\r\n:: Tell me the new password: ");
+						socket.write(colorize.ansify("\r\n:: #green[Tell me the new password:] "));
 						socket.write(echo(false));
 						socket.interactive.state = "new";
 					}
 				} else {
 					// let's set cleanData as the new password
 					if ((cleanData.toLowerCase() === socket.username.toLowerCase()) || !valid(cleanData).valid) {
-					    socket.write("\r\nThat password is not valid");
+					    socket.write(colorize.ansify("\r\n#red[That password is not valid]"));
 					    if (valid(cleanData).hint !== null) socket.write(" (" + valid(cleanData).hint + ")");
-					    socket.write(". Password not changed.\r\n");
+					    socket.write(colorize.ansify("#red[. Password not changed.]\r\n"));
 					    delete socket.interactive;
 					    return;
 					}
 					socket.db.password = crypto.createHash('sha512').update(cleanData).digest('hex');
 					usersdb.set(socket.username, socket.db);
-					socket.write("\r\n:: Password changed, now don't you forget your new password!\r\n");
+					socket.write(colorize.ansify("\r\n:: #cyan[Password changed, now don't you forget your new password!]\r\n"));
 					delete socket.interactive;
 				}
 				break;
@@ -443,7 +447,7 @@ function closeSocket(socket) {
 function newSocket(socket) {
 	socket.setKeepAlive(true);
 	sockets.push(socket);
-	socket.write('Welcome to the '+talkername+'!\r\n\r\nGive me a name:  ');
+	socket.write(colorize.ansify('#green[Welcome to the #bold[#white['+talkername+']]!]\r\n\r\n#cyan[Give me a name:]  '));
 	socket.on('data', function(data) {
 		receiveData(socket, data);
 	})
