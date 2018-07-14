@@ -78,5 +78,8 @@ exports.command = {
 		if (typeof w.loginTime !== 'undefined') {
 			socket.write(":: " + whom + " last logged in at " + new Date(w.loginTime).toString() + ".\r\n");
 		}
+		if (typeof w.loginCount !== 'undefined') {
+			socket.write(":: " + whom + " has logged in " + w.loginCount + " times.\r\n");
+		}
 	}
 }

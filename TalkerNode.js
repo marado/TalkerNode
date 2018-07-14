@@ -224,6 +224,11 @@ function receiveData(socket, data) {
 			socket.write('Taking over session...\n');
 		} else {
 			socket.db.loginTime = Date.now();
+			if (typeof(socket.db.loginCount) === "undefined") {
+			    socket.db.loginCount = 1;
+			} else {
+			    socket.db.loginCount++;
+			}
 			socket.activityTime = Date.now();
 			command_utility().allButMe(socket,function(me,to){to.write("[Entering is: "+ me.username + " (" + universe.get(me.db.where).name + " " + me.db.where + ") ]\r\n");});
 		}
