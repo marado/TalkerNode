@@ -17,9 +17,10 @@ decimal.js@10.1.1:
   resolved "https://registry.yarnpkg.com/decimal.js/-/decimal.js-10.1.1.tgz#fb541922a2e8fc618f5e6fbb474e281ed3d2a64c"
   integrity sha512-vEEgyk1fWVEnv7lPjkNedAIjzxQDue5Iw4FeX4UkNUDSVyD/jZTD0Bw2kAO7k6iyyJRAhM9oxxI0D1ET6k0Mmg==
 
-dirty:
+dirty@>=0.9.9:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/dirty/-/dirty-1.1.0.tgz#70edd2b999541dc9974fd3a8cbd0c670fe236078"
+  integrity sha1-cO3SuZlUHcmXT9Ooy9DGcP4jYHg=
 
 escape-latex@1.2.0:
   version "1.2.0"
@@ -50,13 +51,15 @@ mathjs@:
     tiny-emitter "2.1.0"
     typed-function "1.1.0"
 
-nodiverse:
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/nodiverse/-/nodiverse-0.2.0.tgz#02137136cb81f82517f849509bdc9a9171289f7e"
+nodiverse@>=0.3.0:
+  version "0.3.3"
+  resolved "https://registry.yarnpkg.com/nodiverse/-/nodiverse-0.3.3.tgz#610b9c6207b008f2c898e76b93be56c91620842e"
+  integrity sha1-YQucYgewCPLImOdrk75WyRYghC4=
 
-password-strength:
+password-strength@:
   version "0.0.1"
   resolved "https://registry.yarnpkg.com/password-strength/-/password-strength-0.0.1.tgz#e5b5503f77efecfd0eff26813eb8a8d8cfc83778"
+  integrity sha1-5bVQP3fv7P0O/yaBPrio2M/IN3g=
 
 seed-random@2.2.0:
   version "2.2.0"
