@@ -8,6 +8,7 @@ exports.command = {
 	usage: ".version",
 
 	execute: function(socket, command, command_access) {
+		var colorize = require('colorize');
 		socket.write("+------------------------------------+\r\n TalkerNode, version " +
 			command_access.version +
 			"\r\n https://github.com/marado/TalkerNode\r\n" +

@@ -8,8 +8,9 @@ exports.command = {
 	usage: ".shout <text>",
 
 	execute: function(socket, command, command_access) {
-        if (command === 'undefined' || command.length < 1)
-            return socket.write("Shout what?\r\n");
+		var colorize = require('colorize');
+		if (command === 'undefined' || command.length < 1)
+			return socket.write("Shout what?\r\n");
 		command_access.allButMe(socket,function(me,to){
 			to.write("! " + me.username + " shouts: " + command + "\r\n");
 		});

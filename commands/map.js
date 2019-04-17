@@ -8,6 +8,7 @@ exports.command = {
 	usage: ".map",
 
 	execute: function(socket, command, command_access) {
+		var colorize = require('colorize');
 		socket.write(command_access.getUniverse().asciimap(socket.db.where));
 	}
 }

@@ -8,6 +8,7 @@ exports.command = {
 	usage: ".quit",
 
 	execute: function(socket, command, command_access) {
+		var colorize = require('colorize');
 		command_access.allButMe(socket,function(me,to){to.write("[Leaving is: "+ me.username + " ]\r\n");});
 		socket.end('Goodbye!\n');
 	}

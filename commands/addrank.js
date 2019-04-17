@@ -10,8 +10,9 @@ exports.command = {
 
 	// Function to execute the command
 	execute: function(socket, command, command_access) {
+		var colorize = require('colorize');
 		if (typeof command !== 'string' || command.length < 1) {
-			socket.write("You'll have to give the new rank a name...\r\n");
+			socket.write(colorize.ansify("#yellow[:: You'll have to give the new rank a name...]\r\n"));
 			return;
 		}
 		// add the new rank
@@ -35,6 +36,6 @@ exports.command = {
 				}
 			}
 		}
-		socket.write("Rank added!\r\n");
+		socket.write(colorize.ansify("#bold[Rank added!]\r\n"));
 	}
 }

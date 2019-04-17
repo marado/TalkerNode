@@ -9,6 +9,7 @@ exports.command = {
 
 	execute: function(socket, command, command_access) {
 
+		var colorize = require('colorize');
 		command = command.trim();
 		const fs = require('fs');
 		const directory = './files/';

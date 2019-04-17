@@ -31,6 +31,7 @@ exports.command = {
 
 	// Function to execute the command
 	execute: function(socket, command, command_access) {
+		var colorize = require('colorize');
 		var whom = command.split(' ')[0];
 		if (typeof whom === 'undefined' || whom.length < 1) {
 			whom = socket.username;

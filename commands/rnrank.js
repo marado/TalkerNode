@@ -10,6 +10,7 @@ exports.command = {
 
 	// Function to execute the command
 	execute: function(socket, command, command_access) {
+		var colorize = require('colorize');
 		rank = command.split(' ')[0];
 		name = command.split(' ').slice(1).join(" ");
 		if (

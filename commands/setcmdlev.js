@@ -9,6 +9,7 @@ exports.command = {
 	usage: ".setcmdlev <command> <rank number>",
 
 	execute: function(socket, command, command_access) {
+		var colorize = require('colorize');
 		if (command.split(' ').length !== 2) {
 			socket.write("Usage   : .setcmdlev <command> <rank number>\r\n");
 			return;

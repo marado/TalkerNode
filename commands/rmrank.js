@@ -12,6 +12,7 @@ exports.command = {
 
 	// Function to execute the command
 	execute: function(socket, command, command_access) {
+		var colorize = require('colorize');
 		if (typeof command !== 'string' || command.length < 1) {
 			socket.write("What rank do you want to remove?\r\n");
 			return;

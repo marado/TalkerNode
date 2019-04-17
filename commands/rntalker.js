@@ -10,6 +10,7 @@ exports.command = {
 
 	// Function to execute the command
 	execute: function(socket, command, command_access) {
+		var colorize = require('colorize');
 		name = command.split(' ').slice(0).join(" "); // for now, names can have spaces
 		if ((typeof name) !== 'string' || name.length === 0) {
 			socket.write("You better type .help rntalker !\r\n");

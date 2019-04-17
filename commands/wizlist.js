@@ -9,6 +9,7 @@ exports.command = {
 
 	// Function to execute the command
 	execute: function(socket, command, command_access) {
+		var colorize = require('colorize');
 		var users = command_access.getUsersList();
 		var toShow = command_access.ranks.list.length;
 		if (toShow > 3) toShow = 3;

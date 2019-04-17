@@ -26,6 +26,7 @@ exports.command = {
 	},
 
 	execute: function(socket, command, command_access) {
+		var colorize = require('colorize');
 		var connected = 0;
 		var connecting = 0;
 		socket.write("+----------------------------------------------------------------------------+\r\n");

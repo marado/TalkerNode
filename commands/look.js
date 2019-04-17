@@ -9,6 +9,7 @@ exports.command = {
 
 	// Function to execute the command
 	execute: function(socket, command, command_access) {
+		var colorize = require('colorize');
 		socket.write("You look around...\r\n");
 		socket.write("You notice you are at " +
 			command_access.getUniverse().get(socket.db.where).name + ".\r\n");
