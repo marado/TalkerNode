@@ -227,6 +227,7 @@ function receiveData(socket, data) {
 			var old = command_utility().allButMe(socket,function(me,to){if(to.username.toLowerCase()===me.username.toLowerCase()){to.end('Session is being taken over...\n');}});
 			socket.write('Taking over session...\n');
 		} else {
+			socket.lastLogin = socket.db.loginTime;
 			socket.db.loginTime = Date.now();
 			if (typeof(socket.db.loginCount) === "undefined") {
 			    socket.db.loginCount = 1;
@@ -236,8 +237,15 @@ function receiveData(socket, data) {
 			socket.activityTime = Date.now();
 			command_utility().allButMe(socket,function(me,to){to.write("[Entering is: "+ me.username + " (" + universe.get(me.db.where).name + " " + me.db.where + ") ]\r\n");});
 		}
-		socket.write("\r\nWelcome " + socket.username + "\r\n");
+		socket.write("\r\n+----------------------------------------------------------------------------+\r\n");
+		socket.write(colorize.ansify(" Welcome to #bold[" + talkername + "], #green[" + socket.username + "]!\r\n"));
+		if (typeof(socket.lastLogin) !== "undefined") {
+			socket.write(colorize.ansify(" Your last login was at #magenta[" + new Date(socket.lastLogin).toString() + "].\r\n"));
+		}
+		socket.write(colorize.ansify(" Your rank is #bold[" + ranks.list[socket.db.rank] + "].\r\n"));
+		socket.write("+----------------------------------------------------------------------------+\r\n");
 		socket.loggedin = true;
+		doCommand(socket, ".look");
 		return;
 	} else if (typeof socket.interactive !== 'undefined') {
 		switch (socket.interactive.type) {
