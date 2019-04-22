@@ -10,11 +10,11 @@ exports.command = {
 
 	// Function to execute the command
 	execute: function(socket, command, command_access) {
-		var colorize = require('colorize');
+		var chalk = require('chalk');
 		direction = command.split(' ')[0];
 		// 'direction' needs to be a direction on Nodiverse's nomenculature (N, NE...)
 		if (typeof direction !== 'string' || direction.length === 0) {
-			socket.write(colorize.ansify("#bold[Syntax:] .close <direction>\r\n"));
+			socket.write(chalk.bold("Syntax:") + " .close <direction>\r\n");
 			return;
 		}
 		// FIXME: we're assuming that any uppercased string key with a
@@ -52,6 +52,6 @@ exports.command = {
 		}
 		// saving the altered universe
 		command_access.saveUniverse();
-		socket.write(colorize.ansify(":: You closed the passage towards #bold[" + direction + "].\r\n"));
+		socket.write(":: You closed the passage towards " + chalk.bold(direction) + ".\r\n");
 	}
 }

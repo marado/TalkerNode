@@ -10,9 +10,9 @@ exports.command = {
 
 	// Function to execute the command
 	execute: function(socket, command, command_access) {
-		var colorize = require('colorize');
+		var chalk = require('chalk');
 		command_access.getUniverse().entrypoint = socket.db.where;
 		command_access.saveUniverse();
-		socket.write(":: The Universe's entrypoint is now here.\r\n");
+		socket.write(chalk.green(":: ") + "The Universe's entrypoint is now here.\r\n");
 	}
 }

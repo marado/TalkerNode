@@ -9,7 +9,7 @@ exports.command = {
 
 	// Function to execute the command
 	execute: function(socket, command, command_access) {
-		var colorize = require('colorize');
+		var chalk = require('chalk');
 		var to = command.split(' ')[0];
 		if ((typeof to === 'undefined') || (to.length < 1)) return socket.write("Where do you want to go to?\r\n");
 		if (to.toLowerCase() === command_access.getUniverse().get(socket.db.where).name.toLowerCase()) return socket.write("You are already there!\r\n");

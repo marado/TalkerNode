@@ -8,7 +8,7 @@ exports.command = {
 	usage: ".semote <text>",
 
 	execute: function(socket, command, command_access) {
-		var colorize = require('colorize');
+		var chalk = require('chalk');
 		if (command === 'undefined' || command.length < 1)
 			return socket.write("What are you trying to do?\r\n");
 		var send = "! " + socket.username + " " + command + "\r\n";

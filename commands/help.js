@@ -11,7 +11,7 @@ exports.command = {
 
 	execute: function(socket, command, command_access) {
 
-		var colorize = require('colorize');
+		var chalk = require('chalk');
 		var userRank = socket.db.rank;
 		command = command.trim();
 

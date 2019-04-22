@@ -14,12 +14,12 @@ exports.command = {
 
 	// Function to execute the command
 	execute: function(socket, command, command_access) {
-		var colorize = require('colorize');
+		var chalk = require('chalk');
 		direction = command.split(' ')[0];
 		name = command.split(' ').slice(1).join(" "); // for now, names can have spaces
 		// 'direction' needs to be a direction on Nodiverse's nomenculature (N, NE...)
 		if (typeof direction !== 'string' || direction.length === 0) {
-			socket.write(colorize.ansify("#bold[Syntax:] .dig <direction> <name>\r\n"));
+			socket.write(chalk.bold("Syntax: ") + ".dig <direction> <name>\r\n");
 			return;
 		}
 		// FIXME: we're assuming that any uppercased string key with a
@@ -35,7 +35,7 @@ exports.command = {
 			}
 		}
 		if (!valid) {
-			socket.write(colorize.ansify("#red[:: #bold[" + direction + "] is not a valid direction.]\r\n"));
+			socket.write(chalk.red(":: " + chalk.bold(direction) + " is not a valid direction.\r\n"));
 			return;
 		}
 		// name: first char needs to be a letter, can't be a dupe
@@ -43,11 +43,11 @@ exports.command = {
 			(name.length === 0) ||
 			!(/^[a-zA-Z\u00C0-\u00ff]+$/.test(name.substring(0,1)))
 		) {
-			socket.write(colorize.ansify("#red[:: Place names need to start with a letter!]\r\n"));
+			socket.write(chalk.red(":: Place names need to start with a letter!\r\n"));
 			return;
 		}
 		if (name === command_access.getUniverse().get(socket.db.where).name) {
-			socket.write(colorize.ansify("#yellow[:: You're already there!]\r\n"));
+			socket.write(chalk.yellow(":: You're already there!\r\n"));
 			return;
 		}
 		// look for exits
@@ -56,7 +56,7 @@ exports.command = {
 		// check if the name isn't a dupe
 		for (var n = 0; n < neighbours.length; n++) {
 			if (neighbours[n] !== null && neighbours[n].name === name) {
-				socket.write(colorize.ansify("#yellow[:: That place already exists!]\r\n"));
+				socket.write(chalk.yellow(":: That place already exists!\r\n"));
 				return;
 			}
 		}
@@ -77,18 +77,18 @@ exports.command = {
 		if (targObj !== null) {
 			// deal with situations where the place is not the same
 			if (targObj.name !== name) {
-				socket.write(formatters.text_wrap(colorize.ansify("#red[:: You're trying to create a " +
-					"place called #bold[" + name + "] where there's already another " +
-					"place called #bold[" + targObj.name + "]!] #yellow[Maybe you want to " +
-					"#bold[.destroy] that one first, or recheck your #bold[.map] and make " +
-					"sure of what you're trying to do?]\r\n")));
+				socket.write(formatters.text_wrap(chalk.red(":: You're trying to create a " +
+					"place called " + chalk.bold(name) + " where there's already another " +
+					"place called " + chalk.bold(targObj.name) + "!") + chalk.yellow("Maybe you want to " +
+					chalk.bold(".destroy") + " that one first, or recheck your " + chalk.bold(".map") + "and make " +
+					"sure of what you're trying to do?\r\n")));
 				return;
 			}
 			var updateMe = command_access.getUniverse().get(socket.db.where);
 			// deal with situations where the passage already exists
 			var newPassage = eval("command_access.getUniverse()."+direction);
 			if ((updateMe.passages & newPassage) === newPassage) {
-				socket.write(colorize.ansify("#yellow[You cannot create a passage that already exists!]\r\n"));
+				socket.write(chalk.yellow("You cannot create a passage that already exists!\r\n"));
 				return;
 			}
 			updateMe.passages += newPassage;
@@ -99,7 +99,7 @@ exports.command = {
 						command_access.ranks.list.length - 1
 					] + " know about this!\r\n");
 			} else {
-				socket.write(colorize.ansify("#green[::] You just created a passage to #bold[" + name + "].\r\n"));
+				socket.write(chalk.green(":: ") + "You just created a passage to " + chalk.bold(name) + ".\r\n");
 			}
 		} else {
 			// nothing there, let's create
@@ -130,8 +130,8 @@ exports.command = {
 					"about this!\r\n");
 				return;
 			}
-			socket.write(colorize.ansify("#green[::] You dig towards #bold[" + direction +
-				"], and create a new place called #bold[" + name + "].\r\n"));
+			socket.write(chalk.green(":: ") + "You dig towards " + chalk.bold(direction) +
+				", and create a new place called " + chalk.bold(name) + ".\r\n");
 		}
 		// saving the altered universe
 		command_access.saveUniverse();

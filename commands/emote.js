@@ -9,9 +9,9 @@ exports.command = {
 	weigth: 10,
 
 	execute: function(socket, command, command_access) {
-		var colorize = require('colorize');
+		var chalk = require('chalk');
 		if (command === 'undefined' || command.length < 1)
-			return socket.write(colorize.ansify("#red[:: What are you trying to do?]\r\n"));
+			return socket.write(chalk.red(":: What are you trying to do?\r\n"));
 		var send = socket.username + " " + command + "\r\n";
 		command_access.allHereButMe(socket,function(me,to){to.write(send);}); 
 		socket.write(send);

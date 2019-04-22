@@ -9,7 +9,7 @@ exports.command = {
 
 	// Function to execute the command
 	execute: function(socket, command, command_access) {
-		var colorize = require('colorize');
+		var chalk = require('chalk');
 		var me = socket;
 		var whom = command.split(' ')[0];
 		var w = null;
@@ -46,9 +46,10 @@ exports.command = {
 				command_access.updateUser(whom, w);
 			}
 			whom = whom.toLowerCase().charAt(0).toUpperCase() + whom.toLowerCase().slice(1);
-			var sentence = colorize.ansify("#red[:: #white[" + me.username + "] has demoted #yellow[" + whom + "] to the rank of #green[" + rankName + "]! ::]\r\n");
+			var sentence = chalk.red(":: ") + chalk.white(me.username) + chalk.red(" has demoted ") +
+					chalk.yellow(whom) + chalk.red(" to the rank of ") + chalk.green(rankName) + chalk.red("! ::\r\n");
 			command_access.allButMe(socket,function(me,to){to.write(sentence);});
-			socket.write(colorize.ansify("You #red[demoted] #yellow[" + whom + "] to the rank of #green[" + rankName + "]!\r\n"));
+			socket.write("You " + chalk.red("demoted ") + chalk.yellow(whom) + " to the rank of " + chalk.green(rankName) + "!\r\n");
 		} else {
 			me.write("You cannot demote someone with the same or an higher rank than yours!\r\n");
 		}

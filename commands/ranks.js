@@ -8,7 +8,7 @@ exports.command = {
 	usage: ".ranks",
 
 	execute: function(socket, command, command_access) {
-		var colorize = require('colorize');
+		var chalk = require('chalk');
  		var ranks = command_access.ranks;
 		socket.write("+----------------------------------------------------------------------------+\r\n");
 		for (var r = 0 ; r < ranks.list.length; r++) {

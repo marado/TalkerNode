@@ -9,7 +9,7 @@ exports.command = {
 
 	execute: function(socket, command, command_access) {
 
-		var colorize = require('colorize');
+		var chalk = require('chalk');
 		to = command.split(' ')[0];
 		message = command.split(' ').slice(1).join(" ");
 
