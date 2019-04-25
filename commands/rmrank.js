@@ -32,14 +32,16 @@ exports.command = {
 			socket.write("You cannot manage ranks to which you have no access.\r\n");
 			return;
 		}
-		// Is the rank "empty"?
-		// * no commands
+		// Is the rank "empty"? Let's adjust the rank of the higher commands
 		for (var c in command_access.commands) {
 			if (command_access.getCmdRank(c) == rank) {
 				socket.write(formatters.text_wrap("Can't remove that rank: command " +
 					command_access.commands[c].name +
 					" exists on it. Maybe you want to .setcmdlev it to another rank?\r\n"));
 				return;
+			}
+			if (command_access.getCmdRank(c) > rank) {
+				command_access.setCmdRank(command_access.commands[c].name, command_access.getCmdRank(c) - 1);
 			}
 		}
 		// * no users (if this isn't the highest rank))
