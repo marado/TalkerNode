@@ -11,70 +11,72 @@ var port = process.env.PORT || 8888;
 var version = require('./package.json').version;
 
 // Instantiates the users database
-var dirty = require('dirty');
-var loadeddb = 0; // number of databases loaded so far
-var usersdb = dirty('user.db');
-usersdb.on('load', function() { loadeddb++; });
-usersdb.on('error', function(err) { console.log("USERS DB ERROR! "+err); });
+const low = require('lowdb');
+const FileSync = require('lowdb/adapters/FileSync')
+var loadeddb = 0; // number of databases loaded so far // TODO: this probably is no longer needed with lowdb
+const usersadapter = new FileSync('user.db');
+const usersdb = low(usersadapter);
+loadeddb++;
 
 // Instantiates the talker settings database
 var ranks;
 var commands = {};
-var talkerdb = dirty('talker.db').on('load', function() {
-	ranks = talkerdb.get("ranks");
-	if (typeof ranks === 'undefined') {
-		ranks = {list:[
-				"Jailed",
-				"Newcomer",
-				"Newbie",
-				"Juvie",
-				"Learner",
-				"Adult",
-				"Wiseman",
-				"Hero",
-				"Mage",
-				"Imortal",
-				"God"
-			], entrylevel: 10};
-		talkerdb.set("ranks", ranks);
-	}
-	loadeddb++;
-});
-talkerdb.on('error', function(err) { console.log("TALKER DB ERROR! "+err); });
+const talkeradapter = new FileSync('talker.db');
+const talkerdb = low(talkeradapter);
+ranks = talkerdb.get('ranks').value();
+
+if (typeof ranks === 'undefined') {
+	ranks = {list:[
+			"Jailed",
+			"Newcomer",
+			"Newbie",
+			"Juvie",
+			"Learner",
+			"Adult",
+			"Wiseman",
+			"Hero",
+			"Mage",
+			"Imortal",
+			"God"
+		], entrylevel: 10};
+	talkerdb.set("ranks", ranks).write();
+}
+loadeddb++;
 
 // Instantiates the universe
 var nodiverse = require('nodiverse');
 var universe;
 var talkername = "Moosville"; // TODO: make this configurable
-var universedb = dirty('universe.db').on('load', function() {
-	universedb.on('error', function(err) { console.log("UNIVERSE DB ERROR! "+err); });
-	universe = universedb.get("universe");
-	if (typeof universe === 'undefined') {
-		universe = nodiverse(); // new universe
-		universe.create([0,0,0],0);
-		var limbo = universe.get([0,0,0]);
-		limbo.name = "Limbo"; // at the beginning there was just the limbo
-		universe.update(limbo);
-		universe.entrypoint=[0,0,0]; // where everyone was meant to be
-		universedb.set("universe", universe);
-	} else {
-		// assign the correct prototype to universe
-		// this is somewhat ugly, since we're falling back from
-		// Object.?etPrototypeOf to __proto__ in order not to depend on
-		// nodejs 0.12
-		var setProtoOf = function(obj, proto) { obj.__proto__ = proto; };
-		var mixinProperties = function(obj, proto) {
-			for (var prop in proto) { obj[prop] = proto[prop]; }
-		};
-		var setPrototypeOf = Object.setPrototypeOf ||
-			{__proto__:[]} instanceof Array ? setProtoOf : mixinProperties;
-		var getPrototypeOf = Object.getPrototypeOf ||
-			function(obj) { return obj.__proto__; };
-		setPrototypeOf(universe, getPrototypeOf(nodiverse()));
-	}
-	if (typeof universe.name !== 'undefined') talkername = universe.name;
-	loadeddb++;
-});
+const universeadapter = new FileSync('universe.db');
+const universedb = low(universeadapter);
+universe = universedb.get("universe").value();
+if (typeof universe === 'undefined') {
+	universe = nodiverse(); // new universe
+	universe.create([0,0,0],0);
+	var limbo = universe.get([0,0,0]);
+	limbo.name = "Limbo"; // at the beginning there was just the limbo
+	universe.update(limbo);
+	universe.entrypoint=[0,0,0]; // where everyone was meant to be
+	universedb.set("universe", universe).write();
+} else {
+	// assign the correct prototype to universe
+	// this is somewhat ugly, since we're falling back from
+	// Object.?etPrototypeOf to __proto__ in order not to depend on
+	// nodejs 0.12
+	// TODO: now that we already depend on a nodejs >= 0.12, this ugly hack
+        //       can be cleaned up
+	var setProtoOf = function(obj, proto) { obj.__proto__ = proto; };
+	var mixinProperties = function(obj, proto) {
+		for (var prop in proto) { obj[prop] = proto[prop]; }
+	};
+	var setPrototypeOf = Object.setPrototypeOf ||
+		{__proto__:[]} instanceof Array ? setProtoOf : mixinProperties;
+	var getPrototypeOf = Object.getPrototypeOf ||
+		function(obj) { return obj.__proto__; };
+	setPrototypeOf(universe, getPrototypeOf(nodiverse()));
+}
+if (typeof universe.name !== 'undefined') talkername = universe.name;
+loadeddb++;
 
 /*
  * Cleans the input of carriage return, newline and control characters
@@ -142,9 +144,9 @@ function receiveData(socket, data) {
 		else if ((cleanData.match(/^[a-zA-Z]+$/) !== null) && (1 < cleanData.length) && (cleanData.length < 17)) {
 			socket.username = cleanData.toLowerCase().charAt(0).toUpperCase() + cleanData.toLowerCase().slice(1); // Capitalized name
 			socket.loggedin = false;
-			socket.db = usersdb.get(socket.username);
+			socket.db = usersdb.get(socket.username).value();
 			if (typeof socket.db === 'undefined') {
-				socket.write(chalk.cyan("\r\n#cyan[New user, welcome! Please choose a password: "));
+				socket.write(chalk.cyan("\r\nNew user, welcome! Please choose a password: "));
 				socket.write(echo(false));
 				socket.registering=true;
 			} else {
@@ -167,7 +169,7 @@ function receiveData(socket, data) {
 				if ((cleanData.toLowerCase() === socket.username.toLowerCase()) || !valid(cleanData).valid) {
 				    socket.write(chalk.red("\r\nThat password is not valid"));
 				    if (valid(cleanData).hint !== null) socket.write(" (" + valid(cleanData).hint + ")");
-				    socket.write(chalk.red(".") + "Let's try again...\r\n" + chalk.cyan("Give me a name:  "));
+				    socket.write(chalk.red(". ") + "Let's try again...\r\n" + chalk.cyan("Give me a name:  "));
 				    delete socket.registering;
 				    delete socket.username;
 				    delete socket.loggedin;
@@ -193,9 +195,9 @@ function receiveData(socket, data) {
 						} else {
 							ranks.entrylevel = 1;
 						}
-						talkerdb.set("ranks", ranks);
+						talkerdb.set("ranks", ranks).write();
 					}
-					usersdb.set(socket.username, socket.db);
+					usersdb.set(socket.username, socket.db).write();
 					delete socket.password;
 					delete socket.registering;
 				} else {
@@ -219,9 +221,9 @@ function receiveData(socket, data) {
 		if (universe.get(socket.db.where) === null) { // there's no where, or that place doesn't exist anymore
 			socket.db.where = universe.entrypoint;
 			// save changes into the database
-			var tmp = usersdb.get(socket.username);
+			var tmp = usersdb.get(socket.username).value();
 			tmp.where = socket.db.where;
-			usersdb.set(socket.username, tmp);
+			usersdb.set(socket.username, tmp).write();
 		}
 		if (command_utility().allButMe(socket,function(me,to){if(to.username.toLowerCase()===me.username.toLowerCase()){return true;}})) {
 			var old = command_utility().allButMe(socket,function(me,to){if(to.username.toLowerCase()===me.username.toLowerCase()){to.end('Session is being taken over...\n');}});
@@ -271,7 +273,7 @@ function receiveData(socket, data) {
 					    return;
 					}
 					socket.db.password = crypto.createHash('sha512').update(cleanData).digest('hex');
-					usersdb.set(socket.username, socket.db);
+					usersdb.set(socket.username, socket.db).write();
 					socket.write("\r\n:: " + chalk.cyan("Password changed, now don't you forget your new password!\r\n"));
 					delete socket.interactive;
 				}
@@ -331,7 +333,7 @@ function loadCommands() {
  */
 function getCmdRank(command) {
 	var r;
-	var cmdRanks = talkerdb.get("commands");
+	var cmdRanks = talkerdb.get("commands").value();
 	if (typeof (cmdRanks) !== 'undefined' && typeof (cmdRanks[command]) !== 'undefined') {
 		r = cmdRanks[command];
 	} else if (commands[command]) {
@@ -347,7 +349,7 @@ function getCmdRank(command) {
  * Method that changes the command rank.
  */
 function setCmdRank(command, rank) {
-	var cmdRanks = talkerdb.get("commands");
+	var cmdRanks = talkerdb.get("commands").value();
 	if (typeof(cmdRanks) === 'undefined') cmdRanks = {};
 	if (commands[command]) {
 		var old = commands[command].min_rank;
@@ -356,7 +358,7 @@ function setCmdRank(command, rank) {
 		}
 		if (rank != old) {
 			cmdRanks[command] = rank;
-		    talkerdb.set("commands", cmdRanks);
+		    talkerdb.set("commands", cmdRanks).write();
 		}
 	}
 }
@@ -436,14 +438,14 @@ function closeSocket(socket) {
 	var i = sockets.indexOf(socket);
 	if (i != -1) {
 		// write total time on socket db
-		sockets[i].db = usersdb.get(sockets[i].username);
+		sockets[i].db = usersdb.get(sockets[i].username).value();
 		if (typeof sockets[i].db !== 'undefined') {
 		    if (typeof sockets[i].db.totalTime === 'undefined') {
 			sockets[i].db.totalTime = (Date.now() - sockets[i].db.loginTime);
 		    } else {
 			sockets[i].db.totalTime += (Date.now() - sockets[i].db.loginTime);
 		    }
-		    usersdb.set(sockets[i].username, sockets[i].db);
+		    usersdb.set(sockets[i].username, sockets[i].db).write();
 		}
 		sockets.splice(i, 1);
 	}
@@ -545,7 +547,7 @@ function command_utility() {
         // we?
         getUser: function getUser(name) {
             name = name.toLowerCase().charAt(0).toUpperCase() + name.toLowerCase().slice(1);
-            return usersdb.get(name);
+            return usersdb.get(name).value();
         },
 
 	// returns the username of an "aproximate" user
@@ -555,44 +557,45 @@ function command_utility() {
 	getAproxUser: function getAproxUser(name) {
 		if (this.getUser(name) !== undefined) return [name];
 		var possibilities = [];
-		usersdb.forEach(function(key,val) {
+		for (var key in usersdb.getState()) {
 		    if (name.toLowerCase() === key.toLowerCase().substr(0,name.length) && (name.length < key.length)) {
 			    possibilities.push(key);
 		    }
-		});
+		}
 		if (possibilities.length === 0) return [];
 		return possibilities;
 	},
 
-        // updates a user in the database
-        // TODO: argh, we surely don't want this! harden it!
-        updateUser: function updateUser(username, userObj) {
-            username = username.toLowerCase().charAt(0).toUpperCase() + username.toLowerCase().slice(1);
-            usersdb.set(username,userObj);
-        },
+	// updates a user in the database
+	// TODO: argh, we surely don't want this! harden it!
+	updateUser: function updateUser(username, userObj) {
+		username = username.toLowerCase().charAt(0).toUpperCase() + username.toLowerCase().slice(1);
+		usersdb.set(username,userObj).write();
+	},
 
-		// get users list, only insensitive information
-		getUsersList: function getUsersList() {
-			var list = [];
-		    usersdb.forEach(function(key, val) {
-				// retrieving username, rank and loginTime. If needed, we can always add stuff later
-				list.push({username:key, rank:val.rank, loginTime:val.loginTime});
-			});
-			return list;
-		},
+	// get users list, only insensitive information
+	getUsersList: function getUsersList() {
+		var list = [];
+		for (var key in usersdb.getState()) {
+			// retrieving username, rank and loginTime. If needed, we can always add stuff later
+			var val = usersdb.get(key).value();
+			list.push({username:key, rank:val.rank, loginTime:val.loginTime});
+		}
+		return list;
+	},
 
 		// gives a full view of the universe; TODO: we surely don't want this
 		// TODO: in the meantime, we don't need to define a function for this!
 		getUniverse: function getUniverse() {return universe; },
 		// update universe's database
 		saveUniverse: function setUniverse() {
-			return universedb.set("universe", universe);
+			return universedb.set("universe", universe).write();
 		},
 
 		// updates the ranks object, both in memory and on the database
 		updateRanks: function updateRanks(updated) {
 			ranks = updated;
-			return talkerdb.set("ranks", ranks);
+			return talkerdb.set("ranks", ranks).write();
 		},
 
 		// reloads Talker Name

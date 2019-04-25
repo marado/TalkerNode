@@ -79,8 +79,8 @@ exports.command = {
 			if (targObj.name !== name) {
 				socket.write(formatters.text_wrap(chalk.red(":: You're trying to create a " +
 					"place called " + chalk.bold(name) + " where there's already another " +
-					"place called " + chalk.bold(targObj.name) + "!") + chalk.yellow("Maybe you want to " +
-					chalk.bold(".destroy") + " that one first, or recheck your " + chalk.bold(".map") + "and make " +
+					"place called " + chalk.bold(targObj.name) + "! ") + chalk.yellow("Maybe you want to " +
+					chalk.bold(".destroy") + " that one first, or recheck your " + chalk.bold(".map ") + "and make " +
 					"sure of what you're trying to do?\r\n")));
 				return;
 			}

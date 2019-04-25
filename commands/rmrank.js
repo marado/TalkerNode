@@ -48,7 +48,7 @@ exports.command = {
 		for (var u=0; u < users.length; u++) {
 			if (users[u].rank >= rank) {
 				if (users[u].rank == rank && !highest) {
-					socket.write(formatters_text_wrap("Can't remove that rank: user " +
+					socket.write(formatters.text_wrap("Can't remove that rank: user " +
 						users[u].username +
 						" is of that rank! You might want to .demote or .promote them first.\r\n"));
 					return;
