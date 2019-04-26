@@ -13,12 +13,12 @@ exports.command = {
 		var users = command_access.getUsersList();
 		var toShow = command_access.ranks.list.length;
 		if (toShow > 3) toShow = 3;
-		socket.write("+----------------------------------------------------------------------------+\r\n");
+		socket.write(chalk.green("+----------------------------------------------------------------------------+\r\n"));
 		var someone = false;
 		var online = "";
 		for (var level = command_access.ranks.list.length-1; level > command_access.ranks.list.length-1-toShow; level--) {
-			socket.write(command_access.ranks.list[level] + "\t: ");
-			online += command_access.ranks.list[level] + "\t: ";
+			socket.write(chalk.yellow.bold(command_access.ranks.list[level]) + "\t: ");
+			online += chalk.blue.bold(command_access.ranks.list[level]) + "\t: ";
 			var counter = 0;
 			var ocounter = 0;
 			for (var u = 0; u < users.length; u++) {
@@ -39,12 +39,12 @@ exports.command = {
 			socket.write("\r\n");
 			online += "\r\n";
 		}
-		socket.write("+----------------------------------------------------------------------------+\r\n");
+		socket.write(chalk.green("+----------------------------------------------------------------------------+\r\n"));
 		if (someone) {
-			socket.write("Of which, these are online:\r\n" + online);
+			socket.write(chalk.bold("Of which, these are online:\r\n") + online);
 		} else {
-			socket.write("None of them online at this moment.\r\n");
+			socket.write(chalk.grey("None of them online at this moment.\r\n"));
 		}
-		socket.write("+----------------------------------------------------------------------------+\r\n");
+		socket.write(chalk.green("+----------------------------------------------------------------------------+\r\n"));
 	}
 }

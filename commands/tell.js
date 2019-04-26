@@ -14,24 +14,24 @@ exports.command = {
 		message = command.split(' ').slice(1).join(" ");
 
 		if ((typeof to === 'undefined') || (typeof message === 'undefined') || to.length < 1 || message.length < 1) {
-			socket.write(":: You have to use it this way: .tell someone something\r\n");
+			socket.write(chalk.yellow(":: ") + "You have to use it this way:" + chalk.yellow(" .tell someone something\r\n"));
 		} else {
 			var s = command_access.getAproxOnlineUser(to);
 			if (s.length === 1) {
 				if (socket.username.toLowerCase() === s[0].username.toLowerCase()) {
-					return socket.write(":: Talking to yourself is the first sign of madness.\r\n");
+					return socket.write(chalk.red(":: ") + "Talking to yourself is the first sign of madness.\r\n");
 				}
-				socket.write("You tell " + s[0].username + ": " + message + "\r\n");
-				s[0].write(socket.username + " tells you: " + message + "\r\n");
+				socket.write(chalk.green("You tell ") + s[0].username + chalk.green(": ") + message + "\r\n");
+				s[0].write(socket.username + chalk.green(" tells you: ") + message + "\r\n");
 			} else if (s.length === 0) {
-				socket.write("There is no one of that name logged on.\r\n");
+				socket.write(chalk.red(":: ") + "There is no one of that name logged on.\r\n");
 			} else {
 				var possibilities = "";
 				for (var p = 0; p < s.length - 1; p++) {
-					possibilities += s[p].username + ", ";
+					possibilities += chalk.bold(s[p].username) + ", ";
 				}
-				possibilities += s[s.length - 1].username;
-				socket.write("Be more explicit: whom do you want to talk to ("+possibilities+")?\r\n");
+				possibilities += chalk.bold(s[s.length - 1].username);
+				socket.write(chalk.yellow(":: ") + "Be more explicit: whom do you want to talk to ("+possibilities+")?\r\n");
 			}
 		}
 	}

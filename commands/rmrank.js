@@ -14,7 +14,7 @@ exports.command = {
 	execute: function(socket, command, command_access) {
 		var chalk = require('chalk');
 		if (typeof command !== 'string' || command.length < 1) {
-			socket.write("What rank do you want to remove?\r\n");
+			socket.write(chalk.yellow(":: ") + "What rank do you want to remove?\r\n");
 			return;
 		}
 		// is this a valid rank number?
@@ -24,20 +24,20 @@ exports.command = {
 			rank < 0 ||
 			rank >= command_access.ranks.list.length
 		) {
-			socket.write("That is an invalid rank number!\r\n");
+			socket.write(chalk.red(":: ") + "That is an invalid rank number!\r\n");
 			return;
 		}
 		// do I have access to this rank?
 		if (rank > socket.db.rank) {
-			socket.write("You cannot manage ranks to which you have no access.\r\n");
+			socket.write(chalk.red(":: ") + "You cannot manage ranks to which you have no access.\r\n");
 			return;
 		}
 		// Is the rank "empty"? Let's adjust the rank of the higher commands
 		for (var c in command_access.commands) {
 			if (command_access.getCmdRank(c) == rank) {
-				socket.write(formatters.text_wrap("Can't remove that rank: command " +
-					command_access.commands[c].name +
-					" exists on it. Maybe you want to .setcmdlev it to another rank?\r\n"));
+				socket.write(formatters.text_wrap(chalk.red(":: ") + "Can't remove that rank: command " +
+					chalk.bold(command_access.commands[c].name) +
+					" exists on it. Maybe you want to " + chalk.yellow(".setcmdlev") + " it to another rank?\r\n"));
 				return;
 			}
 			if (command_access.getCmdRank(c) > rank) {
@@ -50,9 +50,9 @@ exports.command = {
 		for (var u=0; u < users.length; u++) {
 			if (users[u].rank >= rank) {
 				if (users[u].rank == rank && !highest) {
-					socket.write(formatters.text_wrap("Can't remove that rank: user " +
-						users[u].username +
-						" is of that rank! You might want to .demote or .promote them first.\r\n"));
+					socket.write(formatters.text_wrap(chalk.red(":: ") + "Can't remove that rank: user " +
+						chalk.bold(users[u].username) +
+						" is of that rank! You might want to " + chalk.bold(".demote") + " or " + chalk.bold(".promote") + " them first.\r\n"));
 					return;
 				} else {
 					var online = command_access.getOnlineUser(users[u].username);
@@ -73,6 +73,6 @@ exports.command = {
 		// actually delete the rank
 		updated.list.splice(command,1);
 		command_access.updateRanks(updated);
-		socket.write("Rank removed!\r\n");
+		socket.write(chalk.green(":: ") + "Rank removed!\r\n");
 	}
 }

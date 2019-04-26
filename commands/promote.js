@@ -15,17 +15,17 @@ exports.command = {
 		var w = null;
 		// check if we got an whom
 		if (typeof whom === 'undefined' || whom.length < 1) {
-			return me.write("Promote whom?\r\n");
+			return me.write(chalk.yellow(":: ") + "Promote whom?\r\n");
 		} else { // check if it's an user
 			var wArr = command_access.getAproxUser(whom);
-			if (wArr.length === 0) return me.write("Promote whom?\r\n");
+			if (wArr.length === 0) return me.write(chalk.yellow(":: ") + "Promote whom?\r\n");
 			if (wArr.length > 1) {
 				var possibilities = "";
 				for (var p = 0; p < wArr.length - 1; p++) {
-					possibilities += wArr[p] + ", ";
+					possibilities += chalk.bold(wArr[p]) + ", ";
 				}
-				possibilities += wArr[wArr.length - 1];
-				return me.write("Be more explicit: whom do you want to promote ("+possibilities+")?\r\n");
+				possibilities += chalk.bold(wArr[wArr.length - 1]);
+				return me.write(chalk.yellow(":: ") + "Be more explicit: whom do you want to promote ("+possibilities+")?\r\n");
 			}
 		}
 		whom = wArr[0];
@@ -44,11 +44,11 @@ exports.command = {
 				command_access.updateUser(whom, w);
 			}
 			whom = whom.toLowerCase().charAt(0).toUpperCase() + whom.toLowerCase().slice(1);
-			var sentence = ":: " + me.username + " has promoted " + whom + " to the rank of " + rankName + "! ::\r\n";
+			var sentence = chalk.green(":: ") + chalk.cyan(me.username) + " has promoted " + chalk.bold(whom) + " to the rank of " + chalk.magenta(rankName) + "! " + chalk.green("::\r\n");
 			command_access.allButMe(socket,function(me,to){to.write(sentence);});
-			socket.write("You promoted " + whom + " to the rank of " + rankName + "!\r\n");
+			socket.write(chalk.green(":: ") + "You promoted " + chalk.bold(whom) + " to the rank of " + chalk.green(rankName) + "!\r\n");
 		} else {
-			me.write("You cannot promote someone to an higher level than yourse!\r\n");
+			me.write(chalk.red(":: ") + "You cannot promote someone to an higher level than yourse!\r\n");
 		}
 	}
 }
