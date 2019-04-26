@@ -255,7 +255,7 @@ function receiveData(socket, data) {
 				if (socket.interactive.state === "old") {
 					// let's confirm the password
 					if (socket.db.password !== crypto.createHash('sha512').update(cleanData).digest('hex')) {
-						 socket.write("\r\n:: " + chalk.red("Wrong password!\r\n"));
+						socket.write("\r\n:: " + chalk.red("Wrong password!\r\n"));
 						delete socket.interactive;
 					} else {
 						// password is correct
@@ -276,6 +276,36 @@ function receiveData(socket, data) {
 					usersdb.set(socket.username, socket.db).write();
 					socket.write("\r\n:: " + chalk.cyan("Password changed, now don't you forget your new password!\r\n"));
 					delete socket.interactive;
+				}
+				break;
+			case "suicide":
+				if (socket.interactive.state === "confirmation") {
+					if (cleanData === "yes, I am sure") {
+						// they really want to .suicide, let's validate they are who they're supposed to be...
+						socket.write(chalk.bold("\r\n:: Alright then... just confirm you're who're you supposed to be, tell us your password: "));
+						socket.write(echo(false));
+						socket.interactive.state = "pass";
+					} else {
+						socket.write(chalk.bold("\r\n:: Ooof, we're glad you don't want to leave us!\r\n"));
+						delete socket.interactive;
+					}
+				} else {
+					// let's confirm the password
+					if (socket.db.password !== crypto.createHash('sha512').update(cleanData).digest('hex')) {
+						socket.write("\r\n:: " + chalk.red("Wrong password!\r\n"));
+						delete socket.interactive;
+					} else {
+						// password is correct
+						socket.write(chalk.gray("\r\n:: Deleting all your data... We're sad to see you go!\r\n"));
+						command_utility().allButMe(socket,function(me,to){to.write("[Leaving is: "+ me.username + " ]\r\n");});
+						delete socket.interactive;
+						var quitter = socket.username;
+						socket.end(":'(\r\n");
+						// actually delete the user
+						var users = usersdb.getState();
+						delete users[quitter];
+						usersdb.setState(users).write();
+					}
 				}
 				break;
 			default:
