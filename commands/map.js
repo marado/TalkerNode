@@ -8,6 +8,6 @@ exports.command = {
 	usage: ".map",
 
 	execute: function(socket, command, command_access) {
-		socket.write(command_access.getUniverse().asciimap(socket.db.where));
+		socket.write(command_access.getUniverse().asciimap(socket.db.where, true));
 	}
 }

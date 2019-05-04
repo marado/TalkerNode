@@ -105,10 +105,12 @@ mathjs@:
     tiny-emitter "2.1.0"
     typed-function "1.1.0"
 
-nodiverse@>=0.3.0:
-  version "0.3.3"
-  resolved "https://registry.yarnpkg.com/nodiverse/-/nodiverse-0.3.3.tgz#610b9c6207b008f2c898e76b93be56c91620842e"
-  integrity sha1-YQucYgewCPLImOdrk75WyRYghC4=
+nodiverse@>=0.3.4:
+  version "0.3.4"
+  resolved "https://registry.yarnpkg.com/nodiverse/-/nodiverse-0.3.4.tgz#250bbc07614309dd583135147345adf4605fb7e0"
+  integrity sha512-ME1Fpsfh83I30WJnYj2EpIgCgM6E91rCIAqBwkX9Rav2ZO+B5ZHu9O+mwDuO1RH+j6gn9Rrx2sRCtLMOuXlF8w==
+  dependencies:
+    chalk ""
 
 password-strength@:
   version "0.0.1"
