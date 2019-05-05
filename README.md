@@ -1,5 +1,5 @@
-TalkerNode
-==========
+ <p align="center"><img src="logo/vertical.png" alt="TalkerNode" height="150px"></p>
+
 
 TalkerNode is a Talker base, written in Node.js .
 
