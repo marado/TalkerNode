@@ -11,6 +11,7 @@ exports.command = {
 
 	// Function to execute the command
 	execute: function(socket, command, command_access) {
+		var chalk = require('chalk');
 		socket.write("You have just executed the template command \r\n");
 	}
 }

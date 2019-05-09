@@ -9,11 +9,12 @@ exports.command = {
 
 	// Function to execute the command
 	execute: function(socket, command, command_access) {
+		var chalk = require('chalk');
 		var to = command.split(' ')[0];
-		if ((typeof to === 'undefined') || (to.length < 1)) return socket.write("Where do you want to go to?\r\n");
-		if (to.toLowerCase() === command_access.getUniverse().get(socket.db.where).name.toLowerCase()) return socket.write("You are already there!\r\n");
+		if ((typeof to === 'undefined') || (to.length < 1)) return socket.write(chalk.yellow(":: Where do you want to go to?\r\n"));
+		if (to.toLowerCase() === command_access.getUniverse().get(socket.db.where).name.toLowerCase()) return socket.write(chalk.red(":: You are already there!\r\n"));
 		var neighbours = command_access.getUniverse().get_neighbours(command_access.getUniverse().get(socket.db.where));
-		if (neighbours.length == 0) return socket.write("You don't see anywhere to go to.\r\n");
+		if (neighbours.length == 0) return socket.write(chalk.yellow(":: You don't see anywhere to go to.\r\n"));
 		var toId = null;
 		var abrev = [];
 		for (var i=0; i < neighbours.length; i++) {
@@ -21,14 +22,14 @@ exports.command = {
 			if (neighbours[i].name.toLowerCase().substring(0,to.length) == to.toLowerCase()) abrev.push(i);
 		}
 		if (toId == null) {
-			if (abrev.length === 0) return socket.write("I don't know where " + to + " is...\r\n");
+			if (abrev.length === 0) return socket.write(chalk.red(":: I don't know where " + chalk.bold(to) + " is...\r\n"));
 			if (abrev.length > 1) {
 				possibilities = "";
 				for (var p = 0; p < abrev.length-1; p++) {
-					possibilities += neighbours[p].name + ", ";
+					possibilities += chalk.bold(neighbours[p].name) + ", ";
 				}
 				possibilities += neighbours[abrev[abrev.length-1]].name;
-				return socket.write("There are several possible exits you might mean: " + possibilities + ". Can you be more specific?\r\n");
+				return socket.write(chalk.yellow(":: There are several possible exits you might mean: " + possibilities + ". Can you be more specific?\r\n"));
 			}
 			toId = abrev[0];
 		}
@@ -46,13 +47,13 @@ exports.command = {
 		if (movement[0] > 0) direction += "west";
 		if (movement[0] < 0) direction += "east";
 
-		command_access.allHereButMe(socket,function(me,t){t.write(": " + me.username + " starts walking to " + direction + " towards " + to.toLowerCase() + "...\r\n");});
-		socket.write(": You start walking to " + direction + " towards " + neighbours[toId].name + "...\r\n");
+		command_access.allHereButMe(socket,function(me,t){t.write(chalk.bold(":: " + chalk.yellow(me.username) + " starts walking to " + chalk.green(direction) + " towards " + chalk.teal(to.toLowerCase()) + "...\r\n"));});
+		socket.write(chalk.bold(":: You start walking to " + chalk.green(direction) + " towards " + chalk.teal(neighbours[toId].name) + "...\r\n"));
 		socket.db.where = neighbours[toId].coords;
 		var tmp = command_access.getUser(socket.username);
 		tmp.where = socket.db.where;
 		command_access.updateUser(socket.username, tmp);
-		command_access.allHereButMe(socket,function(me,to){to.write(": " + me.username + " walks in.\r\n");});
-		socket.write(": You arrive.\r\n");
+		command_access.allHereButMe(socket,function(me,to){to.write(chalk.bold(":: " + chalk.yellow(me.username) + " walks in.\r\n"));});
+		socket.write(chalk.green(":: You arrive.\r\n"));
 	}
 }

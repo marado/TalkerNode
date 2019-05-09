@@ -8,7 +8,8 @@ exports.command = {
 	usage: ".quit",
 
 	execute: function(socket, command, command_access) {
-		command_access.allButMe(socket,function(me,to){to.write("[Leaving is: "+ me.username + " ]\r\n");});
-		socket.end('Goodbye!\n');
+		var chalk = require('chalk');
+		command_access.allButMe(socket,function(me,to){to.write(chalk.bold("[" + chalk.red("Leaving ") + "is: "+ chalk.yellow(me.username) + " ]\r\n"));});
+		socket.end(chalk.grey('Goodbye!\n'));
 	}
 }

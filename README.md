@@ -1,16 +1,12 @@
-TalkerNode
-==========
+ <p align="center"><img src="logo/vertical.png" alt="TalkerNode" height="150px"></p>
+
 
 TalkerNode is a Talker base, written in Node.js .
 
-The original source code was written by sam, from the talker Hades:
-```bash
-telnet hades-talker.org 6660
-```
+The original source code was written by sam, from the talker Hades, and has
+been turned into a TalkerNode by Marcos Marado.
 
-This is a fork from that code, as it was at 11/11/2013.
-
-The latest version of the fork can allways be found at
+The latest version of TalkerNode the fork can always be found at
 https://github.com/marado/TalkerNode .
 
 ## Installation

@@ -9,9 +9,10 @@ exports.command = {
 
 	// Function to execute the command
 	execute: function(socket, command, command_access) {
-		socket.write("You look around...\r\n");
-		socket.write("You notice you are at " +
-			command_access.getUniverse().get(socket.db.where).name + ".\r\n");
+		var chalk = require('chalk');
+		socket.write(chalk.green(":: ") + "You look around...\r\n");
+		socket.write(chalk.green(":: ") + "You notice you are at " +
+			chalk.cyan(command_access.getUniverse().get(socket.db.where).name) + ".\r\n");
 		// look for other people
 		var others = [];
 		for (var i = 0; i < command_access.sockets.length; i++) {
@@ -25,29 +26,29 @@ exports.command = {
 			}
 		}
 		if (others.length > 0) {
-			var peeps = "You see " + others[0];
+			var peeps = chalk.green(":: ") + "You see " + chalk.yellow(others[0]);
 			if (others.length === 1) {
 				peeps += ".";
 			} else {
 				for (var p = 1; p < others.length-1; p++) {
-					peeps += ", " + others[p];
+					peeps += ", " + chalk.yellow(others[p]);
 				}
-				peeps += " and " + others[others.length-1] + ".";
+				peeps += " and " + chalk.yellow(others[others.length-1]) + ".";
 			}
 			socket.write(peeps + "\r\n");
 		} else {
-			socket.write("You are alone here.\r\n");
+			socket.write(chalk.green(":: ") + "You are alone here.\r\n");
 		}
 
 		// look for exits
 		var neighbours = command_access.getUniverse().get_neighbours(
 			command_access.getUniverse().get(socket.db.where));
 		if (neighbours.length == 0) {
-			socket.write("You don't see anywhere to go to.\r\n");
+			socket.write(chalk.green(":: ") + "You don't see anywhere to go to.\r\n");
 		} else {
-			socket.write("You see " + neighbours.length + " passages:\r\n   ");
+			socket.write(chalk.green(":: ") + "You see " + chalk.bold(neighbours.length) + " passages:\r\n   ");
 			for (var i=0; i < neighbours.length; i++) {
-				socket.write(neighbours[i].name + "  ");
+				socket.write(chalk.green(neighbours[i].name) + "  ");
 			}
 			socket.write("\r\n");
 		}

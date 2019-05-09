@@ -8,7 +8,8 @@ exports.command = {
 	usage: ".password",
 
 	execute: function(socket, command, command_access) {
-		socket.write(":: Tell me your old password: ");
+		var chalk = require('chalk');
+		socket.write(chalk.green(":: ") + "Tell me your old password: ");
 		socket.write(command_access.echo(false));
 		socket.interactive = {type:"password", state:"old"};
 	}

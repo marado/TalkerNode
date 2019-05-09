@@ -10,10 +10,11 @@ exports.command = {
 
 	// Function to execute the command
 	execute: function(socket, command, command_access) {
+		var chalk = require('chalk');
 		direction = command.split(' ')[0];
 		// 'direction' needs to be a direction on Nodiverse's nomenculature (N, NE...)
 		if (typeof direction !== 'string' || direction.length === 0) {
-			socket.write("Syntax: .close <direction>\r\n");
+			socket.write(chalk.bold("Syntax:") + " .close <direction>\r\n");
 			return;
 		}
 		// FIXME: we're assuming that any uppercased string key with a
@@ -42,7 +43,7 @@ exports.command = {
 		updateMe.passages -= newPassage;
 		if (!command_access.getUniverse().update(updateMe)) {
 			socket.write("You should have been able to destroy that passage. However, " +
-				"that didn't work. Please let an " +
+				"that didn't work. Please let a " +
 				command_access.ranks.list[
 					command_access.ranks.list.length - 1
 				] + " know about this!\r\n");
@@ -51,6 +52,6 @@ exports.command = {
 		}
 		// saving the altered universe
 		command_access.saveUniverse();
-		socket.write(":: You closed the passage towards " + direction + ".\r\n");
+		socket.write(":: You closed the passage towards " + chalk.bold(direction) + ".\r\n");
 	}
 }
