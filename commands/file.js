@@ -16,11 +16,11 @@ exports.command = {
 
 		// if command called without parameters
 		if (command.trim() === "") {
-			socket.write(chalk.teal("+-- List of available files: --------+\r\n"));
+			socket.write(chalk.cyan("+-- List of available files: --------+\r\n"));
 			fs.readdirSync(directory).forEach(file => {
 				socket.write(" " + chalk.bold(file) + "\r\n");
 			});
-			socket.write(chalk.teal("+------------------------------------+\r\n"));
+			socket.write(chalk.cyan("+------------------------------------+\r\n"));
 		} else {
 			// if command called with parameters
 			try {
