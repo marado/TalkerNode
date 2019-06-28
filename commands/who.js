@@ -49,7 +49,7 @@ exports.command = {
 			}
 		}
 		socket.write(chalk.green("+----------------------------------------------------------------------------+\r\n"));
-		socket.write(chalk.cyan("     Total of " + chalk.bold(connected) + " connected users")); if (connecting > 0) { socket.write(chalk.cyan(" and " + chalk.bold(connecting) + " still connecting\r\n")); }
-		socket.write(chalk.green("+----------------------------------------------------------------------------+\r\n"));
+		socket.write(chalk.cyan("     Total of " + chalk.bold(connected) + " connected users")); if (connecting > 0) { socket.write(chalk.cyan(" and " + chalk.bold(connecting) + " still connecting")); }
+		socket.write(chalk.green("\r\n+----------------------------------------------------------------------------+\r\n"));
 	}
 }

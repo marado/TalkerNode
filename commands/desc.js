@@ -15,11 +15,11 @@ exports.command = {
 		if ((typeof command === 'undefined') || command.length < 1) {
 			socket.write(chalk.yellow("[::] ") + "You have to use it this way: .desc <description here>\r\n");
 		} else if (command.length > descMaxLength) {
-			socket.write(chalk.yellow(":: ") + "Your description can't have more than " + chalk.bold(descMaxLength) + " characters.\r\n");
+			socket.write(chalk.yellow("[::] ") + "Your description can't have more than " + chalk.bold(descMaxLength) + " characters.\r\n");
 		} else {
 			socket.db.desc = command;
 			command_access.updateUser(socket.username, socket.db);
-			socket.write(chalk.green("[::]") + " Your description is now: " + command + "\r\n");
+			socket.write(chalk.green("[::] ") + " Your description is now: " + command + "\r\n");
 		}
 	}
 }
