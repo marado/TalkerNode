@@ -21,7 +21,7 @@ exports.command = {
 			typeof name !== 'string' ||
 			name.length === 0
 		) {
-			socket.write(chalk.yellow(":: ") + "You better type .help rnrank !\r\n");
+			command_access.sendData(socket, chalk.yellow(":: ") + "You better type .help rnrank !\r\n");
 			return;
 		}
 		var rank_number = parseInt(rank, 10);
@@ -30,17 +30,17 @@ exports.command = {
 			rank_number < 0 ||
 			rank_number >= command_access.ranks.list.length
 		) {
-			socket.write(chalk.red(":: ") + "That is an invalid rank number!\r\n");
+			command_access.sendData(socket, chalk.red(":: ") + "That is an invalid rank number!\r\n");
 			return;
 		}
 		if (rank_number > socket.db.rank) {
-			socket.write(chalk.red(":: ") + "You cannot manage ranks to which you have no access.\r\n");
+			command_access.sendData(socket, chalk.red(":: ") + "You cannot manage ranks to which you have no access.\r\n");
 			return;
 		}
 
 		var updated = command_access.ranks;
 		updated.list[rank_number] = name;
 		command_access.updateRanks(updated);
-		socket.write(chalk.green(":: rank name updated.\r\n"));
+		command_access.sendData(socket, chalk.green(":: rank name updated.\r\n"));
 	}
 }

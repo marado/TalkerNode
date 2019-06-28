@@ -5,6 +5,7 @@ var net = require('net');
 var crypto = require('crypto');
 var valid = require('password-strength');
 var chalk = require('chalk');
+const stripAnsi = require('strip-ansi');
 
 var sockets = [];
 var port = process.env.PORT || 8888;
@@ -99,6 +100,17 @@ function echo(bool) {
 }
 
 /*
+ * Method used to send data to a socket
+ */
+function sendData(socket, data) {
+    if (typeof socket.db !== 'undefined' && typeof socket.db.color !== 'undefined' && !(socket.db.color)) {
+	socket.write(stripAnsi(data));
+    } else {
+        socket.write(data);
+    }
+}
+
+/*
  * Method executed when data is received from a socket
  */
 function receiveData(socket, data) {
@@ -132,31 +144,31 @@ function receiveData(socket, data) {
 		return;
 	}
 
-	socket.write(echo(true));
+	sendData(socket, echo(true));
 	if(socket.username == undefined) {
 		if (cleanData.toLowerCase() === "quit") return socket.end('Goodbye!\r\n');
-		if (cleanData.toLowerCase() === "who") { socket.db={rank:0}; doCommand(socket, ".who"); return socket.write(chalk.cyan("Give me a name:  ")); }
-		if (cleanData.toLowerCase() === "version") { socket.db={rank:0}; doCommand(socket, ".version"); return socket.write(chalk.cyan("Give me a name:  ")); }
+		if (cleanData.toLowerCase() === "who") { socket.db={rank:0}; doCommand(socket, ".who"); return sendData(socket, chalk.cyan("Give me a name:  ")); }
+		if (cleanData.toLowerCase() === "version") { socket.db={rank:0}; doCommand(socket, ".version"); return sendData(socket, chalk.cyan("Give me a name:  ")); }
 		var reservedNames=["who","quit","version"];
 		if (reservedNames.indexOf(cleanData.toLowerCase()) > -1) {
-			socket.write("\r\nThat username is reserved, you cannot have it.\r\n" + chalk.cyan("Give me a name:  "));
+			sendData(socket, "\r\nThat username is reserved, you cannot have it.\r\n" + chalk.cyan("Give me a name:  "));
 		}
 		else if ((cleanData.match(/^[a-zA-Z]+$/) !== null) && (1 < cleanData.length) && (cleanData.length < 17)) {
 			socket.username = cleanData.toLowerCase().charAt(0).toUpperCase() + cleanData.toLowerCase().slice(1); // Capitalized name
 			socket.loggedin = false;
 			socket.db = usersdb.get(socket.username).value();
 			if (typeof socket.db === 'undefined') {
-				socket.write(chalk.cyan("\r\nNew user, welcome! Please choose a password: "));
-				socket.write(echo(false));
+				sendData(socket, chalk.cyan("\r\nNew user, welcome! Please choose a password: "));
+				sendData(socket, echo(false));
 				socket.registering=true;
 			} else {
-				socket.write(chalk.cyan("\r\nGive me your password: "));
-				socket.write(echo(false));
+				sendData(socket, chalk.cyan("\r\nGive me your password: "));
+				sendData(socket, echo(false));
 				socket.registering=false;
 			}
 			return;
 		} else {
-			socket.write(chalk.red(
+			sendData(socket, chalk.red(
 			    "\r\nInvalid username: it can only contain letters, have at least two characters and be no longer than 16 characters.\r\n") +
 			    chalk.cyan("Give me a name:  "
 			));
@@ -167,9 +179,9 @@ function receiveData(socket, data) {
 		if (socket.registering) {
 			if (typeof socket.password === 'undefined') {
 				if ((cleanData.toLowerCase() === socket.username.toLowerCase()) || !valid(cleanData).valid) {
-				    socket.write(chalk.red("\r\nThat password is not valid"));
-				    if (valid(cleanData).hint !== null) socket.write(" (" + valid(cleanData).hint + ")");
-				    socket.write(chalk.red(". ") + "Let's try again...\r\n" + chalk.cyan("Give me a name:  "));
+				    sendData(socket, chalk.red("\r\nThat password is not valid"));
+				    if (valid(cleanData).hint !== null) sendData(socket, " (" + valid(cleanData).hint + ")");
+				    sendData(socket, chalk.red(". ") + "Let's try again...\r\n" + chalk.cyan("Give me a name:  "));
 				    delete socket.registering;
 				    delete socket.username;
 				    delete socket.loggedin;
@@ -177,8 +189,8 @@ function receiveData(socket, data) {
 				    return;
 				}
 				socket.password = crypto.createHash('sha512').update(cleanData).digest('hex');
-				socket.write(echo(false));
-				socket.write(chalk.cyan("\r\nConfirm the chosen password: "));
+				sendData(socket, echo(false));
+				sendData(socket, chalk.cyan("\r\nConfirm the chosen password: "));
 				return;
 			} else {
 				if (socket.password === crypto.createHash('sha512').update(cleanData).digest('hex')) {
@@ -206,14 +218,14 @@ function receiveData(socket, data) {
 					delete socket.registering;
 					delete socket.username;
 					delete socket.db;
-					socket.write(chalk.red("\r\nPasswords don't match!") + "Let's start from the beggining... " + chalk.cyan("Tell me your name:  "));
+					sendData(socket, chalk.red("\r\nPasswords don't match!") + "Let's start from the beggining... " + chalk.cyan("Tell me your name:  "));
 					return;
 				}
 			}
 		} else if (socket.db.password !== crypto.createHash('sha512').update(cleanData).digest('hex')) {
 			delete socket.username;
 			delete socket.db;
-			socket.write(chalk.red("\r\nWrong password! ") + "Let's start from the beggining... " + chalk.cyan("Tell me your name:  "));
+			sendData(socket, chalk.red("\r\nWrong password! ") + "Let's start from the beggining... " + chalk.cyan("Tell me your name:  "));
 			return;
 		}
 
@@ -227,7 +239,7 @@ function receiveData(socket, data) {
 		}
 		if (command_utility().allButMe(socket,function(me,to){if(to.username.toLowerCase()===me.username.toLowerCase()){return true;}})) {
 			var old = command_utility().allButMe(socket,function(me,to){if(to.username.toLowerCase()===me.username.toLowerCase()){to.end('Session is being taken over...\n');}});
-			socket.write('Taking over session...\n');
+			sendData(socket, 'Taking over session...\n');
 		} else {
 			socket.lastLogin = socket.db.loginTime;
 			socket.db.loginTime = Date.now();
@@ -239,13 +251,13 @@ function receiveData(socket, data) {
 			socket.activityTime = Date.now();
 			command_utility().allButMe(socket,function(me,to){to.write("[Entering is: "+ me.username + " (" + universe.get(me.db.where).name + " " + me.db.where + ") ]\r\n");});
 		}
-		socket.write("\r\n+----------------------------------------------------------------------------+\r\n");
-		socket.write(" Welcome to " + chalk.bold(talkername) + ", " + chalk.green(socket.username) + "!\r\n");
+		sendData(socket, "\r\n+----------------------------------------------------------------------------+\r\n");
+		sendData(socket, " Welcome to " + chalk.bold(talkername) + ", " + chalk.green(socket.username) + "!\r\n");
 		if (typeof(socket.lastLogin) !== "undefined") {
-			socket.write(" Your last login was at " + chalk.magenta(new Date(socket.lastLogin).toString()) + ".\r\n");
+			sendData(socket, " Your last login was at " + chalk.magenta(new Date(socket.lastLogin).toString()) + ".\r\n");
 		}
-		socket.write(" Your rank is " + chalk.bold(ranks.list[socket.db.rank]) + ".\r\n");
-		socket.write("+----------------------------------------------------------------------------+\r\n");
+		sendData(socket, " Your rank is " + chalk.bold(ranks.list[socket.db.rank]) + ".\r\n");
+		sendData(socket, "+----------------------------------------------------------------------------+\r\n");
 		socket.loggedin = true;
 		doCommand(socket, ".look");
 		return;
@@ -255,26 +267,26 @@ function receiveData(socket, data) {
 				if (socket.interactive.state === "old") {
 					// let's confirm the password
 					if (socket.db.password !== crypto.createHash('sha512').update(cleanData).digest('hex')) {
-						socket.write("\r\n:: " + chalk.red("Wrong password!\r\n"));
+						sendData(socket, "\r\n:: " + chalk.red("Wrong password!\r\n"));
 						delete socket.interactive;
 					} else {
 						// password is correct
-						socket.write("\r\n:: " + chalk.green("Tell me the new password: "));
-						socket.write(echo(false));
+						sendData(socket, "\r\n:: " + chalk.green("Tell me the new password: "));
+						sendData(socket, echo(false));
 						socket.interactive.state = "new";
 					}
 				} else {
 					// let's set cleanData as the new password
 					if ((cleanData.toLowerCase() === socket.username.toLowerCase()) || !valid(cleanData).valid) {
-					    socket.write(chalk.red("\r\nThat password is not valid"));
-					    if (valid(cleanData).hint !== null) socket.write(" (" + valid(cleanData).hint + ")");
-					    socket.write(chalk.red(". Password not changed.\r\n"));
+					    sendData(socket, chalk.red("\r\nThat password is not valid"));
+					    if (valid(cleanData).hint !== null) sendData(socket, " (" + valid(cleanData).hint + ")");
+					    sendData(socket, chalk.red(". Password not changed.\r\n"));
 					    delete socket.interactive;
 					    return;
 					}
 					socket.db.password = crypto.createHash('sha512').update(cleanData).digest('hex');
 					usersdb.set(socket.username, socket.db).write();
-					socket.write("\r\n:: " + chalk.cyan("Password changed, now don't you forget your new password!\r\n"));
+					sendData(socket, "\r\n:: " + chalk.cyan("Password changed, now don't you forget your new password!\r\n"));
 					delete socket.interactive;
 				}
 				break;
@@ -282,21 +294,21 @@ function receiveData(socket, data) {
 				if (socket.interactive.state === "confirmation") {
 					if (cleanData === "yes, I am sure") {
 						// they really want to .suicide, let's validate they are who they're supposed to be...
-						socket.write(chalk.bold("\r\n:: Alright then... just confirm you're who're you supposed to be, tell us your password: "));
-						socket.write(echo(false));
+						sendData(socket, chalk.bold("\r\n:: Alright then... just confirm you're who're you supposed to be, tell us your password: "));
+						sendData(socket, echo(false));
 						socket.interactive.state = "pass";
 					} else {
-						socket.write(chalk.bold("\r\n:: Ooof, we're glad you don't want to leave us!\r\n"));
+						sendData(socket, chalk.bold("\r\n:: Ooof, we're glad you don't want to leave us!\r\n"));
 						delete socket.interactive;
 					}
 				} else {
 					// let's confirm the password
 					if (socket.db.password !== crypto.createHash('sha512').update(cleanData).digest('hex')) {
-						socket.write("\r\n:: " + chalk.red("Wrong password!\r\n"));
+						sendData(socket, "\r\n:: " + chalk.red("Wrong password!\r\n"));
 						delete socket.interactive;
 					} else {
 						// password is correct
-						socket.write(chalk.gray("\r\n:: Deleting all your data... We're sad to see you go!\r\n"));
+						sendData(socket, chalk.gray("\r\n:: Deleting all your data... We're sad to see you go!\r\n"));
 						command_utility().allButMe(socket,function(me,to){to.write("[Leaving is: "+ me.username + " ]\r\n");});
 						delete socket.interactive;
 						var quitter = socket.username;
@@ -309,7 +321,7 @@ function receiveData(socket, data) {
 				}
 				break;
 			default:
-				socket.write("\r\n:: Something really weird just happened... let's try to recover from it...\r\n");
+				sendData(socket, "\r\n:: Something really weird just happened... let's try to recover from it...\r\n");
 				delete socket.interactive;
 				break;
 		}
@@ -450,13 +462,13 @@ function doCommand(socket, command) {
 			    possibilities += cArr[p].name + ", ";
 			}
 			possibilities += cArr[cArr.length - 1].name;
-			return socket.write("Found " + cArr.length + " possible commands (" + possibilities + "). Please be more specific.\r\n");
+			return sendData(socket, "Found " + cArr.length + " possible commands (" + possibilities + "). Please be more specific.\r\n");
 		} else {
-			return socket.write("There's no such thing as a " + c + " command.\r\n");
+			return sendData(socket, "There's no such thing as a " + c + " command.\r\n");
 		}
 	}
 	catch(err) {
-		socket.write("Error executing command '" + c + "': " + err + "\r\n");
+		sendData(socket, "Error executing command '" + c + "': " + err + "\r\n");
 		console.error("Error executing command '" + c + "': " + err + "\r\n");
 	}
 }
@@ -487,7 +499,7 @@ function closeSocket(socket) {
 function newSocket(socket) {
 	socket.setKeepAlive(true);
 	sockets.push(socket);
-	socket.write(chalk.green('Welcome to the ') + chalk.bold.white(talkername) + chalk.green("!") + chalk.cyan('\r\n\r\nGive me a name:  '));
+	sendData(socket, chalk.green('Welcome to the ') + chalk.bold.white(talkername) + chalk.green("!") + chalk.cyan('\r\n\r\nGive me a name:  '));
 	socket.on('data', function(data) {
 		receiveData(socket, data);
 	})
@@ -514,6 +526,7 @@ function command_utility() {
 	    getCmdRank: getCmdRank,
 	    setCmdRank: setCmdRank,
 	    findCommand: findCommand,
+	    sendData: sendData,
 
 	    /*
 	     * Execute function to all connected users *but* the triggering one.

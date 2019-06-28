@@ -46,7 +46,7 @@ exports.command = {
 			whom = whom.toLowerCase().charAt(0).toUpperCase() + whom.toLowerCase().slice(1);
 			var sentence = chalk.green(":: ") + chalk.cyan(me.username) + " has promoted " + chalk.bold(whom) + " to the rank of " + chalk.magenta(rankName) + "! " + chalk.green("::\r\n");
 			command_access.allButMe(socket,function(me,to){to.write(sentence);});
-			socket.write(chalk.green(":: ") + "You promoted " + chalk.bold(whom) + " to the rank of " + chalk.green(rankName) + "!\r\n");
+			command_access.sendData(socket, chalk.green(":: ") + "You promoted " + chalk.bold(whom) + " to the rank of " + chalk.green(rankName) + "!\r\n");
 		} else {
 			me.write(chalk.red(":: ") + "You cannot promote someone to an higher level than yourse!\r\n");
 		}

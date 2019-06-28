@@ -13,12 +13,12 @@ exports.command = {
 		var chalk = require('chalk');
 		name = command.split(' ').slice(0).join(" "); // for now, names can have spaces
 		if ((typeof name) !== 'string' || name.length === 0) {
-			socket.write(chalk.yellow(":: ") + "You better type .help rntalker !\r\n");
+			command_access.sendData(socket, chalk.yellow(":: ") + "You better type .help rntalker !\r\n");
 			return;
 		}
 		command_access.getUniverse().name = name;
 		command_access.saveUniverse();
 		command_access.reloadTalkerName();
-		socket.write(chalk.green(":: This talker is now " + chalk.bold(name) + ".\r\n"));
+		command_access.sendData(socket, chalk.green(":: This talker is now " + chalk.bold(name) + ".\r\n"));
 	}
 }

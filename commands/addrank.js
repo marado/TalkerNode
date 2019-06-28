@@ -12,7 +12,7 @@ exports.command = {
 	execute: function(socket, command, command_access) {
 		var chalk = require('chalk');
 		if (typeof command !== 'string' || command.length < 1) {
-			socket.write(chalk.yellow(":: You'll have to give the new rank a name...\r\n"));
+			command_access.sendData(socket, chalk.yellow(":: You'll have to give the new rank a name...\r\n"));
 			return;
 		}
 		// add the new rank
@@ -36,6 +36,6 @@ exports.command = {
 				}
 			}
 		}
-		socket.write(chalk.bold("Rank added!\r\n"));
+		command_access.sendData(socket, chalk.bold("Rank added!\r\n"));
 	}
 }

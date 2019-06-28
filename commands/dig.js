@@ -19,7 +19,7 @@ exports.command = {
 		name = command.split(' ').slice(1).join(" "); // for now, names can have spaces
 		// 'direction' needs to be a direction on Nodiverse's nomenculature (N, NE...)
 		if (typeof direction !== 'string' || direction.length === 0) {
-			socket.write(chalk.bold("Syntax: ") + ".dig <direction> <name>\r\n");
+			command_access.sendData(socket, chalk.bold("Syntax: ") + ".dig <direction> <name>\r\n");
 			return;
 		}
 		// FIXME: we're assuming that any uppercased string key with a
@@ -35,7 +35,7 @@ exports.command = {
 			}
 		}
 		if (!valid) {
-			socket.write(chalk.red(":: " + chalk.bold(direction) + " is not a valid direction.\r\n"));
+			command_access.sendData(socket, chalk.red(":: " + chalk.bold(direction) + " is not a valid direction.\r\n"));
 			return;
 		}
 		// name: first char needs to be a letter, can't be a dupe
@@ -43,11 +43,11 @@ exports.command = {
 			(name.length === 0) ||
 			!(/^[a-zA-Z\u00C0-\u00ff]+$/.test(name.substring(0,1)))
 		) {
-			socket.write(chalk.red(":: Place names need to start with a letter!\r\n"));
+			command_access.sendData(socket, chalk.red(":: Place names need to start with a letter!\r\n"));
 			return;
 		}
 		if (name === command_access.getUniverse().get(socket.db.where).name) {
-			socket.write(chalk.yellow(":: You're already there!\r\n"));
+			command_access.sendData(socket, chalk.yellow(":: You're already there!\r\n"));
 			return;
 		}
 		// look for exits
@@ -56,7 +56,7 @@ exports.command = {
 		// check if the name isn't a dupe
 		for (var n = 0; n < neighbours.length; n++) {
 			if (neighbours[n] !== null && neighbours[n].name === name) {
-				socket.write(chalk.yellow(":: That place already exists!\r\n"));
+				command_access.sendData(socket, chalk.yellow(":: That place already exists!\r\n"));
 				return;
 			}
 		}
@@ -77,7 +77,7 @@ exports.command = {
 		if (targObj !== null) {
 			// deal with situations where the place is not the same
 			if (targObj.name !== name) {
-				socket.write(formatters.text_wrap(chalk.red(":: You're trying to create a " +
+				command_access.sendData(socket, formatters.text_wrap(chalk.red(":: You're trying to create a " +
 					"place called " + chalk.bold(name) + " where there's already another " +
 					"place called " + chalk.bold(targObj.name) + "! ") + chalk.yellow("Maybe you want to " +
 					chalk.bold(".destroy") + " that one first, or recheck your " + chalk.bold(".map ") + "and make " +
@@ -88,18 +88,18 @@ exports.command = {
 			// deal with situations where the passage already exists
 			var newPassage = eval("command_access.getUniverse()."+direction);
 			if ((updateMe.passages & newPassage) === newPassage) {
-				socket.write(chalk.yellow("You cannot create a passage that already exists!\r\n"));
+				command_access.sendData(socket, chalk.yellow("You cannot create a passage that already exists!\r\n"));
 				return;
 			}
 			updateMe.passages += newPassage;
 			if (!command_access.getUniverse().update(updateMe)) {
-				socket.write("You should have been able to create a passage to " +
+				command_access.sendData(socket, "You should have been able to create a passage to " +
 					name + ". However, that didn't work. Please let an " +
 					command_access.ranks.list[
 						command_access.ranks.list.length - 1
 					] + " know about this!\r\n");
 			} else {
-				socket.write(chalk.green(":: ") + "You just created a passage to " + chalk.bold(name) + ".\r\n");
+				command_access.sendData(socket, chalk.green(":: ") + "You just created a passage to " + chalk.bold(name) + ".\r\n");
 			}
 		} else {
 			// nothing there, let's create
@@ -108,7 +108,7 @@ exports.command = {
 			) / Math.log(2)][1];
 			if (!command_access.getUniverse().create(target, opposite)) {
 				// we shouldn't be able to get here. Is this a Nodiverse bug?
-				socket.write("You should have been able to dig towards " +
+				command_access.sendData(socket, "You should have been able to dig towards " +
 					direction + " from here and create a place called " + name +
 					". However, that didn't work. Please let an " +
 					command_access.ranks.list[
@@ -121,7 +121,7 @@ exports.command = {
 			if (done !== null) done.name = name;
 			if (!command_access.getUniverse().update(done)) {
 				// we shouldn't be able to get here. Is this a Nodiverse bug?
-				socket.write("You dug, but you weren't able to make the new place " +
+				command_access.sendData(socket, "You dug, but you weren't able to make the new place " +
 					"how you wanted it to be. It's not your fault... and you " +
 					"should warn an " +
 					command_access.ranks.list[
@@ -130,7 +130,7 @@ exports.command = {
 					"about this!\r\n");
 				return;
 			}
-			socket.write(chalk.green(":: ") + "You dig towards " + chalk.bold(direction) +
+			command_access.sendData(socket, chalk.green(":: ") + "You dig towards " + chalk.bold(direction) +
 				", and create a new place called " + chalk.bold(name) + ".\r\n");
 		}
 		// saving the altered universe

@@ -10,12 +10,12 @@ exports.command = {
 	execute: function(socket, command, command_access) {
 		var chalk = require('chalk');
  		var ranks = command_access.ranks;
-		socket.write(chalk.green("+----------------------------------------------------------------------------+\r\n"));
+		command_access.sendData(socket, chalk.green("+----------------------------------------------------------------------------+\r\n"));
 		for (var r = 0 ; r < ranks.list.length; r++) {
 			var text = ("  " + r).slice(-3) + "\t: " + (ranks.list[r] + "            ").substr(0,11);
 			if (socket.db.rank == r) text += chalk.yellow.bold("\t<- you");
-			socket.write(text+"\r\n");
+			command_access.sendData(socket, text+"\r\n");
 		}
-		socket.write(chalk.green("+----------------------------------------------------------------------------+\r\n"));
+		command_access.sendData(socket, chalk.green("+----------------------------------------------------------------------------+\r\n"));
 	}
 }

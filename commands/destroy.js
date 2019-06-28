@@ -14,7 +14,7 @@ exports.command = {
 		direction = command.split(' ')[0];
 		// 'direction' needs to be a direction on Nodiverse's nomenculature (N, NE...)
 		if (typeof direction !== 'string' || direction.length === 0) {
-			socket.write(chalk.bold("Syntax: ") + ".destroy <direction>\r\n");
+			command_access.sendData(socket, chalk.bold("Syntax: ") + ".destroy <direction>\r\n");
 			return;
 		}
 		// FIXME: we're assuming that any uppercased string key with a
@@ -30,7 +30,7 @@ exports.command = {
 			}
 		}
 		if (!valid) {
-			socket.write(chalk.bold(direction) + " " + chalk.red("is not a valid direction.\r\n"));
+			command_access.sendData(socket, chalk.bold(direction) + " " + chalk.red("is not a valid direction.\r\n"));
 			return;
 		}
 		// look for exits
@@ -44,17 +44,17 @@ exports.command = {
 		if (direction.search("U") !== -1) target[2]++;
 		if (direction.search("D") !== -1) target[2]--;
 		if (target.toString() === command_access.getUniverse().entrypoint.toString()) {
-			socket.write(chalk.red("You cannot destroy the portal to this Universe!\r\n"));
+			command_access.sendData(socket, chalk.red("You cannot destroy the portal to this Universe!\r\n"));
 			return;
 		}
 		targObj = command_access.getUniverse().get(target);
 		if (targObj === null) {
-			socket.write(chalk.red("There's nothing there to be destroyed!\r\n"));
+			command_access.sendData(socket, chalk.red("There's nothing there to be destroyed!\r\n"));
 			return;
 		}
 		if (!command_access.getUniverse().nuke(target)) {
 			// we shouldn't be able to get here. Is this a Nodiverse bug?
-			socket.write(chalk.red("You should have been able to destroy " + direction +
+			command_access.sendData(socket, chalk.red("You should have been able to destroy " + direction +
 				" from here. However, that didn't work. " + chalk.bold("Please let an " +
 				command_access.ranks.list[command_access.ranks.list.length - 1] +
 				" know about this!\r\n")));
@@ -62,7 +62,7 @@ exports.command = {
 		}
 		// saving the altered universe
 		command_access.saveUniverse();
-		socket.write(chalk.yellow(":: ") + "You destroyed " + chalk.bold(direction) +
+		command_access.sendData(socket, chalk.yellow(":: ") + "You destroyed " + chalk.bold(direction) +
 			", hopefully knowing what you're doing.\r\n");
 	}
 }

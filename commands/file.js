@@ -16,17 +16,17 @@ exports.command = {
 
 		// if command called without parameters
 		if (command.trim() === "") {
-			socket.write(chalk.cyan("+-- List of available files: --------+\r\n"));
+			command_access.sendData(socket, chalk.cyan("+-- List of available files: --------+\r\n"));
 			fs.readdirSync(directory).forEach(file => {
-				socket.write(" " + chalk.bold(file) + "\r\n");
+				command_access.sendData(socket, " " + chalk.bold(file) + "\r\n");
 			});
-			socket.write(chalk.cyan("+------------------------------------+\r\n"));
+			command_access.sendData(socket, chalk.cyan("+------------------------------------+\r\n"));
 		} else {
 			// if command called with parameters
 			try {
-				socket.write("\r\n" + fs.readFileSync(directory + command) + "\r\n");
+				command_access.sendData(socket, "\r\n" + fs.readFileSync(directory + command) + "\r\n");
 			} catch(e) {
-				socket.write(chalk.red(":: ") + "That file isn't available.\r\n");
+				command_access.sendData(socket, chalk.red(":: ") + "That file isn't available.\r\n");
 			}
 		}
 	}

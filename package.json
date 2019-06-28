@@ -1,6 +1,6 @@
 {
   "name": "TalkerNode",
-  "version": "0.6.15",
+  "version": "0.6.16",
   "description": "TalkerNode is a Talker base, written in Node.js.",
   "main": "TalkerNode.js",
   "repository": {
@@ -9,13 +9,15 @@
   },
   "author": "Marcos Marado <mindboosternoori@gmail.com>",
   "license": "Unlicense",
-  "engines" : { "node" : ">=6" },
+  "engines": {
+    "node": ">=6"
+  },
   "dependencies": {
     "chalk": "",
     "lowdb": ">=0.17.0",
     "mathjs": "",
     "nodiverse": ">=0.3.4",
-    "password-strength": ""
+    "password-strength": "",
+    "strip-ansi": "^5.2.0"
   }
 }
-

@@ -13,6 +13,6 @@ exports.command = {
 		var chalk = require('chalk');
 		command_access.getUniverse().entrypoint = socket.db.where;
 		command_access.saveUniverse();
-		socket.write(chalk.green(":: ") + "The Universe's entrypoint is now here.\r\n");
+		command_access.sendData(socket, chalk.green(":: ") + "The Universe's entrypoint is now here.\r\n");
 	}
 }

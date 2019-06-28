@@ -9,8 +9,8 @@ exports.command = {
 
 	execute: function(socket, command, command_access) {
 		var chalk = require('chalk');
-		socket.write(chalk.bold(chalk.red(":: This action is irreversible!\r\n")));
-		socket.write(chalk.red(":: Write '" + chalk.bold("yes, I am sure") + "' if you're sure you want to go ahead...: "));
+		command_access.sendData(socket, chalk.bold(chalk.red(":: This action is irreversible!\r\n")));
+		command_access.sendData(socket, chalk.red(":: Write '" + chalk.bold("yes, I am sure") + "' if you're sure you want to go ahead...: "));
 		socket.interactive = {type:"suicide", state:"confirmation"};
 	}
 }

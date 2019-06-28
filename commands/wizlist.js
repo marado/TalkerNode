@@ -13,11 +13,11 @@ exports.command = {
 		var users = command_access.getUsersList();
 		var toShow = command_access.ranks.list.length;
 		if (toShow > 3) toShow = 3;
-		socket.write(chalk.green("+----------------------------------------------------------------------------+\r\n"));
+		command_access.sendData(socket, chalk.green("+----------------------------------------------------------------------------+\r\n"));
 		var someone = false;
 		var online = "";
 		for (var level = command_access.ranks.list.length-1; level > command_access.ranks.list.length-1-toShow; level--) {
-			socket.write(chalk.yellow.bold(command_access.ranks.list[level]) + "\t: ");
+			command_access.sendData(socket, chalk.yellow.bold(command_access.ranks.list[level]) + "\t: ");
 			online += chalk.blue.bold(command_access.ranks.list[level]) + "\t: ";
 			var counter = 0;
 			var ocounter = 0;
@@ -31,20 +31,20 @@ exports.command = {
 						online += users[u].username + "\t";
 					}
 					if (counter !== 0 && counter % 8 === 0)
-						socket.write("\n\t  ");
-					socket.write(users[u].username + "\t");
+						command_access.sendData(socket, "\n\t  ");
+					command_access.sendData(socket, users[u].username + "\t");
 					counter++;
 				}
 			}
-			socket.write("\r\n");
+			command_access.sendData(socket, "\r\n");
 			online += "\r\n";
 		}
-		socket.write(chalk.green("+----------------------------------------------------------------------------+\r\n"));
+		command_access.sendData(socket, chalk.green("+----------------------------------------------------------------------------+\r\n"));
 		if (someone) {
-			socket.write(chalk.bold("Of which, these are online:\r\n") + online);
+			command_access.sendData(socket, chalk.bold("Of which, these are online:\r\n") + online);
 		} else {
-			socket.write(chalk.grey("None of them online at this moment.\r\n"));
+			command_access.sendData(socket, chalk.grey("None of them online at this moment.\r\n"));
 		}
-		socket.write(chalk.green("+----------------------------------------------------------------------------+\r\n"));
+		command_access.sendData(socket, chalk.green("+----------------------------------------------------------------------------+\r\n"));
 	}
 }

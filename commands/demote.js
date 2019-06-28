@@ -31,7 +31,7 @@ exports.command = {
 			w = command_access.getUser(whom);
 		}
 		if (w.rank == 0) {
-			socket.write("How low do you think someone can be?\r\n");
+			command_access.sendData(socket, "How low do you think someone can be?\r\n");
 		} else if (me.db.rank > w.rank) {
 			// if user is online, do it via sockets
 			var online = command_access.getOnlineUser(whom);
@@ -49,7 +49,7 @@ exports.command = {
 			var sentence = chalk.red(":: ") + chalk.white(me.username) + chalk.red(" has demoted ") +
 					chalk.yellow(whom) + chalk.red(" to the rank of ") + chalk.green(rankName) + chalk.red("! ::\r\n");
 			command_access.allButMe(socket,function(me,to){to.write(sentence);});
-			socket.write("You " + chalk.red("demoted ") + chalk.yellow(whom) + " to the rank of " + chalk.green(rankName) + "!\r\n");
+			command_access.sendData(socket, "You " + chalk.red("demoted ") + chalk.yellow(whom) + " to the rank of " + chalk.green(rankName) + "!\r\n");
 		} else {
 			me.write("You cannot demote someone with the same or an higher rank than yours!\r\n");
 		}

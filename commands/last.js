@@ -57,35 +57,35 @@ exports.command = {
 			var sliced = times.slice(0,listSize-1);
 			// ...and then find the users for each of those times:
 			if (sliced.length === 0) {
-				socket.write("There's nothing to let you know about, yet.\r\n");
+				command_access.sendData(socket, "There's nothing to let you know about, yet.\r\n");
 			} else {
-	   	 		socket.write(chalk.cyan("+----------------------------------------------------------------------------+\r\n"));
-	   	 		socket.write(chalk.cyan("+ " + chalk.bold("These are the last users to have logged in:") + "                                +\r\n"));
-	   	 		socket.write(chalk.cyan("+----------------------------------------------------------------------------+\r\n"));
+	   	 		command_access.sendData(socket, chalk.cyan("+----------------------------------------------------------------------------+\r\n"));
+	   	 		command_access.sendData(socket, chalk.cyan("+ " + chalk.bold("These are the last users to have logged in:") + "                                +\r\n"));
+	   	 		command_access.sendData(socket, chalk.cyan("+----------------------------------------------------------------------------+\r\n"));
 	   	 		for (var i = 0; i < sliced.length; i++) {
 					for (var j = 0; j < cleanlist.length; j++) {
 						if (cleanlist[j].loginTime === sliced[i]) {
-							socket.write("  " + chalk.yellow(cleanlist[j].username) + 
+							command_access.sendData(socket, "  " + chalk.yellow(cleanlist[j].username) + 
 								" logged in at " + chalk.bold(new Date(cleanlist[j].loginTime).toString()) + ".  ");
 							if (command_access.getOnlineUser(cleanlist[j].username)) {
-								socket.write(chalk.yellow.bold("ONLINE"));
+								command_access.sendData(socket, chalk.yellow.bold("ONLINE"));
 							}
-							socket.write("\r\n");
+							command_access.sendData(socket, "\r\n");
 						}
 					}
 	   	 		}
-	   	 		socket.write(chalk.cyan("+----------------------------------------------------------------------------+\r\n"));
+	   	 		command_access.sendData(socket, chalk.cyan("+----------------------------------------------------------------------------+\r\n"));
 			}
 		} else {
 			var wArr = command_access.getAproxUser(whom);
-			if (wArr.length === 0) return socket.write(chalk.red("::") + " There's no one called " + chalk.bold(whom) + ".\r\n");
+			if (wArr.length === 0) return command_access.sendData(socket, chalk.red("::") + " There's no one called " + chalk.bold(whom) + ".\r\n");
 			if (wArr.length > 1) {
 				var possibilities = "";
 				for (var p = 0; p < wArr.length - 1; p++) {
 					possibilities += chalk.bold(wArr[p]) + ", ";
 				}
 				possibilities += chalk.bold(wArr[wArr.length - 1]);
-				return socket.write(chalk.yellow(
+				return command_access.sendData(socket, chalk.yellow(
 					":: Be more explicit: whom do you want to refer to (" +
 						possibilities + ")?\r\n"
 				));
@@ -93,12 +93,12 @@ exports.command = {
 			whom = wArr[0];
 			w = command_access.getUser(whom);
 			if (typeof w.loginTime !== 'undefined') {
-				socket.write(chalk.green(":: " + chalk.cyan(whom) + " last logged in at " + chalk.bold(new Date(w.loginTime).toString()) + ".\r\n"));
+				command_access.sendData(socket, chalk.green(":: " + chalk.cyan(whom) + " last logged in at " + chalk.bold(new Date(w.loginTime).toString()) + ".\r\n"));
 			} else {
-				socket.write(chalk.green(":: There is no information about when did " + chalk.cyan(whom) + " last logged in. \r\n"));
+				command_access.sendData(socket, chalk.green(":: There is no information about when did " + chalk.cyan(whom) + " last logged in. \r\n"));
 			}
 			if (command_access.getOnlineUser(whom)) {
-				socket.write(chalk.green(":: " + chalk.cyan(whom) + " is still online.\r\n"));
+				command_access.sendData(socket, chalk.green(":: " + chalk.cyan(whom) + " is still online.\r\n"));
 			}
 		}
 	}

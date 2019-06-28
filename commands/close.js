@@ -14,7 +14,7 @@ exports.command = {
 		direction = command.split(' ')[0];
 		// 'direction' needs to be a direction on Nodiverse's nomenculature (N, NE...)
 		if (typeof direction !== 'string' || direction.length === 0) {
-			socket.write(chalk.bold("Syntax:") + " .close <direction>\r\n");
+			command_access.sendData(socket, chalk.bold("Syntax:") + " .close <direction>\r\n");
 			return;
 		}
 		// FIXME: we're assuming that any uppercased string key with a
@@ -30,28 +30,28 @@ exports.command = {
 			}
 		}
 		if (!valid) {
-			socket.write(direction + " is not a valid direction.\r\n");
+			command_access.sendData(socket, direction + " is not a valid direction.\r\n");
 			return;
 		}
 		var updateMe = command_access.getUniverse().get(socket.db.where);
 		// deal with situations where the passage doesn't exist
 		var newPassage = eval("command_access.getUniverse()."+direction);
 		if ((updateMe.passages & newPassage) !== newPassage) {
-			socket.write("You cannot close a passage that doesn't exist!\r\n");
+			command_access.sendData(socket, "You cannot close a passage that doesn't exist!\r\n");
 			return;
 		}
 		updateMe.passages -= newPassage;
 		if (!command_access.getUniverse().update(updateMe)) {
-			socket.write("You should have been able to destroy that passage. However, " +
+			command_access.sendData(socket, "You should have been able to destroy that passage. However, " +
 				"that didn't work. Please let a " +
 				command_access.ranks.list[
 					command_access.ranks.list.length - 1
 				] + " know about this!\r\n");
 		} else {
-			socket.write("You closed the passage.\r\n");
+			command_access.sendData(socket, "You closed the passage.\r\n");
 		}
 		// saving the altered universe
 		command_access.saveUniverse();
-		socket.write(":: You closed the passage towards " + chalk.bold(direction) + ".\r\n");
+		command_access.sendData(socket, ":: You closed the passage towards " + chalk.bold(direction) + ".\r\n");
 	}
 }

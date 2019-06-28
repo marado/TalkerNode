@@ -10,8 +10,8 @@ exports.command = {
 	execute: function(socket, command, command_access) {
 		var chalk = require('chalk');
  		if (command === 'undefined' || command.length < 1)
-			return socket.write(chalk.red(":: ") + "Say what?\r\n");
+			return command_access.sendData(socket, chalk.red(":: ") + "Say what?\r\n");
 		command_access.allHereButMe(socket,function(me,to){to.write(me.username + chalk.bold(": ") + command + "\r\n");});
-		socket.write(chalk.bold("You said: ") + command + "\r\n");
+		command_access.sendData(socket, chalk.bold("You said: ") + command + "\r\n");
 	}
 }
