@@ -13,6 +13,29 @@ https://github.com/marado/TalkerNode .
 > yarn # or `npm install`
 ```
 
+Then, you run the talker by doing:
+```bash
+> node TallkerNode.js
+```
+
+That will make your talker run on the default port (8888), but you can
+make it run on a different port by setting up the environment variable PORT:
+
+```bash
+> PORT=3333 node TallkerNode.js
+```
+
+Now that your talker is running, feel free to connect to it! The first user
+created will be of the highest rank. You can connect to your own talker, either
+by pointing your favorite MU* client to localhost in port 8888, or, for
+instance, using telnet:
+
+```bash
+> telnet 0 8888
+```
+
+Enjoy!
+
 ## License
 
 This is free and unencumbered software released into the public domain.
