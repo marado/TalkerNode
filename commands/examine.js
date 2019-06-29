@@ -57,13 +57,22 @@ exports.command = {
 		if (typeof (w.totalTime) === 'undefined') {
 			// it either is his/her first time online, or it's an old user that
 			// didn't log on recently
-			if (command_access.getOnlineUser(whom) !== false) {
-				command_access.sendData(socket, chalk.bold(":: ") + chalk.cyan(whom) + " is " + chalk.green("online") + " for the " + chalk.bold("first time") + ".\r\n");
-			} else {
+			if (command_access.getOnlineUser(whom) === false) {
 				command_access.sendData(socket, chalk.bold(":: ") + chalk.cyan(whom) + " hasn't been " + chalk.green("online") + " for a " + chalk.bold("long time") + ".\r\n");
+			} else {
+				// we should always be going into this if, but let's double check anyway
+				if (typeof w.loginTime !== 'undefined') {
+					command_access.sendData(socket, chalk.bold(":: ") + chalk.cyan(whom) + " has spent " + chalk.bold(this.friendlyTime(Date.now() - w.loginTime)) + chalk.green(" online") + ".\r\n");
+				}
 			}
 		} else {
-			command_access.sendData(socket, chalk.bold(":: ") + chalk.cyan(whom) + " has been " + chalk.green("online") + " for " + chalk.bold(this.friendlyTime(w.totalTime)) + ".\r\n");
+			if (command_access.getOnlineUser(whom) !== false) {
+				// the user is currently online
+				command_access.sendData(socket, chalk.bold(":: ") + chalk.cyan(whom) + " has spent " + chalk.bold(this.friendlyTime(w.totalTime + (Date.now() - w.loginTime))) + chalk.green(" online") + ".\r\n");
+			} else {
+				// the user isn't online
+				command_access.sendData(socket, chalk.bold(":: ") + chalk.cyan(whom) + " has spent " + chalk.bold(this.friendlyTime(w.totalTime)) + chalk.green(" online") + ".\r\n");
+			}
 		}
 		command_access.sendData(socket, 
 			chalk.bold(":: ") + chalk.cyan(whom) + " is of rank " + chalk.bold(command_access.ranks.list[w.rank]) +

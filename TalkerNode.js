@@ -218,14 +218,14 @@ function receiveData(socket, data) {
 					delete socket.registering;
 					delete socket.username;
 					delete socket.db;
-					sendData(socket, chalk.red("\r\nPasswords don't match!") + "Let's start from the beggining... " + chalk.cyan("Tell me your name:  "));
+					sendData(socket, chalk.red("\r\nPasswords don't match!") + "\r\nLet's start from the beggining...\r\n" + chalk.cyan("Tell me your name:  "));
 					return;
 				}
 			}
 		} else if (socket.db.password !== crypto.createHash('sha512').update(cleanData).digest('hex')) {
 			delete socket.username;
 			delete socket.db;
-			sendData(socket, chalk.red("\r\nWrong password! ") + "Let's start from the beggining... " + chalk.cyan("Tell me your name:  "));
+			sendData(socket, chalk.red("\r\nWrong password! ") + "\r\nLet's start from the beggining...\r\n" + chalk.cyan("Tell me your name:  "));
 			return;
 		}
 

@@ -1,12 +1,9 @@
  <p align="center"><img src="logo/vertical.png" alt="TalkerNode" height="150px"></p>
 
+TalkerNode is a [Talker](https://en.wikipedia.org/wiki/Talker) base, written in
+Node.js .
 
-TalkerNode is a Talker base, written in Node.js .
-
-The original source code was written by sam, from the talker Hades, and has
-been turned into a TalkerNode by Marcos Marado.
-
-The latest version of TalkerNode the fork can always be found at
+The latest version of TalkerNode can always be found at
 https://github.com/marado/TalkerNode .
 
 ## Installation
