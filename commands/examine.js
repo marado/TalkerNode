@@ -14,19 +14,19 @@ exports.command = {
 		if (ms < 1000) {
 			return "" + ms + " ms";
 		} else if (ms < (1000 * 60)) {
-			return "" + Math.floor(ms / 1000) + " s";
+			return "" + Math.floor(ms / 1000) + " s" + (ms%1000) + "ms";
 		} else if (ms < (1000 * 60 * 60)) {
-			return "" + Math.floor(ms / 1000 / 60) + " min";
+			return "" + Math.floor(ms / 1000 / 60) + " min" + Math.floor((ms / 1000) % 60) + " s" + Math.floor(ms %1000) + " ms";
 		} else if (ms < (1000 * 60 * 60 * 24)) {
-			return "" + Math.floor(ms / 1000 / 60 / 60) + " h";
+			return "" + Math.floor(ms / 1000 / 60 / 60) + " h" + Math.floor((ms / 1000 / 60)%60) + " min" + Math.floor((ms / 1000) % 60) + " s" + Math.floor(ms%1000) + " ms";
 		} else if (ms < (1000 * 60 * 60 * 24 * 30)) {
-			return "" + Math.floor(ms / 1000 / 60 / 60 / 24) + " d";
+			return "" + Math.floor(ms / 1000 / 60 / 60 / 24) + " d" + Math.floor((ms / 1000 / 60 / 60) % 24) + " h" + Math.floor((ms / 1000 / 60) % 60) + " min" + Math.floor((ms / 1000) % 60) + " s" + Math.floor(ms % 1000);
 		} else if (ms < (1000 * 60 * 60 * 24 * 365)) {
 			var m = Math.floor(ms / 1000 / 60 / 60 / 24 / 30);
 			if (m > 11) m = 11;
-			return "" + m + " mon";
+			return "" + m + " mon" + Math.floor((ms / 1000 / 60 / 60 / 24)% 30) + " d" + Math.floor((ms / 1000 / 60 / 60 )%24) + " h" + Math.floor((ms / 1000 / 60 ) % 60) + " m" + Math.floor((ms / 1000 )% 60) + " s" + Math.floor(ms % 1000) + " ms";
 		}
-		return "" + Math.floor(ms / 1000 / 60 / 60 / 24 / 365) + " y";
+		return "" + Math.floor(ms / 1000 / 60 / 60 / 24 / 365) + " y" + Math.floor(((ms / 1000 / 60 / 60 / 24 )% 365)/30) + " mon" + Math.floor(((ms / 1000 / 60 / 60 / 24 )% 365)%30) + " d" + Math.floor((ms / 1000 / 60 / 60 )% 24) + " h" + Math.floor((ms / 1000 / 60 )% 60) + " m" + Math.floor((ms / 1000 ) % 60) + " s" + Math.floor(ms % 1000) + " ms";
 	},
 
 	// Function to execute the command
