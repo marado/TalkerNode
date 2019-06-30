@@ -18,6 +18,6 @@
     "mathjs": "",
     "nodiverse": ">=0.3.4",
     "password-strength": "",
-    "strip-ansi": "^5.2.0"
+    "strip-ansi": ""
   }
 }
