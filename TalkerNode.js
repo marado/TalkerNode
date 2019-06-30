@@ -96,7 +96,7 @@ function echo(bool) {
     bytes[0] = 0xFF;
     bytes[1] = bool ? 0xFC : 0xFB; //  0xFF 0xFC 0x01 for off,  0xFF 0xFB 0x01 for on
     bytes[2] = 0x01;
-    return new Buffer(bytes);
+    return new Buffer.from(bytes);
 }
 
 /*
