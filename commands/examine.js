@@ -4,33 +4,48 @@ exports.command = {
 	unloadable: true,			// Can the command be unloaded dynamically
 	min_rank: 0,				// Minimum rank to use to execute the command
 	display: "Shows information about a user", // Summary help text to show in the .help command
-	help: "Shows information about a user.\r\n" + 
-		"Without arguments, it will give you information about yourself.\r\n" + 
+	help: "Shows information about a user.\r\n" +
+		"Without arguments, it will give you information about yourself.\r\n" +
 		"If you add another user as an argument, it will show you info about him/her " +
 		"instead.",
 	usage: ".examine [<user>]",
 
-	friendlyTime: function(ms) {
-		if (ms < 1000) {
-			return "" + ms + " ms";
-		} else if (ms < (1000 * 60)) {
-			return "" + Math.floor(ms / 1000) + " s" + (ms%1000) + "ms";
-		} else if (ms < (1000 * 60 * 60)) {
-			return "" + Math.floor(ms / 1000 / 60) + " min" + Math.floor((ms / 1000) % 60) + " s" + Math.floor(ms %1000) + " ms";
-		} else if (ms < (1000 * 60 * 60 * 24)) {
-			return "" + Math.floor(ms / 1000 / 60 / 60) + " h" + Math.floor((ms / 1000 / 60)%60) + " min" + Math.floor((ms / 1000) % 60) + " s" + Math.floor(ms%1000) + " ms";
-		} else if (ms < (1000 * 60 * 60 * 24 * 30)) {
-			return "" + Math.floor(ms / 1000 / 60 / 60 / 24) + " d" + Math.floor((ms / 1000 / 60 / 60) % 24) + " h" + Math.floor((ms / 1000 / 60) % 60) + " min" + Math.floor((ms / 1000) % 60) + " s" + Math.floor(ms % 1000);
-		} else if (ms < (1000 * 60 * 60 * 24 * 365)) {
-			var m = Math.floor(ms / 1000 / 60 / 60 / 24 / 30);
-			if (m > 11) m = 11;
-			return "" + m + " mon" + Math.floor((ms / 1000 / 60 / 60 / 24)% 30) + " d" + Math.floor((ms / 1000 / 60 / 60 )%24) + " h" + Math.floor((ms / 1000 / 60 ) % 60) + " m" + Math.floor((ms / 1000 )% 60) + " s" + Math.floor(ms % 1000) + " ms";
+	friendlyTime: function (ms) {
+		let msec, sec, min, hour, day, month, year;
+		msec = Math.floor(ms % 1000);
+		sec = Math.floor((ms / 1000) % 60);
+		min = Math.floor((ms / 1000 / 60) % 60);
+		hour = Math.floor((ms / 1000 / 60 / 60) % 24);
+		day = Math.floor((ms / 1000 / 60 / 60 / 24) % 30);
+		month = Math.floor((ms / 1000 / 60 / 60 / 24 / 30) % 12);
+		year = Math.floor((ms / 1000 / 60 / 60 / 24 / 30 / 12));
+		let f_time = "";
+		if (msec) {
+			f_time = msec + " milliseconds" + f_time;
 		}
-		return "" + Math.floor(ms / 1000 / 60 / 60 / 24 / 365) + " y" + Math.floor(((ms / 1000 / 60 / 60 / 24 )% 365)/30) + " mon" + Math.floor(((ms / 1000 / 60 / 60 / 24 )% 365)%30) + " d" + Math.floor((ms / 1000 / 60 / 60 )% 24) + " h" + Math.floor((ms / 1000 / 60 )% 60) + " m" + Math.floor((ms / 1000 ) % 60) + " s" + Math.floor(ms % 1000) + " ms";
+		if (sec) {
+			f_time = sec + " seconds, " + f_time;
+		}
+		if (min) {
+			f_time = min + " minutes, " + f_time;
+		}
+		if (hour) {
+			f_time = hour + " hours, " + f_time;
+		}
+		if (day) {
+			f_time = day + " days, " + f_time;
+		}
+		if (month) {
+			f_time = month + " months, " + f_time;
+		}
+		if (month) {
+			f_time = year + " years, " + f_time;
+		}
+		return f_time;
 	},
 
 	// Function to execute the command
-	execute: function(socket, command, command_access) {
+	execute: function (socket, command, command_access) {
 		var chalk = require('chalk');
 		var whom = command.split(' ')[0];
 		if (typeof whom === 'undefined' || whom.length < 1) {
@@ -74,7 +89,7 @@ exports.command = {
 				command_access.sendData(socket, chalk.bold(":: ") + chalk.cyan(whom) + " has spent " + chalk.bold(this.friendlyTime(w.totalTime)) + chalk.green(" online") + ".\r\n");
 			}
 		}
-		command_access.sendData(socket, 
+		command_access.sendData(socket,
 			chalk.bold(":: ") + chalk.cyan(whom) + " is of rank " + chalk.bold(command_access.ranks.list[w.rank]) +
 			", and was last seen at " + chalk.yellow(command_access.getUniverse().get(w.where).name) + ".\r\n"
 		);
