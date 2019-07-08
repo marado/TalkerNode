@@ -10,7 +10,7 @@ exports.command = {
 		"instead.",
 	usage: ".examine [<user>]",
 
-	friendlyTime: function (ms) {
+	friendlyTime: function(ms) {
 		let msec, sec, min, hour, day, month, year;
 		msec = Math.floor(ms % 1000);
 		sec = Math.floor((ms / 1000) % 60);
@@ -21,16 +21,16 @@ exports.command = {
 		year = Math.floor((ms / 1000 / 60 / 60 / 24 / 30 / 12));
 		let f_time = "";
 		if (msec) {
-			f_time = msec + " milliseconds" + f_time;
+			f_time = msec + " milliseconds";
 		}
 		if (sec) {
-			f_time = sec + " seconds, " + f_time;
+			f_time = sec + " seconds";
 		}
 		if (min) {
-			f_time = min + " minutes, " + f_time;
+			f_time = min + " minutes";
 		}
 		if (hour) {
-			f_time = hour + " hours, " + f_time;
+				f_time = hour + " hours, " + f_time;
 		}
 		if (day) {
 			f_time = day + " days, " + f_time;
@@ -38,14 +38,14 @@ exports.command = {
 		if (month) {
 			f_time = month + " months, " + f_time;
 		}
-		if (month) {
+		if (year) {
 			f_time = year + " years, " + f_time;
 		}
 		return f_time;
 	},
 
 	// Function to execute the command
-	execute: function (socket, command, command_access) {
+	execute: function(socket, command, command_access) {
 		var chalk = require('chalk');
 		var whom = command.split(' ')[0];
 		if (typeof whom === 'undefined' || whom.length < 1) {
