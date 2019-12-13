@@ -10,7 +10,7 @@ https://github.com/marado/TalkerNode .
 
 ```bash
 > git clone https://github.com/marado/TalkerNode
-> yarn # or `npm install`
+> npm install
 ```
 
 Then, you run the talker by doing:
