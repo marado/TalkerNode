@@ -257,11 +257,13 @@ function receiveData(socket, data) {
 		} else if (socket.db.password !== crypto.createHash('sha512').update(cleanData).digest('hex')) {
 			delete socket.username;
 			delete socket.db;
+			require("fs").appendFileSync('auth.log', new Date().toISOString() + " " + socket.remoteAddress + " with port " + socket.remotePort + " failed to log in\r\n");
 			sendData(socket, chalk.red("\r\nWrong password! ") + "\r\nLet's start from the beggining...\r\n" + chalk.cyan("Tell me your name:  "));
 			return;
 		}
 
 		// entering the talker...
+		require("fs").appendFileSync('auth.log', new Date().toISOString() + " " + socket.remoteAddress + " with port " + socket.remotePort + " successfully logged in\r\n");
 		if (universe.get(socket.db.where) === null) { // there's no where, or that place doesn't exist anymore
 			socket.db.where = universe.entrypoint;
 			// save changes into the database
