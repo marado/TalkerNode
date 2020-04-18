@@ -19,5 +19,11 @@
     "nodiverse": ">=0.3.4",
     "password-strength": "",
     "strip-ansi": ""
-  }
+  },
+  "keywords": [
+    "talker",
+    "server",
+    "MU*",
+    "telnet"
+  ]
 }
