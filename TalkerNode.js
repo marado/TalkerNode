@@ -117,28 +117,34 @@ function sendData(socket, data) {
 	} else {
 		datalines = data.split(/\r\n|\r|\n/).length;
 	}
-	if (typeof socket.db === 'undefined' ||
-		typeof socket.db.pager === 'undefined' ||
-		parseInt(socket.db.pager) === 0 ||
-		parseInt(socket.db.pager) >= datalines
-	) {
-		if (typeof socket.db !== 'undefined' && typeof socket.db.color !== 'undefined' && !(socket.db.color)) {
-			socket.write(stripAnsi(data));
+	try {
+		if (typeof socket.db === 'undefined' ||
+			typeof socket.db.pager === 'undefined' ||
+			parseInt(socket.db.pager) === 0 ||
+			parseInt(socket.db.pager) >= datalines
+		) {
+			if (typeof socket.db !== 'undefined' && typeof socket.db.color !== 'undefined' && !(socket.db.color)) {
+				socket.write(stripAnsi(data));
+			} else {
+				socket.write(data);
+			}
 		} else {
-			socket.write(data);
+			// TODO: react to socket.db.pager :
+			// cut the message in two, send the first, save the second
+			// - and get ready an interactive mechanism, like the one used in .pass, for eg.
+			//
+			// While that's not done...
+			// socket.write("This message should be cut and within a pager.\r\n");
+			if (typeof socket.db !== 'undefined' && typeof socket.db.color !== 'undefined' && !(socket.db.color)) {
+				socket.write(stripAnsi(data));
+			} else {
+				socket.write(data);
+			}
 		}
-	} else {
-		// TODO: react to socket.db.pager :
-		// cut the message in two, send the first, save the second
-		// - and get ready an interactive mechanism, like the one used in .pass, for eg.
-		//
-		// While that's not done...
-		// socket.write("This message should be cut and within a pager.\r\n");
-		if (typeof socket.db !== 'undefined' && typeof socket.db.color !== 'undefined' && !(socket.db.color)) {
-			socket.write(stripAnsi(data));
-		} else {
-			socket.write(data);
-		}
+	} catch (e) {
+	    // This is being left intentionally empty: socket.write failures
+	    // can, and are expected to happen, but we can ignore that and
+	    // proceed in those cases.
 	}
 }
 
