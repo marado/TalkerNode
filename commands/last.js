@@ -10,25 +10,6 @@ exports.command = {
 		"last login instead. You can also specify how many records to show.",
 	usage: ".last [<user>|<list_size>]",
 
-	friendlyTime: function(ms) {
-		if (ms < 1000) {
-			return "" + ms + " ms";
-		} else if (ms < (1000 * 60)) {
-			return "" + Math.floor(ms / 1000) + " s";
-		} else if (ms < (1000 * 60 * 60)) {
-			return "" + Math.floor(ms / 1000 / 60) + " min";
-		} else if (ms < (1000 * 60 * 60 * 24)) {
-			return "" + Math.floor(ms / 1000 / 60 / 60) + " h";
-		} else if (ms < (1000 * 60 * 60 * 24 * 30)) {
-			return "" + Math.floor(ms / 1000 / 60 / 60 / 24) + " d";
-		} else if (ms < (1000 * 60 * 60 * 24 * 365)) {
-			var m = Math.floor(ms / 1000 / 60 / 60 / 24 / 30);
-			if (m > 11) m = 11;
-			return "" + m + " mon";
-		}
-		return "" + Math.floor(ms / 1000 / 60 / 60 / 24 / 365) + " y";
-	},
-
 	// Function to execute the command
 	execute: function(socket, command, command_access) {
 		var chalk = require('chalk');
@@ -68,13 +49,13 @@ exports.command = {
 			if (sliced.length === 0) {
 				command_access.sendData(socket, "There's nothing to let you know about, yet.\r\n");
 			} else {
-	   	 		command_access.sendData(socket, chalk.cyan("+----------------------------------------------------------------------------+\r\n"));
-	   	 		command_access.sendData(socket, chalk.cyan("+ " + chalk.bold("These are the last users to have logged in:") + "                                +\r\n"));
-	   	 		command_access.sendData(socket, chalk.cyan("+----------------------------------------------------------------------------+\r\n"));
-	   	 		for (var i = 0; i < sliced.length; i++) {
+				command_access.sendData(socket, chalk.cyan("+----------------------------------------------------------------------------+\r\n"));
+				command_access.sendData(socket, chalk.cyan("+ " + chalk.bold("These are the last users to have logged in:") + "                                +\r\n"));
+				command_access.sendData(socket, chalk.cyan("+----------------------------------------------------------------------------+\r\n"));
+				for (var i = 0; i < sliced.length; i++) {
 					for (var j = 0; j < cleanlist.length; j++) {
 						if (cleanlist[j].loginTime === sliced[i]) {
-							command_access.sendData(socket, "  " + chalk.yellow(cleanlist[j].username) + 
+							command_access.sendData(socket, "  " + chalk.yellow(cleanlist[j].username) +
 								" logged in at " + chalk.bold(new Date(cleanlist[j].loginTime).toString()) + ".  ");
 							if (command_access.getOnlineUser(cleanlist[j].username)) {
 								command_access.sendData(socket, chalk.yellow.bold("ONLINE"));
@@ -82,8 +63,8 @@ exports.command = {
 							command_access.sendData(socket, "\r\n");
 						}
 					}
-	   	 		}
-	   	 		command_access.sendData(socket, chalk.cyan("+----------------------------------------------------------------------------+\r\n"));
+				}
+				command_access.sendData(socket, chalk.cyan("+----------------------------------------------------------------------------+\r\n"));
 			}
 		} else {
 			var wArr = command_access.getAproxUser(whom);
