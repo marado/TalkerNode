@@ -4,11 +4,11 @@ exports.command = {
 	unloadable: true,			// Can the command be unloaded dynamically
 	min_rank: 0,				// Minimum rank to use to execute the command
 	display: "Shows information about users last logins", // Summary help text to show in the .help command
-	help: "Shows information about users last logins.\r\n" + 
-		"Without arguments, it will give you information about who last logged in.\r\n" + 
-		"If you an user as an argument, it will show you info about his last login " +
-		"instead.",
-	usage: ".last [<user>]",
+	help: "Shows information about users last logins.\r\n" +
+		"Without arguments, it will give you information about who last logged in.\r\n" +
+		"If you specify an user as an argument, it will show you info about his " +
+		"last login instead. You can also specify how many records to show.",
+	usage: ".last [<user>|<list_size>]",
 
 	friendlyTime: function(ms) {
 		if (ms < 1000) {
@@ -32,10 +32,19 @@ exports.command = {
 	// Function to execute the command
 	execute: function(socket, command, command_access) {
 		var chalk = require('chalk');
-		var listSize = 15;	// size of the list of last users logging in
-		var whom = command.split(' ')[0];
+		var listSize, whom;
+		if (parseInt(command.split(' ')[0]) || command.split(' ')[0] === "0") {
+			// command is a number; listSize setting
+			listSize = Math.abs(parseInt(command.split(' ')[0]))+1;
+		} else {
+			// command is a username; whom setting
+			listSize = 15;	// size of the list of last users logging in
+			whom = command.split(' ')[0];
+		}
 		if (typeof whom === 'undefined' || whom.length < 1) {
-			// fetch list of last listSize logins:
+			// if are asking for no one...
+			if (listSize <= 1)
+				return command_access.sendData(socket, chalk.yellow(":: So, you really don't want to know it, right?\r\n"));
 
 			// get all the users
 			var users = command_access.getUsersList();
