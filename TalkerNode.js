@@ -564,6 +564,7 @@ function command_utility() {
 	    commands: commands,
 	    ranks: ranks,
 	    echo: echo,
+		loadCommands: loadCommands,							 
 	    getCmdRank: getCmdRank,
 	    setCmdRank: setCmdRank,
 	    findCommand: findCommand,
