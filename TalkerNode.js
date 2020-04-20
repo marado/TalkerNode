@@ -559,7 +559,15 @@ function newSocket(socket) {
 	require("fs").appendFileSync('auth.log', new Date().toISOString() + " " + socket.remoteAddress + " connected with port " + socket.remotePort + "\r\n");
 	socket.setKeepAlive(true);
 	sockets.push(socket);
-	sendData(socket, chalk.green('Welcome to the ') + chalk.bold.white(talkername) + chalk.green("!") + chalk.cyan('\r\n\r\nGive me a name:  '));
+	try {  // load motd file
+		var motd = require("fs").readFileSync('motd.txt');
+		sendData(socket, motd);
+	} catch {
+		// no motd available; generic welcome
+		sendData(socket, chalk.green('Welcome to the ')
+			+ chalk.bold.white(talkername) + chalk.green("!"));
+	}
+	sendData(socket,chalk.cyan('\r\n\r\nGive me a name:  '));
 	socket.on('data', function(data) {
 		receiveData(socket, data);
 	})
