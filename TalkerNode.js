@@ -530,15 +530,23 @@ function doCommand(socket, command) {
 function closeSocket(socket) {
 	var i = sockets.indexOf(socket);
 	if (i != -1) {
-		// write total time on socket db
-		sockets[i].db = usersdb.get(sockets[i].username).value();
-		if (typeof sockets[i].db !== 'undefined') {
-		    if (typeof sockets[i].db.totalTime === 'undefined') {
-			sockets[i].db.totalTime = (Date.now() - sockets[i].db.loginTime);
-		    } else {
-			sockets[i].db.totalTime += (Date.now() - sockets[i].db.loginTime);
-		    }
-		    usersdb.set(sockets[i].username, sockets[i].db).write();
+		// if the socket already belong to a user...
+		if (typeof socket.username !== 'undefined') {
+			// announce the user departure
+			command_utility().allButMe(socket,function(me,to){to.write(
+				chalk.bold("[" + chalk.red("Leaving ") + "is: "
+					+ chalk.yellow(me.username) + " ]\r\n")
+			);});
+			// write total time on socket db
+			sockets[i].db = usersdb.get(sockets[i].username).value();
+			if (typeof sockets[i].db !== 'undefined') {
+				if (typeof sockets[i].db.totalTime === 'undefined') {
+					sockets[i].db.totalTime = (Date.now() - sockets[i].db.loginTime);
+				} else {
+					sockets[i].db.totalTime += (Date.now() - sockets[i].db.loginTime);
+				}
+				usersdb.set(sockets[i].username, sockets[i].db).write();
+			}
 		}
 		sockets.splice(i, 1);
 	}
