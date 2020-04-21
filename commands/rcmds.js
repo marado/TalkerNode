@@ -10,7 +10,7 @@ exports.command = {
 	execute: function(socket, command, command_access) {
 		var chalk = require('chalk');
 		try {
-			command_access.loadCommands();
+			command_access.sendData(socket, command_access.loadCommands());
 			command_access.sendData(socket, chalk.green(":: ") + "Commands reloaded\r\n");
 		} catch(err) {
 			command_access.sendData(socket,

@@ -386,24 +386,35 @@ function receiveData(socket, data) {
 function loadCommands() {
 	// Loop through all files, trying to load them
 	var normalizedPath = require("path").join(__dirname, "commands");
+	var output = "";
 	require("fs").readdirSync(normalizedPath).forEach(function(file) {
 		if (file.substr(file.length-3, 3) === ".js") {
-			delete require.cache[require.resolve('./commands/' + file)]
-			var cmd_load = require('./commands/' + file);
-			var cmd = cmd_load.command;
+			try {
+				delete require.cache[require.resolve('./commands/' + file)]
+				var cmd_load = require('./commands/' + file);
+				var cmd = cmd_load.command;
 
-			// Only load the command if it's set to Autoload
-			if(cmd.autoload) {
-				console.log("Loading Command: Command '" + cmd.name + "' loaded (from '" + file + "')");
-				cmd.loaded_date = new Date();
-				commands[cmd.name] = cmd;
-			} else {
-				console.log("Loading Command: Skipping " + cmd.name + " (from '" + file + "'). Autoload = false");
+				// Only load the command if it's set to Autoload
+				if(cmd.autoload) {
+					output += "Loading Command: Command '"
+						+ cmd.name + "' loaded (from '"
+						+ file + "')\r\n";
+					cmd.loaded_date = new Date();
+					commands[cmd.name] = cmd;
+				} else {
+					output += "Loading Command: Skipping "
+						+ cmd.name + " (from '"
+						+ file
+						+ "'). Autoload = false\r\n";
+				}
+			} catch (e) {
+				throw file + ": " + e;
 			}
 		} else {
-			console.log("Skipping " + file + ": file extension is not 'js'");
+			output += "Skipping " + file + ": file extension is not 'js'\r\n";
 		}
 	});
+	return output;
 }
 
 /*
@@ -711,7 +722,11 @@ function setPrompt() {
 	rl.on('line', function(line) {
 	  switch(line.trim()) {
 	    case 'rc':
-	      loadCommands();
+	      try {
+	        console.log(loadCommands());
+	      } catch (e) {
+	        console.log(e);
+	      }
 	      break;
 	    default:
 	      console.log("Available commands: ");
@@ -742,7 +757,7 @@ function main() {
 		// Listen on defined port
 		server.listen(port);
 		console.log(talkername + " initialized on port "+ port);
-		loadCommands();
+		console.log(loadCommands());
 		setPrompt();
 	}
 }
