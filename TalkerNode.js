@@ -458,40 +458,53 @@ function setCmdRank(command, rank) {
 
 /*
  * Method to find a command
+ * hierarchy: direct match > alias direct match > weighted partial match
+ * The 'weigthed partial match' gives precedence to commands of lower ranks
  */
 function findCommand(socket, command) {
-    var c = command;
-    var userRank = socket.db.rank;
-    if(commands[c] && userRank >= getCmdRank(c)) {
-	return [commands[c]];
-    } else {
-	// when we have more than one possible command, we
-	// choose the most heavier from the ones with lower
-	// getCmdRank
-	var results = [];
-	var weigth = 0;
-	var rank = ranks.list.length - 1;
-	for (var cmd in commands) {
-	    if(cmd.substr(0, c.length) == c && userRank >= getCmdRank(cmd)) {
-		var cweigth = 0;
-		if (typeof commands[cmd].weigth !== 'undefined')
-		    cweigth = commands[cmd].weigth;
-		if (getCmdRank(cmd) < rank) {
-		    rank = getCmdRank(cmd);
-		    weigth = cweigth;
-		    results = [commands[cmd]];
-		} else if (getCmdRank(cmd) === rank) {
-		    if (cweigth > weigth) {
-			weigth = commands[cmd].weigth;
-			results = [commands[cmd]];
-		    } else if (cweigth === weigth) {
-			results.push(commands[cmd]);
-		    }
+	var c = command;
+	var userRank = socket.db.rank;
+	if(commands[c] && userRank >= getCmdRank(c)) {
+		// direct match
+		return [commands[c]];
+	} else {
+		// when we have more than one possible command, we
+		// choose the most heavier from the ones with lower
+		// getCmdRank
+		var results = [];
+		var weigth = 0;
+		var rank = ranks.list.length - 1;
+		for (var cmd in commands) {
+			// alias direct match
+			if (
+				commands[cmd].alias !== 'undefined' &&
+				commands[cmd] !== "" && commands[cmd].alias === c
+			) {
+				return [commands[cmd]];
+			}
+			// partial match
+			if(cmd.substr(0, c.length) == c &&
+				userRank >= getCmdRank(cmd))
+			{
+				var cweigth = 0;
+				if (typeof commands[cmd].weigth !== 'undefined')
+					cweigth = commands[cmd].weigth;
+				if (getCmdRank(cmd) < rank) {
+					rank = getCmdRank(cmd);
+					weigth = cweigth;
+					results = [commands[cmd]];
+				} else if (getCmdRank(cmd) === rank) {
+					if (cweigth > weigth) {
+						weigth = commands[cmd].weigth;
+						results = [commands[cmd]];
+					} else if (cweigth === weigth) {
+						results.push(commands[cmd]);
+					}
+				}
+			}
 		}
-	    }
+		return results;
 	}
-	return results;
-    }
 }
 
 /*
