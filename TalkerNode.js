@@ -80,6 +80,15 @@ if (typeof universe.name !== 'undefined') talkername = universe.name;
 loadeddb++;
 
 /*
+ * Returns a standard formatted date time string
+ */
+function getDateTimeString(datetimestring=0) {
+	var datetime = Date();
+	if(datetimestring > 0){ datetime = new Date(datetimestring);	} 
+	return datetime.toString().split(' ').slice(0,6).join(' ');
+}
+
+/*
  * Cleans the input of carriage return, newline and control characters
  */
 function cleanInput(data) {
@@ -294,7 +303,7 @@ function receiveData(socket, data) {
 		sendData(socket, "\r\n+----------------------------------------------------------------------------+\r\n");
 		sendData(socket, " Welcome to " + chalk.bold(talkername) + ", " + chalk.green(socket.username) + "!\r\n");
 		if (typeof(socket.lastLogin) !== "undefined") {
-			sendData(socket, " Your last login was at " + chalk.magenta(new Date(socket.lastLogin).toString()) + ".\r\n");
+			sendData(socket, " Your last login was at " + chalk.magenta(getDateTimeString(socket.lastLogin)) + ".\r\n");
 		}
 		sendData(socket, " Your rank is " + chalk.bold(ranks.list[socket.db.rank]) + ".\r\n");
 		sendData(socket, "+----------------------------------------------------------------------------+\r\n");
@@ -590,7 +599,8 @@ function command_utility() {
 	    sockets: sockets,
 	    commands: commands,
 	    ranks: ranks,
-	    echo: echo,
+		echo: echo,
+		getDateTimeString: getDateTimeString,
 	    loadCommands: loadCommands,
 	    getCmdRank: getCmdRank,
 	    setCmdRank: setCmdRank,
