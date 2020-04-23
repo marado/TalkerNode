@@ -67,7 +67,12 @@ exports.command = {
 		if (typeof (w.registerTime) === 'undefined') {
 			command_access.sendData(socket, chalk.bold(":: ") + chalk.cyan(whom) + " was " + chalk.green("registered") + " in an " + chalk.bold("old version") + ".\r\n");
 		} else {
-			command_access.sendData(socket, chalk.bold(":: ") + chalk.cyan(whom) + " was " + chalk.green("registered") + " at " + chalk.bold(new Date(w.registerTime).toString()) + ".\r\n");
+			command_access.sendData(socket, chalk.bold(":: ") + chalk.cyan(whom)
+				+ " was " + chalk.green("registered") + " at "
+				+ chalk.bold(
+					command_access.getDateTimeString(w.registerTime)
+				) + ".\r\n"
+			);
 		}
 		if (typeof (w.totalTime) === 'undefined') {
 			// it either is his/her first time online, or it's an old user that
@@ -94,7 +99,11 @@ exports.command = {
 			", and was last seen at " + chalk.yellow(command_access.getUniverse().get(w.where).name) + ".\r\n"
 		);
 		if (typeof w.loginTime !== 'undefined') {
-			command_access.sendData(socket, chalk.bold(":: ") + chalk.cyan(whom) + " last logged in at " + chalk.bold(new Date(w.loginTime).toString()) + ".\r\n");
+			command_access.sendData(socket, chalk.bold(":: ") + chalk.cyan(whom)
+				+ " last logged in at "
+				+ chalk.bold(command_access.getDateTimeString(w.loginTime))
+				+ ".\r\n"
+			);
 		}
 		if (typeof w.loginCount !== 'undefined') {
 			command_access.sendData(socket, chalk.bold(":: ") + chalk.cyan(whom) + " has logged in " + chalk.bold(w.loginCount) + " times.\r\n");

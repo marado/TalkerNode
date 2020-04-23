@@ -55,8 +55,13 @@ exports.command = {
 				for (var i = 0; i < sliced.length; i++) {
 					for (var j = 0; j < cleanlist.length; j++) {
 						if (cleanlist[j].loginTime === sliced[i]) {
-							command_access.sendData(socket, "  " + chalk.yellow(cleanlist[j].username) +
-								" logged in at " + chalk.bold(new Date(cleanlist[j].loginTime).toString()) + ".  ");
+							command_access.sendData(socket,
+								"  " + chalk.yellow(cleanlist[j].username)
+								+ " logged in at "
+								+ chalk.bold(command_access.getDateTimeString(
+									cleanlist[j].loginTime
+								)) + ".  "
+							);
 							if (command_access.getOnlineUser(cleanlist[j].username)) {
 								command_access.sendData(socket, chalk.yellow.bold("ONLINE"));
 							}
@@ -83,7 +88,15 @@ exports.command = {
 			whom = wArr[0];
 			w = command_access.getUser(whom);
 			if (typeof w.loginTime !== 'undefined') {
-				command_access.sendData(socket, chalk.green(":: " + chalk.cyan(whom) + " last logged in at " + chalk.bold(new Date(w.loginTime).toString()) + ".\r\n"));
+				command_access.sendData(
+					socket,
+					chalk.green(
+						":: " + chalk.cyan(whom) + " last logged in at "
+							+ chalk.bold(command_access.getDateTimeString(
+								w.loginTime
+							)) + ".\r\n"
+					)
+				);
 			} else {
 				command_access.sendData(socket, chalk.green(":: There is no information about when did " + chalk.cyan(whom) + " last logged in. \r\n"));
 			}
