@@ -1,5 +1,6 @@
 exports.command = {
 	name: "color",
+	alias: "colour",
 	autoload: true,
 	unloadable: false,
 	min_rank: 1,
