@@ -17,6 +17,7 @@
     "lowdb": ">=0.17.0",
     "mathjs": "",
     "nodiverse": ">=0.3.4",
+    "otpauth": "",
     "password-strength": "",
     "strip-ansi": ""
   },

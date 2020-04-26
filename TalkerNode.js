@@ -108,6 +108,47 @@ function echo(bool) {
 }
 
 /*
+* Generates 2FA secret keys and backup codes
+*/
+function auth2faGenerateSecretKey() {
+	var OTPAuth = require('otpauth');
+	return (new OTPAuth.Secret().b32);
+}
+
+/*
+* Validates 2FA OTP code
+*/
+function auth2faValidateOTP(username,userToken) {
+	var userRecord = usersdb.get(username).value();
+	userToken = userToken.replace(/-/g,'') // remove possible dashes from backup code
+	if(userToken === userRecord.auth2fa_backupCode) {
+		// user is using a backup code -> burn code and validate ok
+		auth2faBurnBackupCode(username);
+		return true;
+	} else {
+		// check provided OTP code is valid
+		const OTPAuth = require('otpauth');
+		var secretKey = userRecord.auth2fa_secretKey;
+		var TOTP = new OTPAuth.TOTP({ secret: secretKey });
+
+		var authDelta = TOTP.validate({
+			token: userToken,
+			window: 3
+		});
+		return !(authDelta === null);
+	}
+}
+
+/*
+* Burn 2FA backup code
+*/
+function auth2faBurnBackupCode(username) {
+	var userRecord = usersdb.get(username.toLowerCase().charAt(0).toUpperCase() + username.toLowerCase().slice(1)).value();
+	userRecord.auth2fa_backupCode = '!' + userRecord.auth2fa_backupCode;
+	usersdb.set(username,userRecord).write();
+}
+
+/*
  * Method used to send data to a socket
  */
 function sendData(socket, data) {
@@ -268,12 +309,33 @@ function receiveData(socket, data) {
 					return;
 				}
 			}
-		} else if (socket.db.password !== crypto.createHash('sha512').update(cleanData).digest('hex')) {
+		} else if (typeof socket.auth2faOK === 'undefined' && socket.db.password !== crypto.createHash('sha512').update(cleanData).digest('hex')) {
 			require("fs").appendFileSync('auth.log', new Date().toISOString() + " " + socket.remoteAddress + " with port " + socket.remotePort + " failed to log in, username attempted was: " + socket.username + "\r\n");
 			delete socket.username;
 			delete socket.db;
 			sendData(socket, chalk.red("\r\nWrong password! ") + "\r\nLet's start from the beggining...\r\n" + chalk.cyan("Tell me your name:  "));
 			return;
+		} else {
+			// password authentication sucessfull
+			if(socket.db.auth2fa_status && typeof socket.auth2faOK === 'undefined') {
+				// 2FA challenge
+				sendData(socket, chalk.cyan("\r\nGive me your 2FA token or backup code: "));
+				sendData(socket, echo(false));
+				socket.auth2faOK = false;
+				return;
+			} else if(socket.db.auth2fa_status && !socket.auth2faOK) {
+				// 2FA verification
+				if(!auth2faValidateOTP(socket.username,cleanData)) {
+					require("fs").appendFileSync('auth.log', new Date().toISOString() + " " + socket.remoteAddress + " with port " + socket.remotePort + " failed to log in with a valid 2fa token, username attempted was: " + socket.username + "\r\n");
+					delete socket.username;
+					delete socket.auth2faOK;
+					delete socket.db;
+					sendData(socket, chalk.red("\r\nInvalid token! ") + "\r\nLet's start from the beggining...\r\n" + chalk.cyan("Tell me your name:  "));
+					return;
+				} else {
+					socket.auth2faOK = true;
+				}
+			}
 		}
 
 		// entering the talker...
@@ -612,32 +674,41 @@ function newSocket(socket) {
 //
 function command_utility() {
     var ret = {
-	    version: version,
-	    talkername: talkername,
-	    sockets: sockets,
-	    commands: commands,
-	    ranks: ranks,
-	    echo: echo,
-	    getDateTimeString: getDateTimeString,
-	    loadCommands: loadCommands,
-	    getCmdRank: getCmdRank,
-	    setCmdRank: setCmdRank,
-	    findCommand: findCommand,
-	    sendData: sendData,
+		version: version,
+		talkername: talkername,
+		sockets: sockets,
+		commands: commands,
+		ranks: ranks,
+		echo: echo,
+		auth2faGenerateSecretKey: auth2faGenerateSecretKey,
+		auth2faValidateOTP: auth2faValidateOTP,
+		auth2faBurnBackupCode: auth2faBurnBackupCode,
+		getDateTimeString: getDateTimeString,
+		loadCommands: loadCommands,
+		getCmdRank: getCmdRank,
+		setCmdRank: setCmdRank,
+		findCommand: findCommand,
+		sendData: sendData,
 
-	    /*
-	     * Execute function to all connected users *but* the triggering one.
-	     * It stops at the first connected user to which the function returns true, returning true.
-	     */
-	    allButMe: function allButMe(socket,fn) {
-	    	for(var i = 0; i<sockets.length; i++) {
-	    		if (sockets[i] !== socket) {
-	    			if ((typeof sockets[i].loggedin != 'undefined') && sockets[i].loggedin){
-	    				if(fn(socket,sockets[i])) return true;
-	    			}
-	    		}
-	    	}
-	    },
+		/*
+		* Execute function to all connected users *but* the triggering
+		* one.
+		* It stops at the first connected user to which the function
+		* returns true, returning true.
+		*/
+		allButMe: function allButMe(socket,fn) {
+			for(var i = 0; i<sockets.length; i++) {
+				if (sockets[i] !== socket) {
+					if ((
+						typeof sockets[i].loggedin !=
+						'undefined'
+					) && sockets[i].loggedin){
+						if(fn(socket,sockets[i]))
+							return true;
+					}
+				}
+			}
+		},
 
 		// same as allButMe, but only for those in the same room as me
 		allHereButMe: function allHereButMe(socket,fn) {
@@ -690,39 +761,39 @@ function command_utility() {
             return usersdb.get(name).value();
         },
 
-	// returns the username of an "aproximate" user
-	// read 'getAproxOnlineUser' to understand the difference between
-	// 'getOnlineUser' and it, same happens here between 'getUser' and
-	// 'getAproxUser'.
-	getAproxUser: function getAproxUser(name) {
-		if (this.getUser(name) !== undefined) return [name];
-		var possibilities = [];
-		for (var key in usersdb.getState()) {
-		    if (name.toLowerCase() === key.toLowerCase().substr(0,name.length) && (name.length < key.length)) {
-			    possibilities.push(key);
-		    }
-		}
-		if (possibilities.length === 0) return [];
-		return possibilities;
-	},
+		// returns the username of an "aproximate" user
+		// read 'getAproxOnlineUser' to understand the difference between
+		// 'getOnlineUser' and it, same happens here between 'getUser' and
+		// 'getAproxUser'.
+		getAproxUser: function getAproxUser(name) {
+			if (this.getUser(name) !== undefined) return [name];
+			var possibilities = [];
+			for (var key in usersdb.getState()) {
+				if (name.toLowerCase() === key.toLowerCase().substr(0,name.length) && (name.length < key.length)) {
+					possibilities.push(key);
+				}
+			}
+			if (possibilities.length === 0) return [];
+			return possibilities;
+		},
 
-	// updates a user in the database
-	// TODO: argh, we surely don't want this! harden it!
-	updateUser: function updateUser(username, userObj) {
-		username = username.toLowerCase().charAt(0).toUpperCase() + username.toLowerCase().slice(1);
-		usersdb.set(username,userObj).write();
-	},
+		// updates a user in the database
+		// TODO: argh, we surely don't want this! harden it!
+		updateUser: function updateUser(username, userObj) {
+			username = username.toLowerCase().charAt(0).toUpperCase() + username.toLowerCase().slice(1);
+			usersdb.set(username,userObj).write();
+		},
 
-	// get users list, only insensitive information
-	getUsersList: function getUsersList() {
-		var list = [];
-		for (var key in usersdb.getState()) {
-			// retrieving username, rank and loginTime. If needed, we can always add stuff later
-			var val = usersdb.get(key).value();
-			list.push({username:key, rank:val.rank, loginTime:val.loginTime});
-		}
-		return list;
-	},
+		// get users list, only insensitive information
+		getUsersList: function getUsersList() {
+			var list = [];
+			for (var key in usersdb.getState()) {
+				// retrieving username, rank and loginTime. If needed, we can always add stuff later
+				var val = usersdb.get(key).value();
+				list.push({username:key, rank:val.rank, loginTime:val.loginTime});
+			}
+			return list;
+		},
 
 		// gives a full view of the universe; TODO: we surely don't want this
 		// TODO: in the meantime, we don't need to define a function for this!
