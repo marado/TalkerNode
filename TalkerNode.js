@@ -100,6 +100,43 @@ function echo(bool) {
 }
 
 /*
+* Generates 2FA secret keys and backup codes
+*/
+function auth2faGenerateSecretKey() {
+	var auth2fa = require('speakeasy');
+	return auth2fa.generateSecret({length: 20}).base32;
+}
+
+/*
+* Validates 2FA OTP code
+*/
+function auth2faValidateOTP(username,userToken) {
+	var userRecord = usersdb.get(username).value()
+	userToken = userToken.replace('-','') // remove possible dashes from backup code
+	if(userToken === userRecord.auth2fa_backupCode) {
+		// user is using a backup code -> burn code and validate ok
+		auth2faBurnBackupCode(username);
+		return true;
+	} else {
+		// check provided OTP code is valid
+		var auth2fa = require('speakeasy');
+		return (auth2fa.totp.verify({ secret: userRecord.auth2fa_secretKey,
+									  encoding: 'base32',
+									  window: 2,
+									  token: userToken }));
+	}
+}
+
+/*
+* Burn 2FA backup code
+*/
+function auth2faBurnBackupCode(username) {
+	var userRecord = usersdb.get(username).value()
+	userRecord.auth2fa_backupCode = '!' + userRecord.auth2fa_backupCode
+	// update db
+}
+
+/*
  * Method used to send data to a socket
  */
 function sendData(socket, data) {
@@ -596,7 +633,10 @@ function command_utility() {
 	    sockets: sockets,
 	    commands: commands,
 	    ranks: ranks,
-	    echo: echo,
+		echo: echo,
+		auth2faGenerateSecretKey: auth2faGenerateSecretKey,
+		auth2faValidateOTP: auth2faValidateOTP,
+		auth2faBurnBackupCode: auth2faBurnBackupCode,
 	    loadCommands: loadCommands,
 	    getCmdRank: getCmdRank,
 	    setCmdRank: setCmdRank,
@@ -668,39 +708,39 @@ function command_utility() {
             return usersdb.get(name).value();
         },
 
-	// returns the username of an "aproximate" user
-	// read 'getAproxOnlineUser' to understand the difference between
-	// 'getOnlineUser' and it, same happens here between 'getUser' and
-	// 'getAproxUser'.
-	getAproxUser: function getAproxUser(name) {
-		if (this.getUser(name) !== undefined) return [name];
-		var possibilities = [];
-		for (var key in usersdb.getState()) {
-		    if (name.toLowerCase() === key.toLowerCase().substr(0,name.length) && (name.length < key.length)) {
-			    possibilities.push(key);
-		    }
-		}
-		if (possibilities.length === 0) return [];
-		return possibilities;
-	},
+		// returns the username of an "aproximate" user
+		// read 'getAproxOnlineUser' to understand the difference between
+		// 'getOnlineUser' and it, same happens here between 'getUser' and
+		// 'getAproxUser'.
+		getAproxUser: function getAproxUser(name) {
+			if (this.getUser(name) !== undefined) return [name];
+			var possibilities = [];
+			for (var key in usersdb.getState()) {
+				if (name.toLowerCase() === key.toLowerCase().substr(0,name.length) && (name.length < key.length)) {
+					possibilities.push(key);
+				}
+			}
+			if (possibilities.length === 0) return [];
+			return possibilities;
+		},
 
-	// updates a user in the database
-	// TODO: argh, we surely don't want this! harden it!
-	updateUser: function updateUser(username, userObj) {
-		username = username.toLowerCase().charAt(0).toUpperCase() + username.toLowerCase().slice(1);
-		usersdb.set(username,userObj).write();
-	},
+		// updates a user in the database
+		// TODO: argh, we surely don't want this! harden it!
+		updateUser: function updateUser(username, userObj) {
+			username = username.toLowerCase().charAt(0).toUpperCase() + username.toLowerCase().slice(1);
+			usersdb.set(username,userObj).write();
+		},
 
-	// get users list, only insensitive information
-	getUsersList: function getUsersList() {
-		var list = [];
-		for (var key in usersdb.getState()) {
-			// retrieving username, rank and loginTime. If needed, we can always add stuff later
-			var val = usersdb.get(key).value();
-			list.push({username:key, rank:val.rank, loginTime:val.loginTime});
-		}
-		return list;
-	},
+		// get users list, only insensitive information
+		getUsersList: function getUsersList() {
+			var list = [];
+			for (var key in usersdb.getState()) {
+				// retrieving username, rank and loginTime. If needed, we can always add stuff later
+				var val = usersdb.get(key).value();
+				list.push({username:key, rank:val.rank, loginTime:val.loginTime});
+			}
+			return list;
+		},
 
 		// gives a full view of the universe; TODO: we surely don't want this
 		// TODO: in the meantime, we don't need to define a function for this!
