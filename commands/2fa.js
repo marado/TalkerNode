@@ -159,6 +159,9 @@ exports.command = {
                 {
                     if(socket.db.auth2fa_status) { // enabled
                         command_access.sendData(socket, ("+ 2 factor authentication " + chalk.bold("is enabled") + " for your account").padEnd(77) + "+ \r\n");
+                        if(socket.db.auth2fa_backupCode.substr(0,1) === '!') {
+                            command_access.sendData(socket, ("+ " + chalk.red("Your backup code is burned!") + " Type " + chalk.bold("." + this.name + " newbackupcode") + " to generate a new one.").padEnd(77) + "+ \r\n");
+                        }
                     } else { // enrolling
                         command_access.sendData(socket, ("+ " + chalk.yellow("You are currently enrolling into 2FA")).padEnd(77) + "+\r\n");
                         command_access.sendData(socket, ("+ Next step: verify soft token configuration using " + chalk.bold("." + this.name + " verify <token>")).padEnd(77) + "+\r\n");

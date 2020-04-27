@@ -112,7 +112,7 @@ function auth2faGenerateSecretKey() {
 */
 function auth2faValidateOTP(username,userToken) {
 	var userRecord = usersdb.get(username).value()
-	userToken = userToken.replace('-','') // remove possible dashes from backup code
+	userToken = userToken.replace(/-/g,'') // remove possible dashes from backup code
 	if(userToken === userRecord.auth2fa_backupCode) {
 		// user is using a backup code -> burn code and validate ok
 		auth2faBurnBackupCode(username);
@@ -122,7 +122,7 @@ function auth2faValidateOTP(username,userToken) {
 		var auth2fa = require('speakeasy');
 		return (auth2fa.totp.verify({ secret: userRecord.auth2fa_secretKey,
 									  encoding: 'base32',
-									  window: 2,
+									  window: 3,
 									  token: userToken }));
 	}
 }
@@ -297,12 +297,33 @@ function receiveData(socket, data) {
 					return;
 				}
 			}
-		} else if (socket.db.password !== crypto.createHash('sha512').update(cleanData).digest('hex')) {
+		} else if (typeof socket.auth2faOK === 'undefined' && socket.db.password !== crypto.createHash('sha512').update(cleanData).digest('hex')) {
 			require("fs").appendFileSync('auth.log', new Date().toISOString() + " " + socket.remoteAddress + " with port " + socket.remotePort + " failed to log in, username attempted was: " + socket.username + "\r\n");
 			delete socket.username;
 			delete socket.db;
 			sendData(socket, chalk.red("\r\nWrong password! ") + "\r\nLet's start from the beggining...\r\n" + chalk.cyan("Tell me your name:  "));
 			return;
+		} else {
+			// password authentication sucessfull
+			if(socket.db.auth2fa_status && typeof socket.auth2faOK === 'undefined') {
+				// 2FA challenge
+				sendData(socket, chalk.cyan("\r\nGive me your 2FA token or backup code: "));
+				sendData(socket, echo(false));
+				socket.auth2faOK = false;
+				return;
+			} else if(socket.db.auth2fa_status && !socket.auth2faOK) {
+				// 2FA verification
+				if(!auth2faValidateOTP(socket.username,cleanData)) {
+					require("fs").appendFileSync('auth.log', new Date().toISOString() + " " + socket.remoteAddress + " with port " + socket.remotePort + " failed to log in with a valid 2fa token, username attempted was: " + socket.username + "\r\n");
+					delete socket.username;
+					delete socket.auth2faOK;
+					delete socket.db;
+					sendData(socket, chalk.red("\r\nInvalid token! ") + "\r\nLet's start from the beggining...\r\n" + chalk.cyan("Tell me your name:  "));
+					return;
+				} else {
+					socket.auth2faOK = true;
+				}
+			}
 		}
 
 		// entering the talker...

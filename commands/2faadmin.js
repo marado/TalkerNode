@@ -60,26 +60,33 @@ exports.command = {
             case 'status':
                 if(typeof argument === 'undefined') { // general status
                     var userList = command_access.getUsersList();
-                    var countEnabled = 0, countDisabled = 0, countEnrolling = 0;
+                    var countEnabled = 0, countDisabled = 0, countEnrolling = 0, countBurnedBackupCode = 0;
                     for (let index = 0; index < userList.length; index++) {
                         var userRecord = command_access.getUser(userList[index].username);
                         if(typeof userRecord.auth2fa_status === 'undefined') {
                             countDisabled++;
                         } else if(userRecord.auth2fa_status) {
                             countEnabled++;
+                            if(userRecord.auth2fa_backupCode.substr(0,1) === '!') {
+                                countBurnedBackupCode++;
+                            }
                         } else {
                             countEnrolling++;
                         }
                     }
                     command_access.sendData(socket, chalk.green("User accounts with 2FA enabled           : " + countEnabled + "\r\n"));
                     command_access.sendData(socket, chalk.yellow("User accounts with 2FA ongoing enrollment: " + countEnrolling + "\r\n"));
-                    command_access.sendData(socket, chalk.red("User accounts with 2FA disabled          : " + countDisabled + "\r\n"));
+                    command_access.sendData(socket, chalk.red("User accounts with burned backup codes   : " + countBurnedBackupCode + "\r\n"));
+                    command_access.sendData(socket, chalk.blueBright("User accounts with 2FA disabled          : " + countDisabled + "\r\n"));
                 } else { // user status
                     var userRecord = command_access.getUser(argument);
                     if(typeof userRecord !== 'undefined') {
                         if(typeof userRecord.auth2fa_status !== 'undefined') {
                             if(userRecord.auth2fa_status) {
                                 command_access.sendData(socket, "2 factor authentication " + chalk.bold("is enabled") + " for user " + argument + "\r\n");
+                                if(userRecord.auth2fa_backupCode.substr(0,1) === '!') {
+                                    command_access.sendData(socket, chalk.red("Backup code for user " + argument + " is burned!\r\n"));
+                                }
                             } else {
                                 command_access.sendData(socket, "2 factor authentication is in " + chalk.bold("enrollment process") + " for user " + argument + "\r\n");
                             }
