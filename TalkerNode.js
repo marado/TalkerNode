@@ -131,9 +131,9 @@ function auth2faValidateOTP(username,userToken) {
 * Burn 2FA backup code
 */
 function auth2faBurnBackupCode(username) {
-	var userRecord = usersdb.get(username).value()
+	var userRecord = usersdb.get(username.toLowerCase().charAt(0).toUpperCase() + username.toLowerCase().slice(1)).value();
 	userRecord.auth2fa_backupCode = '!' + userRecord.auth2fa_backupCode
-	// update db
+	usersdb.set(username,userRecord).write();
 }
 
 /*

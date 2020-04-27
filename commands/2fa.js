@@ -3,13 +3,13 @@ exports.command = {
 	alias: "",
 	autoload: true,
 	unloadable: true,
-	min_rank: 2,
+	min_rank: 0,
 	display: "Manages 2 factor authentication for your account",
     help: "To enroll your account for 2FA:      .2fa enroll   +   .2fa verify <token>\r\n" +
-		"To generate a new backup code:       .2fa newbackupcode\r\n" +
-        "To check your account 2FA status:    .2fa status\r\n" +
-        "To disable 2FA for your account:     .2fa disable <token>\r\n\r\n" +
-        "For more detailed help use .2fa help",
+		  "To generate a new backup code:       .2fa newbackupcode\r\n" +
+          "To check your account 2FA status:    .2fa status\r\n" +
+          "To disable 2FA for your account:     .2fa disable <token>\r\n\r\n" +
+          "For more detailed help use .2fa help",
 	usage: ".2fa <help|enroll|verify <token>|disable <token>|newbackupcode|status>",
 	weigth: 0,
 
