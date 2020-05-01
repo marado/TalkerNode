@@ -66,8 +66,8 @@ exports.command = {
                         socket.db.auth2fa_secretKey = newSecretKey;
                         socket.db.auth2fa_status = false;
                         command_access.sendData(socket, "Your secret key is:  " + chalk.yellow(chalk.bold(this.formatFriendlyKeyString(newSecretKey))) + "\r\n");
-                        command_access.sendData(socket, "Please add it to your soft token software (just the letters, the dashes are for\r\n");
-                        command_access.sendData(socket, "easy reading), and then verify the configuration using " + chalk.yellow(chalk.bold("." + this.name + " verify <token>")) + "\r\n");
+                        command_access.sendData(socket, "Please add it to your soft token software (dashes are for easy reading only),\r\n");
+                        command_access.sendData(socket, "and then verify the configuration using " + chalk.yellow(chalk.bold("." + this.name + " verify <token>")) + "\r\n");
                         command_access.sendData(socket, "to complete enrollment.\r\n");
                         command_access.updateUser(socket.username, socket.db);
 

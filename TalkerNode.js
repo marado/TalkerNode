@@ -103,15 +103,15 @@ function echo(bool) {
 * Generates 2FA secret keys and backup codes
 */
 function auth2faGenerateSecretKey() {
-	var auth2fa = require('speakeasy');
-	return auth2fa.generateSecret({length: 20}).base32;
+	var OTPAuth = require('otpauth');
+	return (new OTPAuth.Secret().b32);
 }
 
 /*
 * Validates 2FA OTP code
 */
 function auth2faValidateOTP(username,userToken) {
-	var userRecord = usersdb.get(username).value()
+	var userRecord = usersdb.get(username).value();
 	userToken = userToken.replace(/-/g,'') // remove possible dashes from backup code
 	if(userToken === userRecord.auth2fa_backupCode) {
 		// user is using a backup code -> burn code and validate ok
@@ -119,11 +119,15 @@ function auth2faValidateOTP(username,userToken) {
 		return true;
 	} else {
 		// check provided OTP code is valid
-		var auth2fa = require('speakeasy');
-		return (auth2fa.totp.verify({ secret: userRecord.auth2fa_secretKey,
-									  encoding: 'base32',
-									  window: 3,
-									  token: userToken }));
+		const OTPAuth = require('otpauth');
+		var secretKey = userRecord.auth2fa_secretKey;
+		var TOTP = new OTPAuth.TOTP({ secret: secretKey });
+		
+		var authDelta = TOTP.validate({
+			token: userToken,
+			window: 3
+		});
+		return !(authDelta === null);
 	}
 }
 
@@ -132,7 +136,7 @@ function auth2faValidateOTP(username,userToken) {
 */
 function auth2faBurnBackupCode(username) {
 	var userRecord = usersdb.get(username.toLowerCase().charAt(0).toUpperCase() + username.toLowerCase().slice(1)).value();
-	userRecord.auth2fa_backupCode = '!' + userRecord.auth2fa_backupCode
+	userRecord.auth2fa_backupCode = '!' + userRecord.auth2fa_backupCode;
 	usersdb.set(username,userRecord).write();
 }
 
