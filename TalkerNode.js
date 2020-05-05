@@ -21,11 +21,12 @@ loadeddb++;
 
 // Instantiates the talker settings database
 var ranks;
+var watchdog;
 var commands = {};
 const talkeradapter = new FileSync('talker.db');
 const talkerdb = low(talkeradapter);
-ranks = talkerdb.get('ranks').value();
 
+ranks = talkerdb.get('ranks').value();
 if (typeof ranks === 'undefined') {
 	ranks = {list:[
 			"Jailed",
@@ -42,6 +43,13 @@ if (typeof ranks === 'undefined') {
 		], entrylevel: 10};
 	talkerdb.set("ranks", ranks).write();
 }
+
+watchdog = talkerdb.get('watchdog').value();
+if (typeof watchdog === 'undefined') {
+	watchdog = 3600; // seconds; if set to 0 watchdog feature will be disabled
+	talkerdb.set("watchdog", watchdog).write();
+}
+
 loadeddb++;
 
 // Instantiates the universe
@@ -105,6 +113,36 @@ function echo(bool) {
     bytes[1] = bool ? 0xFC : 0xFB; //  0xFF 0xFC 0x01 for off,  0xFF 0xFB 0x01 for on
     bytes[2] = 0x01;
     return new Buffer.from(bytes);
+}
+
+/*
+* Saves total time for user or all users to the db
+*/
+function saveTotalTime(username) {
+	if(typeof username === 'undefined') { // save time for all users
+		for (let index = 0; index < sockets.length; index++) {
+			const socket = sockets[index];
+			var socketdb = usersdb.get(socket.username).value();
+			if (typeof socketdb !== 'undefined') {
+				if (typeof socketdb.totalTime === 'undefined') {
+					socketdb.totalTime = (Date.now() - socketdb.loginTime);
+				} else {
+					socketdb.totalTime += (Date.now() - socketdb.loginTime);
+				}
+				usersdb.set(socket.username, socketdb).write();
+			}
+		}
+	} else { // save time for given user
+		var userdb = usersdb.get(username).value();
+		if (typeof userdb !== 'undefined') {
+			if (typeof userdb.totalTime === 'undefined') {
+				userdb.totalTime = (Date.now() - userdb.loginTime);
+			} else {
+				userdb.totalTime += (Date.now() - userdb.loginTime);
+			}
+			usersdb.set(username, userdb).write();
+		}
+	}
 }
 
 /*
@@ -565,15 +603,7 @@ function closeSocket(socket) {
 					+ chalk.yellow(me.username) + " ]\r\n")
 			);});
 			// write total time on socket db
-			sockets[i].db = usersdb.get(sockets[i].username).value();
-			if (typeof sockets[i].db !== 'undefined') {
-				if (typeof sockets[i].db.totalTime === 'undefined') {
-					sockets[i].db.totalTime = (Date.now() - sockets[i].db.loginTime);
-				} else {
-					sockets[i].db.totalTime += (Date.now() - sockets[i].db.loginTime);
-				}
-				usersdb.set(sockets[i].username, sockets[i].db).write();
-			}
+			saveTotalTime(sockets[i].username);		
 		}
 		sockets.splice(i, 1);
 	}
@@ -623,7 +653,8 @@ function command_utility() {
 	    getCmdRank: getCmdRank,
 	    setCmdRank: setCmdRank,
 	    findCommand: findCommand,
-	    sendData: sendData,
+		sendData: sendData,
+		saveTotalTime: saveTotalTime,
 
 	    /*
 	     * Execute function to all connected users *but* the triggering one.
@@ -785,6 +816,13 @@ function setPrompt() {
 	});
 }
 
+/*
+* Housekeeping function invoked periodically by watchdog feature
+*/
+
+function doHousekeeping() {
+	saveTotalTime();		// Saves total time to db for all online users
+}
 
 /*
  * AND FINALLY... THE ACTUAL main()!
@@ -802,6 +840,11 @@ function main() {
 		server.listen(port);
 		console.log(talkername + " initialized on port "+ port);
 		console.log(loadCommands());
+		if(talkerdb.get("watchdog").value() > 0) {
+			console.log("Unleashing watchdog for housekeeping each " + talkerdb.get("watchdog").value() + " seconds");
+			setInterval(doHousekeeping, (talkerdb.get("watchdog").value()*1000));
+		}
+		
 		setPrompt();
 	}
 }
