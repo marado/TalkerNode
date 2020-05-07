@@ -610,6 +610,43 @@ function command_utility() {
 	    findCommand: findCommand,
 	    sendData: sendData,
 
+		/*
+		 * Returns a friendly time format 
+		 */
+		friendlyTime: function friendlyTime(ms) {
+			let msec, sec, min, hour, day, month, year;
+			msec = Math.floor(ms % 1000);
+			sec = Math.floor((ms / 1000) % 60);
+			min = Math.floor((ms / 1000 / 60) % 60);
+			hour = Math.floor((ms / 1000 / 60 / 60) % 24);
+			day = Math.floor((ms / 1000 / 60 / 60 / 24) % 30);
+			month = Math.floor((ms / 1000 / 60 / 60 / 24 / 30) % 12);
+			year = Math.floor((ms / 1000 / 60 / 60 / 24 / 30 / 12));
+			let f_time = "";
+			if (msec) {
+				f_time = msec + " milliseconds";
+			}
+			if (sec) {
+				f_time = sec + " seconds";
+			}
+			if (min) {
+				f_time = min + " minutes";
+			}
+			if (hour) {
+					f_time = hour + " hours, " + f_time;
+			}
+			if (day) {
+				f_time = day + " days, " + f_time;
+			}
+			if (month) {
+				f_time = month + " months, " + f_time;
+			}
+			if (year) {
+				f_time = year + " years, " + f_time;
+			}
+			return f_time;
+		},
+		
 	    /*
 	     * Execute function to all connected users *but* the triggering one.
 	     * It stops at the first connected user to which the function returns true, returning true.
@@ -675,39 +712,39 @@ function command_utility() {
             return usersdb.get(name).value();
         },
 
-	// returns the username of an "aproximate" user
-	// read 'getAproxOnlineUser' to understand the difference between
-	// 'getOnlineUser' and it, same happens here between 'getUser' and
-	// 'getAproxUser'.
-	getAproxUser: function getAproxUser(name) {
-		if (this.getUser(name) !== undefined) return [name];
-		var possibilities = [];
-		for (var key in usersdb.getState()) {
-		    if (name.toLowerCase() === key.toLowerCase().substr(0,name.length) && (name.length < key.length)) {
-			    possibilities.push(key);
-		    }
-		}
-		if (possibilities.length === 0) return [];
-		return possibilities;
-	},
+		// returns the username of an "aproximate" user
+		// read 'getAproxOnlineUser' to understand the difference between
+		// 'getOnlineUser' and it, same happens here between 'getUser' and
+		// 'getAproxUser'.
+		getAproxUser: function getAproxUser(name) {
+			if (this.getUser(name) !== undefined) return [name];
+			var possibilities = [];
+			for (var key in usersdb.getState()) {
+				if (name.toLowerCase() === key.toLowerCase().substr(0,name.length) && (name.length < key.length)) {
+					possibilities.push(key);
+				}
+			}
+			if (possibilities.length === 0) return [];
+			return possibilities;
+		},
 
-	// updates a user in the database
-	// TODO: argh, we surely don't want this! harden it!
-	updateUser: function updateUser(username, userObj) {
-		username = username.toLowerCase().charAt(0).toUpperCase() + username.toLowerCase().slice(1);
-		usersdb.set(username,userObj).write();
-	},
+		// updates a user in the database
+		// TODO: argh, we surely don't want this! harden it!
+		updateUser: function updateUser(username, userObj) {
+			username = username.toLowerCase().charAt(0).toUpperCase() + username.toLowerCase().slice(1);
+			usersdb.set(username,userObj).write();
+		},
 
-	// get users list, only insensitive information
-	getUsersList: function getUsersList() {
-		var list = [];
-		for (var key in usersdb.getState()) {
-			// retrieving username, rank and loginTime. If needed, we can always add stuff later
-			var val = usersdb.get(key).value();
-			list.push({username:key, rank:val.rank, loginTime:val.loginTime});
-		}
-		return list;
-	},
+		// get users list, only insensitive information
+		getUsersList: function getUsersList() {
+			var list = [];
+			for (var key in usersdb.getState()) {
+				// retrieving username, rank and loginTime. If needed, we can always add stuff later
+				var val = usersdb.get(key).value();
+				list.push({username:key, rank:val.rank, loginTime:val.loginTime, totalTime:val.totalTime, loginCount:val.loginCount});
+			}
+			return list;
+		},
 
 		// gives a full view of the universe; TODO: we surely don't want this
 		// TODO: in the meantime, we don't need to define a function for this!
