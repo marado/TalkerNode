@@ -787,9 +787,9 @@ function command_utility() {
 	getUsersList: function getUsersList() {
 		var list = [];
 		for (var key in usersdb.getState()) {
-			// retrieving username, rank and loginTime. If needed, we can always add stuff later
+			// retrieving username, rank, loginTime, totalTime and loginCount. If needed, we can always add stuff later
 			var val = usersdb.get(key).value();
-			list.push({username:key, rank:val.rank, loginTime:val.loginTime});
+			list.push({username:key, rank:val.rank, loginTime:val.loginTime, totalTime:val.totalTime, loginCount:val.loginCount});
 		}
 		return list;
 	},
