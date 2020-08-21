@@ -12,19 +12,18 @@ exports.command = {
 	execute: function(socket, command, command_access) {
 		var chalk = require('chalk');
 		var formatters = require('../utils/formatters.js');
+		var userlist;
 		if(command === "") { // sort by total time
-			var userList = command_access.getUsersList().sort(function(a,b){return b.totalTime - a.totalTime;});
+			userList = command_access.getUsersList().sort(function(a,b){return b.totalTime - a.totalTime;});
 			var lengthMaxFriendlyTotalTime = formatters.friendly_time(userList[0].totalTime).length;
 			command_access.sendData(socket, "\r\n" + chalk.cyan("+-- Top Users by login time -------------------------------------------------+\r\n\r\n"));
-		} else {
-			if(command === '-l') { // sort by login count
-				var userList = command_access.getUsersList().sort(function(a,b){return b.loginCount - a.loginCount;});
-				var lengthMaxLoginCount = userList[0].loginCount.toString().length;
-				command_access.sendData(socket, "\r\n" + chalk.cyan("+-- Top Users by login count ------------------------------------------------+\r\n\r\n"));
-			} else { // invalid argument
-				command_access.sendData(socket, "Invalid argument. Check .help " + this.name + " for usage instructions.\r\n");
-				return;
-			}
+		} else if(command === '-l') { // sort by login count
+			userList = command_access.getUsersList().sort(function(a,b){return b.loginCount - a.loginCount;});
+			var lengthMaxLoginCount = userList[0].loginCount.toString().length;
+			command_access.sendData(socket, "\r\n" + chalk.cyan("+-- Top Users by login count ------------------------------------------------+\r\n\r\n"));
+		} else { // invalid argument
+			command_access.sendData(socket, "Invalid argument. Check .help " + this.name + " for usage instructions.\r\n");
+			return;
 		}
 		for (let index = 0; index < userList.length; index++) {
 			const userObject = userList[index];
