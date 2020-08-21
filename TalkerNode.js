@@ -597,10 +597,26 @@ function closeSocket(socket) {
 		// if the socket already belong to a user...
 		if (typeof socket.username !== 'undefined') {
 			// announce the user departure
-			command_utility().allButMe(socket,function(me,to){to.write(
-				chalk.bold("[" + chalk.red("Leaving ") + "is: "
-					+ chalk.yellow(me.username) + " ]\r\n")
-			);});
+			command_utility().allButMe(socket,function(me,to){
+				try {
+					to.write(chalk.bold(
+						"[" + chalk.red("Leaving ") +
+						"is: " +
+						chalk.yellow(me.username) +
+						" ]\r\n"
+					));
+				} catch(err) {
+					// there are expectable and non-fatal
+					// errors that can happen here, but
+					// there can also be bugs. Let's print
+					// the error out so logs can be useful.
+					console.log(
+						"E: closeSocket's " +
+						"announcement failed for " +
+						"one socket: " + err
+					);
+				}
+			});
 			// write total time on socket db
 			saveTotalTime(sockets[i].username);
 		}
@@ -655,34 +671,41 @@ function command_utility() {
 		sendData: sendData,
 		saveTotalTime: saveTotalTime,
 
-	    /*
-	     * Execute function to all connected users *but* the triggering one.
-	     * It stops at the first connected user to which the function returns true, returning true.
-	     */
-	    allButMe: function allButMe(socket,fn) {
-	    	for(var i = 0; i<sockets.length; i++) {
-	    		if (sockets[i] !== socket) {
-	    			if ((typeof sockets[i].loggedin != 'undefined') && sockets[i].loggedin){
-	    				if(fn(socket,sockets[i])) return true;
-	    			}
-	    		}
-	    	}
-	    },
+		/*
+		 * Execute function to all connected users *but* the triggering
+		 * one.
+		 * It stops at the first connected user to which the function
+		 * returns true, returning true.
+		 */
+		allButMe: function allButMe(socket,fn) {
+			for(var i = 0; i<sockets.length; i++) {
+				if (sockets[i] !== socket) {
+					if ((typeof sockets[i].loggedin != 'undefined') &&
+						sockets[i].loggedin &&
+						(sockets[i].readyState === 'open')
+					){
+						if(fn(socket,sockets[i])) return true;
+					}
+				}
+			}
+		},
 
 		// same as allButMe, but only for those in the same room as me
 		allHereButMe: function allHereButMe(socket,fn) {
 			for(var i = 0 ; i < sockets.length; i++) {
 				if (sockets[i] !== socket) {
-				if ((typeof sockets[i].loggedin != 'undefined') && sockets[i].loggedin &&
-							(sockets[i].db.where[0] == socket.db.where[0]) &&
-							(sockets[i].db.where[1] == socket.db.where[1]) &&
-							(sockets[i].db.where[2] == socket.db.where[2])
+					if ((typeof sockets[i].loggedin != 'undefined') &&
+						sockets[i].loggedin &&
+						(sockets[i].readyState === 'open') &&
+						(sockets[i].db.where[0] == socket.db.where[0]) &&
+						(sockets[i].db.where[1] == socket.db.where[1]) &&
+						(sockets[i].db.where[2] == socket.db.where[2])
 					){
-	    				if(fn(socket,sockets[i])) return true;
+						if(fn(socket,sockets[i])) return true;
 					}
-	    		}
-	    	}
-	    },
+				}
+			}
+		},
 
 	    // returns socket for the user, or false if he doesn't exist
 	    getOnlineUser: function getOnlineUser(name) {
