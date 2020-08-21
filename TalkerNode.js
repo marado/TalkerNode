@@ -630,6 +630,7 @@ function closeSocket(socket) {
 function newSocket(socket) {
 	require("fs").appendFileSync('auth.log', new Date().toISOString() + " " + socket.remoteAddress + " connected with port " + socket.remotePort + "\r\n");
 	socket.setKeepAlive(true);
+	socket.on('error',e=>console.log("client socket error: " + e));
 	sockets.push(socket);
 	try {  // load motd file
 		var motd = require("fs").readFileSync('motd.txt');
@@ -859,6 +860,7 @@ function main() {
 
 		// Listen on defined port
 		server.listen(port);
+		server.on('error',e=>console.log("server socket error: " + e));
 		console.log(talkername + " initialized on port "+ port);
 		console.log(loadCommands());
 		if(talkerdb.get("watchdog").value() > 0) {
