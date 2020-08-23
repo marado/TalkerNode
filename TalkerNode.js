@@ -216,9 +216,6 @@ function receiveData(socket, data) {
 		6 , // Telnet IAC - Timing Mark
 		24, // Telnet IAC - Terminal Type
 		31, // Telnet IAC - Window Size
-		33, // Telnet IAC - Remote Flow Control
-		34, // Telnet IAC - Linemode
-		36, // Telnet IAC - Environment Variables
 		65533 // reply to echo off
 	];
 	if (IAC.indexOf(cleanData.charCodeAt(0)) !== -1) {
