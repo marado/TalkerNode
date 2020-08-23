@@ -630,6 +630,9 @@ function closeSocket(socket) {
 function newSocket(socket) {
 	require("fs").appendFileSync('auth.log', new Date().toISOString() + " " + socket.remoteAddress + " connected with port " + socket.remotePort + "\r\n");
 	socket.setKeepAlive(true);
+	// FIXME: socket errors are expected, there is no point in logging
+	//        them, at least if the error is
+	//        "Error [ERR_STREAM_WRITE_AFTER_END]: write after end"
 	socket.on('error',e=>console.log("client socket error: " + e));
 	sockets.push(socket);
 	try {  // load motd file

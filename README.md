@@ -15,14 +15,14 @@ https://github.com/marado/TalkerNode .
 
 Then, you run the talker by doing:
 ```bash
-> node TallkerNode.js
+> node TalkerNode.js
 ```
 
 That will make your talker run on the default port (8888), but you can
 make it run on a different port by setting up the environment variable PORT:
 
 ```bash
-> PORT=3333 node TallkerNode.js
+> PORT=3333 node TalkerNode.js
 ```
 
 Now that your talker is running, feel free to connect to it! The first user
