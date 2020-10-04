@@ -193,12 +193,13 @@ function sendData(socket, data) {
 	}
 }
 
-var receiveBuffer = '';
 /*
  * Method executed when data is received from a socket
  */
 function receiveData(socket, data) {
-
+	if(socket.receiveBuffer === undefined) {
+	    socket.receiveBuffer = '';
+	}
 	// Detect IAC commands
 	if(data[0] == 0xFF) {
 		// TODO: We're just filtering out IAC commands. We should be dealing with them instead...
@@ -209,23 +210,23 @@ function receiveData(socket, data) {
 
 	// Buffer received data and wait for newline before processing
 	// Fixes #121 (Windows uses character mode rather than line mode)
-	receiveBuffer += data;
-	if (receiveBuffer.indexOf('\r\n') === -1)
+	socket.receiveBuffer += data;
+	if (socket.receiveBuffer.indexOf('\r\n') === -1)
 		return;
 
 	// Clean input
-	var cleanData = cleanInput(receiveBuffer);
+	var cleanData = cleanInput(socket.receiveBuffer);
 
 	if(cleanData.length == 0)
 		return;
 
 
 	// Useful when in debug mode, you don't want this otherwise... it wouldn't be nice for your users' privacy, would it?
-	// console.log('Moo: Buf:', receiveBuffer);
+	// console.log('Moo: Buf:', socket.receiveBuffer);
 	// console.log("Moo [" + cleanData + "]");
 
 	// Empty the receive buffer, ready for the next input...
-	receiveBuffer = '';
+	socket.receiveBuffer = '';
 
 	sendData(socket, echo(true));
 	if(socket.username == undefined) {
