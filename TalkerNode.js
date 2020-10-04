@@ -193,36 +193,39 @@ function sendData(socket, data) {
 	}
 }
 
+var receiveBuffer = '';
 /*
  * Method executed when data is received from a socket
  */
 function receiveData(socket, data) {
 
-	var cleanData = cleanInput(data);
+	// Detect IAC commands
+	if(data[0] == 0xFF) {
+		// TODO: We're just filtering out IAC commands. We should be dealing with them instead...
+		//       See: https://github.com/marado/TalkerNode/issues/34
+		// console.log("Moo: IAC:", data);
+		return;
+	}
+
+	// Buffer received data and wait for newline before processing
+	// Fixes #121 (Windows uses character mode rather than line mode)
+	receiveBuffer += data;
+	if (receiveBuffer.indexOf('\r\n') === -1)
+		return;
+
+	// Clean input
+	var cleanData = cleanInput(receiveBuffer);
 
 	if(cleanData.length == 0)
 		return;
 
+
 	// Useful when in debug mode, you don't want this otherwise... it wouldn't be nice for your users' privacy, would it?
+	// console.log('Moo: Buf:', receiveBuffer);
 	// console.log("Moo [" + cleanData + "]");
 
-	// TODO: We're just filtering out IAC commands. We should be dealing with them instead...
-	//       See: https://github.com/marado/TalkerNode/issues/34
-	// IAC commands
-	var IAC = [
-		1 , // Telnet IAC - Echo
-		3 , // Telnet IAC - Suppress Go Ahead
-		5 , // Telnet IAC - Status
-		6 , // Telnet IAC - Timing Mark
-		24, // Telnet IAC - Terminal Type
-		31, // Telnet IAC - Window Size
-		65533 // reply to echo off
-	];
-	if (IAC.indexOf(cleanData.charCodeAt(0)) !== -1) {
-		// This is IAC, not an user input
-		// console.log("Moo: IAC: [" + cleanData.charCodeAt(0) +"]");
-		return;
-	}
+	// Empty the receive buffer, ready for the next input...
+	receiveBuffer = '';
 
 	sendData(socket, echo(true));
 	if(socket.username == undefined) {
