@@ -13,9 +13,16 @@ exports.command = {
 		var chalk = require('chalk');
 		var formatters = require('../utils/formatters.js');
 		var userlist;
+
+		// the usertime is found in a different way, depending on if they're online or not
+		// TODO: consider moving this into an helper function that can be used on .exa and elsewhere
+		var usertime = function(user) {
+				return user.loggedin ? (Date.now() - user.loginTime) : user.totalTime;
+		}
+
 		if(command === "") { // sort by total time
-			userList = command_access.getUsersList().sort(function(a,b){return b.totalTime - a.totalTime;});
-			var lengthMaxFriendlyTotalTime = formatters.friendly_time(userList[0].totalTime).length;
+			userList = command_access.getUsersList().sort(function(a,b){return usertime(b) - usertime(a);});
+			var lengthMaxFriendlyTotalTime = formatters.friendly_time(usertime(userList[0])).length;
 			command_access.sendData(socket, "\r\n" + chalk.cyan("+-- Top Users by login time -------------------------------------------------+\r\n\r\n"));
 		} else if(command === '-l') { // sort by login count
 			userList = command_access.getUsersList().sort(function(a,b){return b.loginCount - a.loginCount;});
@@ -36,7 +43,7 @@ exports.command = {
 			if(command === '-l') {
 				userRow = userRow + userObject.loginCount.toString().padStart(lengthMaxLoginCount) + " logins";
 			} else {
-				userRow = userRow + formatters.friendly_time(userObject.totalTime).padStart(lengthMaxFriendlyTotalTime);
+				userRow = userRow + formatters.friendly_time(usertime(userObject)).padStart(lengthMaxFriendlyTotalTime);
 			}
 			userRow = userRow + " : " + userObject.username + "\r\n";
 			if(userRow[0] === '>') {
