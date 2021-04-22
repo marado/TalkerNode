@@ -597,27 +597,39 @@ function closeSocket(socket) {
 	if (i != -1) {
 		// if the socket already belong to a user...
 		if (typeof socket.username !== 'undefined') {
-			// announce the user departure
-			command_utility().allButMe(socket,function(me,to){
-				try {
-					to.write(chalk.bold(
-						"[" + chalk.red("Leaving ") +
-						"is: " +
-						chalk.yellow(me.username) +
-						" ]\r\n"
-					));
-				} catch(err) {
-					// there are expectable and non-fatal
-					// errors that can happen here, but
-					// there can also be bugs. Let's print
-					// the error out so logs can be useful.
-					console.log(
-						"E: closeSocket's " +
-						"announcement failed for " +
-						"one socket: " + err
-					);
-				}
-			});
+			// is there any other socket for this same user?
+			var announce = true;
+			for (var s = 0; s < sockets.length; s++) {
+				if (s !== i &&
+					socket.username.toLowerCase() ===
+						sockets[s].username.toLowerCase() &&
+					sockets[s].loggedin
+				) announce = false;
+			}
+
+			if (announce) {
+				// announce the user departure
+				command_utility().allButMe(socket,function(me,to){
+					try {
+						to.write(chalk.bold(
+							"[" + chalk.red("Leaving ") +
+							"is: " +
+							chalk.yellow(me.username) +
+							" ]\r\n"
+						));
+					} catch(err) {
+						// there are expectable and non-fatal
+						// errors that can happen here, but
+						// there can also be bugs. Let's print
+						// the error out so logs can be useful.
+						console.log(
+							"E: closeSocket's " +
+							"announcement failed for " +
+							"one socket: " + err
+						);
+					}
+				});
+			}
 			// write total time on socket db
 			saveTotalTime(sockets[i].username);
 		}
