@@ -197,35 +197,36 @@ function sendData(socket, data) {
  * Method executed when data is received from a socket
  */
 function receiveData(socket, data) {
+	if(socket.receiveBuffer === undefined) {
+	    socket.receiveBuffer = '';
+	}
+	// Detect IAC commands
+	if(data[0] == 0xFF) {
+		// TODO: We're just filtering out IAC commands. We should be dealing with them instead...
+		//       See: https://github.com/marado/TalkerNode/issues/34
+		// console.log("Moo: IAC:", data);
+		return;
+	}
 
-	var cleanData = cleanInput(data);
+	// Buffer received data and wait for newline before processing
+	// Fixes #121 (Windows uses character mode rather than line mode)
+	socket.receiveBuffer += data;
+	if (socket.receiveBuffer.indexOf('\r\n') === -1)
+		return;
+
+	// Clean input
+	var cleanData = cleanInput(socket.receiveBuffer);
 
 	if(cleanData.length == 0)
 		return;
 
+
 	// Useful when in debug mode, you don't want this otherwise... it wouldn't be nice for your users' privacy, would it?
+	// console.log('Moo: Buf:', socket.receiveBuffer);
 	// console.log("Moo [" + cleanData + "]");
 
-	// TODO: We're just filtering out IAC commands. We should be dealing with them instead...
-	//       See: https://github.com/marado/TalkerNode/issues/34
-	// IAC commands
-	var IAC = [
-		1 , // Telnet IAC - Echo
-		3 , // Telnet IAC - Suppress Go Ahead
-		5 , // Telnet IAC - Status
-		6 , // Telnet IAC - Timing Mark
-		24, // Telnet IAC - Terminal Type
-		31, // Telnet IAC - Window Size
-		33, // Telnet IAC - Remote Flow Control
-		34, // Telnet IAC - Linemode
-		36, // Telnet IAC - Environment Variables
-		65533 // reply to echo off
-	];
-	if (IAC.indexOf(cleanData.charCodeAt(0)) !== -1) {
-		// This is IAC, not an user input
-		// console.log("Moo: IAC: [" + cleanData.charCodeAt(0) +"]");
-		return;
-	}
+	// Empty the receive buffer, ready for the next input...
+	socket.receiveBuffer = '';
 
 	sendData(socket, echo(true));
 	if(socket.username == undefined) {
@@ -596,11 +597,39 @@ function closeSocket(socket) {
 	if (i != -1) {
 		// if the socket already belong to a user...
 		if (typeof socket.username !== 'undefined') {
-			// announce the user departure
-			command_utility().allButMe(socket,function(me,to){to.write(
-				chalk.bold("[" + chalk.red("Leaving ") + "is: "
-					+ chalk.yellow(me.username) + " ]\r\n")
-			);});
+			// is there any other socket for this same user?
+			var announce = true;
+			for (var s = 0; s < sockets.length; s++) {
+				if (s !== i &&
+					socket.username.toLowerCase() ===
+						sockets[s].username.toLowerCase() &&
+					sockets[s].loggedin
+				) announce = false;
+			}
+
+			if (announce) {
+				// announce the user departure
+				command_utility().allButMe(socket,function(me,to){
+					try {
+						to.write(chalk.bold(
+							"[" + chalk.red("Leaving ") +
+							"is: " +
+							chalk.yellow(me.username) +
+							" ]\r\n"
+						));
+					} catch(err) {
+						// there are expectable and non-fatal
+						// errors that can happen here, but
+						// there can also be bugs. Let's print
+						// the error out so logs can be useful.
+						console.log(
+							"E: closeSocket's " +
+							"announcement failed for " +
+							"one socket: " + err
+						);
+					}
+				});
+			}
 			// write total time on socket db
 			saveTotalTime(sockets[i].username);
 		}
@@ -614,6 +643,10 @@ function closeSocket(socket) {
 function newSocket(socket) {
 	require("fs").appendFileSync('auth.log', new Date().toISOString() + " " + socket.remoteAddress + " connected with port " + socket.remotePort + "\r\n");
 	socket.setKeepAlive(true);
+	// FIXME: socket errors are expected, there is no point in logging
+	//        them, at least if the error is
+	//        "Error [ERR_STREAM_WRITE_AFTER_END]: write after end"
+	socket.on('error',e=>console.log("client socket error: " + e));
 	sockets.push(socket);
 	try {  // load motd file
 		var motd = require("fs").readFileSync('motd.txt');
@@ -664,160 +697,102 @@ function command_utility() {
 		allButMe: function allButMe(socket,fn) {
 			for(var i = 0; i<sockets.length; i++) {
 				if (sockets[i] !== socket) {
-					if ((typeof sockets[i].loggedin !=
-						'undefined') &&
-						sockets[i].loggedin
-					) {
-						if(fn(socket,sockets[i]))
-							return true;
+					if ((typeof sockets[i].loggedin != 'undefined') &&
+						sockets[i].loggedin &&
+						(sockets[i].readyState === 'open')
+					){
+						if(fn(socket,sockets[i])) return true;
 					}
 				}
 			}
-		},
-
-		/*
-		 * Returns a friendly time format
-		 */
-		friendlyTime: function friendlyTime(ms) {
-			let msec, sec, min, hour, day, month, year;
-			msec = Math.floor(ms % 1000);
-			sec = Math.floor((ms / 1000) % 60);
-			min = Math.floor((ms / 1000/60) % 60);
-			hour = Math.floor((ms / 1000/60/60) % 24);
-			day = Math.floor((ms / 1000/60/60/24) % 30);
-			month = Math.floor((ms / 1000/60/60/24/30) % 12);
-			year = Math.floor(ms / 1000/60/60/24/30/12);
-			let f_time = "";
-			if (msec) {
-				f_time = msec + " milliseconds";
-			}
-			if (sec) {
-				f_time = sec + " seconds";
-			}
-			if (min) {
-				f_time = min + " minutes";
-			}
-			if (hour) {
-				f_time = hour + " hours, " + f_time;
-			}
-			if (day) {
-				f_time = day + " days, " + f_time;
-			}
-			if (month) {
-				f_time = month + " months, " + f_time;
-			}
-			if (year) {
-				f_time = year + " years, " + f_time;
-			}
-			return f_time;
 		},
 
 		// same as allButMe, but only for those in the same room as me
 		allHereButMe: function allHereButMe(socket,fn) {
 			for(var i = 0 ; i < sockets.length; i++) {
 				if (sockets[i] !== socket) {
-					if ((typeof sockets[i].loggedin !=
-							'undefined') &&
+					if ((typeof sockets[i].loggedin != 'undefined') &&
 						sockets[i].loggedin &&
-						(sockets[i].db.where[0] ==
-							socket.db.where[0]) &&
-						(sockets[i].db.where[1] ==
-							socket.db.where[1]) &&
-						(sockets[i].db.where[2] ==
-							socket.db.where[2])
+						(sockets[i].readyState === 'open') &&
+						(sockets[i].db.where[0] == socket.db.where[0]) &&
+						(sockets[i].db.where[1] == socket.db.where[1]) &&
+						(sockets[i].db.where[2] == socket.db.where[2])
 					){
-						if(fn(socket,sockets[i]))
-							return true;
+						if(fn(socket,sockets[i])) return true;
 					}
 				}
 			}
 		},
 
-		// returns socket for the user, or false if he doesn't exist
-		getOnlineUser: function getOnlineUser(name) {
-			for (var i = 0; i < sockets.length; i++) {
-				if (name.toLowerCase() ===
-					sockets[i].username.toLowerCase() &&
-					sockets[i].loggedin)
-						return sockets[i];
-			}
-			return false;
-		},
+	    // returns socket for the user, or false if he doesn't exist
+	    getOnlineUser: function getOnlineUser(name) {
+	    	for (var i = 0; i < sockets.length; i++) {
+	    		if (name.toLowerCase() === sockets[i].username.toLowerCase() && sockets[i].loggedin) return sockets[i];
+	    	}
+	    	return false;
+	    },
 
-		// returns array of sockets of the 'approximate' online users
-		//
-		// While 'getOnlineUser' is the correct function to use if you
-		// want to know if 'username' is online or not, sometimes users
-		// want to refer to another user in an 'human' way,
-		// abbreviating.
-		// Eg.: .wizlist tries to find if each wiz is online or not.
-		// Since the username is fully and correctly known,
-		// 'getOnlineUser' should be used. On the other hand, .tell
-		// gets an username as an argument. On that case, an user can
-		// type '.tell mr hello', meaning '.tell MrMe hello'. On that
-		// case, 'getAproxOnlineUser' should be used.
-		getAproxOnlineUser: function getOnlineUser(name) {
-			if (this.getOnlineUser(name) !== false)
-				return [this.getOnlineUser(name)];
-			var possibilities = [];
-			for (var i = 0; i < sockets.length; i++) {
-				if (name.toLowerCase() ===
-					sockets[i].username.toLowerCase().substr(0,name.length)
-					&& sockets[i].loggedin &&
-					(name.length <
-						sockets[i].username.length)
-				)
-					possibilities.push(sockets[i]);
-			}
-			return possibilities;
-		},
+	    // returns array of sockets of the 'approximate' online users
+	    // While 'getOnlineUser' is the correct function to use if you want
+	    // to know if 'username' is online or not, sometimes users want to
+	    // refer to another user in an 'human' way, abbreviating.
+	    // Eg.: .wizlist tries to find if each wiz is online or not. Since
+	    // the username is fully and correctly known, 'getOnlineUser' should be
+	    // used. On the other hand, .tell gets an username as an argument. On
+	    // that case, an user can type '.tell mr hello', meaning '.tell MrMe
+	    // hello'. On that case, 'getAproxOnlineUser' should be used.
+	    getAproxOnlineUser: function getOnlineUser(name) {
+		if (this.getOnlineUser(name) !== false) return [this.getOnlineUser(name)];
+		var possibilities = [];
+		for (var i = 0; i < sockets.length; i++) {
+		    if (name.toLowerCase() === sockets[i].username.toLowerCase().substr(0,name.length) && sockets[i].loggedin && (name.length < sockets[i].username.length))
+			possibilities.push(sockets[i]);
+		}
+		return possibilities;
+	    },
 
-		// returns the user object, in all its db glory
-		// TODO: Let's give just a subset of data from the user, OK? I
-		// mean, we don't want any command to have access to other
-		// users' passwords, do we?
-		getUser: function getUser(name) {
-			name = name.toLowerCase().charAt(0).toUpperCase() +
-				name.toLowerCase().slice(1);
-			return usersdb.get(name).value();
-		},
+        // returns the user object, in all its db glory
+        // TODO: Let's give just a subset of data from the user, OK? I mean, we
+        // don't want any command to have access to other users' passwords, do
+        // we?
+        getUser: function getUser(name) {
+            name = name.toLowerCase().charAt(0).toUpperCase() + name.toLowerCase().slice(1);
+            return usersdb.get(name).value();
+        },
 
-		// returns the username of an "aproximate" user
-		// read 'getAproxOnlineUser' to understand the difference
-		// between 'getOnlineUser' and it, same happens here between
-		// 'getUser' and 'getAproxUser'.
-		getAproxUser: function getAproxUser(name) {
-			if (this.getUser(name) !== undefined) return [name];
-			var possibilities = [];
-			for (var key in usersdb.getState()) {
-				if (name.toLowerCase() ===
-					key.toLowerCase().substr(0,name.length)
-					&& (name.length < key.length)
-				) {
-					possibilities.push(key);
-				}
-			}
-			if (possibilities.length === 0) return [];
-			return possibilities;
-		},
+	// returns the username of an "aproximate" user
+	// read 'getAproxOnlineUser' to understand the difference between
+	// 'getOnlineUser' and it, same happens here between 'getUser' and
+	// 'getAproxUser'.
+	getAproxUser: function getAproxUser(name) {
+		if (this.getUser(name) !== undefined) return [name];
+		var possibilities = [];
+		for (var key in usersdb.getState()) {
+		    if (name.toLowerCase() === key.toLowerCase().substr(0,name.length) && (name.length < key.length)) {
+			    possibilities.push(key);
+		    }
+		}
+		if (possibilities.length === 0) return [];
+		return possibilities;
+	},
 
-		// updates a user in the database
-		// TODO: argh, we surely don't want this! harden it!
-		updateUser: function updateUser(username, userObj) {
-			username = username.toLowerCase().charAt(0).toUpperCase() + username.toLowerCase().slice(1);
-			usersdb.set(username,userObj).write();
-		},
+	// updates a user in the database
+	// TODO: argh, we surely don't want this! harden it!
+	updateUser: function updateUser(username, userObj) {
+		username = username.toLowerCase().charAt(0).toUpperCase() + username.toLowerCase().slice(1);
+		usersdb.set(username,userObj).write();
+	},
 
-		// get users list, only insensitive information
-		getUsersList: function getUsersList() {
-			var list = [];
-			for (var key in usersdb.getState()) {
-				// retrieving username, rank and loginTime. If needed, we can always add stuff later
-				var val = usersdb.get(key).value();
-				list.push({username:key, rank:val.rank, loginTime:val.loginTime, totalTime:val.totalTime, loginCount:val.loginCount});
-			}
-			return list;
-		},
+	// get users list, only insensitive information
+	getUsersList: function getUsersList() {
+		var list = [];
+		for (var key in usersdb.getState()) {
+			// retrieving username, rank, loginTime, totalTime and loginCount. If needed, we can always add stuff later
+			var val = usersdb.get(key).value();
+			list.push({username:key, rank:val.rank, loginTime:val.loginTime, totalTime:val.totalTime, loginCount:val.loginCount});
+		}
+		return list;
+	},
 
 		// gives a full view of the universe; TODO: we surely don't want this
 		// TODO: in the meantime, we don't need to define a function for this!
@@ -838,7 +813,7 @@ function command_utility() {
 			talkername = universe.name;
 		},
 
-	};
+    };
 };
 
 /*
@@ -901,6 +876,7 @@ function main() {
 
 		// Listen on defined port
 		server.listen(port);
+		server.on('error',e=>console.log("server socket error: " + e));
 		console.log(talkername + " initialized on port "+ port);
 		console.log(loadCommands());
 		if(talkerdb.get("watchdog").value() > 0) {
