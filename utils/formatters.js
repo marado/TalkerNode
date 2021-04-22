@@ -43,7 +43,54 @@ var line_wrap = function (text, width) {
   return return_text;
 }
 
+/**
+ * Visually formats a timestamp.
+ * @param  {int}    ms The time in miliseconds
+ * @return {string} The time in a verbose, human-friendly way
+ */
+var friendly_time = function(ms) {
+  let msec, sec, min, hour, day, month, year;
+  msec = Math.floor(ms % 1000);
+  sec = Math.floor((ms / 1000) % 60);
+  min = Math.floor((ms / 1000 / 60) % 60);
+  hour = Math.floor((ms / 1000 / 60 / 60) % 24);
+  day = Math.floor((ms / 1000 / 60 / 60 / 24) % 30);
+  month = Math.floor((ms / 1000 / 60 / 60 / 24 / 30) % 12);
+  year = Math.floor((ms / 1000 / 60 / 60 / 24 / 30 / 12));
+  let f_time = "";
+  if (msec) {
+    f_time = msec + " millisecond";
+    if (msec > 1) f_time += "s";
+  }
+  if (sec) {
+    f_time = sec + " second";
+    if (sec > 1) f_time += "s";
+  }
+  if (min) {
+    f_time = min + " minute";
+    if (min > 1) f_time += "s";
+  }
+  if (hour) {
+    var quantity = (hour > 1) ? "s" : "";
+    f_time = hour + " hour" + quantity + ", " + f_time;
+  }
+  if (day) {
+    var quantity = (day > 1) ? "s" : "";
+    f_time = day + " day" + quantity + ", " + f_time;
+  }
+  if (month) {
+    var quantity = (month > 1) ? "s" : "";
+    f_time = month + " month" + quantity + ", " + f_time;
+  }
+  if (year) {
+    var quantity = (year > 1) ? "s" : "";
+    f_time = year + " year" + quantity + ", " + f_time;
+  }
+  return f_time;
+}
+
 module.exports = {
   text_wrap: text_wrap,
-  line_wrap: line_wrap
+  line_wrap: line_wrap,
+  friendly_time: friendly_time
 }

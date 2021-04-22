@@ -20,12 +20,11 @@ const usersdb = low(usersadapter);
 loadeddb++;
 
 // Instantiates the talker settings database
-var ranks;
 var commands = {};
 const talkeradapter = new FileSync('talker.db');
 const talkerdb = low(talkeradapter);
-ranks = talkerdb.get('ranks').value();
 
+var ranks = talkerdb.get('ranks').value();
 if (typeof ranks === 'undefined') {
 	ranks = {list:[
 			"Jailed",
@@ -42,6 +41,14 @@ if (typeof ranks === 'undefined') {
 		], entrylevel: 10};
 	talkerdb.set("ranks", ranks).write();
 }
+
+var watchdog = talkerdb.get('watchdog').value();
+if (typeof watchdog === 'undefined') {
+	// value in seconds; if set to 0 watchdog feature will be disabled
+	watchdog = 24*60*60;
+	talkerdb.set("watchdog", watchdog).write();
+}
+
 loadeddb++;
 
 // Instantiates the universe
@@ -80,6 +87,14 @@ if (typeof universe.name !== 'undefined') talkername = universe.name;
 loadeddb++;
 
 /*
+ * Returns a standard formatted date time string
+ */
+function getDateTimeString(datetimestring=0) {
+	var datetime = (datetimestring > 0) ? new Date(datetimestring) : Date();
+	return datetime.toString().split(' ').slice(0,6).join(' ');
+}
+
+/*
  * Cleans the input of carriage return, newline and control characters
  */
 function cleanInput(data) {
@@ -97,6 +112,36 @@ function echo(bool) {
     bytes[1] = bool ? 0xFC : 0xFB; //  0xFF 0xFC 0x01 for off,  0xFF 0xFB 0x01 for on
     bytes[2] = 0x01;
     return new Buffer.from(bytes);
+}
+
+/*
+* Saves total time for user or all users to the db
+*/
+function saveTotalTime(username) {
+	if(typeof username === 'undefined') { // save time for all users
+		for (let index = 0; index < sockets.length; index++) {
+			const socket = sockets[index];
+			var socketdb = usersdb.get(socket.username).value();
+			if (typeof socketdb !== 'undefined') {
+				if (typeof socketdb.totalTime === 'undefined') {
+					socketdb.totalTime = (Date.now() - socketdb.loginTime);
+				} else {
+					socketdb.totalTime += (Date.now() - socketdb.loginTime);
+				}
+				usersdb.set(socket.username, socketdb).write();
+			}
+		}
+	} else { // save time for given user
+		var userdb = usersdb.get(username).value();
+		if (typeof userdb !== 'undefined') {
+			if (typeof userdb.totalTime === 'undefined') {
+				userdb.totalTime = (Date.now() - userdb.loginTime);
+			} else {
+				userdb.totalTime += (Date.now() - userdb.loginTime);
+			}
+			usersdb.set(username, userdb).write();
+		}
+	}
 }
 
 /*
@@ -152,35 +197,36 @@ function sendData(socket, data) {
  * Method executed when data is received from a socket
  */
 function receiveData(socket, data) {
+	if(socket.receiveBuffer === undefined) {
+	    socket.receiveBuffer = '';
+	}
+	// Detect IAC commands
+	if(data[0] == 0xFF) {
+		// TODO: We're just filtering out IAC commands. We should be dealing with them instead...
+		//       See: https://github.com/marado/TalkerNode/issues/34
+		// console.log("Moo: IAC:", data);
+		return;
+	}
 
-	var cleanData = cleanInput(data);
+	// Buffer received data and wait for newline before processing
+	// Fixes #121 (Windows uses character mode rather than line mode)
+	socket.receiveBuffer += data;
+	if (socket.receiveBuffer.indexOf('\r\n') === -1)
+		return;
+
+	// Clean input
+	var cleanData = cleanInput(socket.receiveBuffer);
 
 	if(cleanData.length == 0)
 		return;
 
+
 	// Useful when in debug mode, you don't want this otherwise... it wouldn't be nice for your users' privacy, would it?
+	// console.log('Moo: Buf:', socket.receiveBuffer);
 	// console.log("Moo [" + cleanData + "]");
 
-	// TODO: We're just filtering out IAC commands. We should be dealing with them instead...
-	//       See: https://github.com/marado/TalkerNode/issues/34
-	// IAC commands
-	var IAC = [
-		1 , // Telnet IAC - Echo
-		3 , // Telnet IAC - Suppress Go Ahead
-		5 , // Telnet IAC - Status
-		6 , // Telnet IAC - Timing Mark
-		24, // Telnet IAC - Terminal Type
-		31, // Telnet IAC - Window Size
-		33, // Telnet IAC - Remote Flow Control
-		34, // Telnet IAC - Linemode
-		36, // Telnet IAC - Environment Variables
-		65533 // reply to echo off
-	];
-	if (IAC.indexOf(cleanData.charCodeAt(0)) !== -1) {
-		// This is IAC, not an user input
-		// console.log("Moo: IAC: [" + cleanData.charCodeAt(0) +"]");
-		return;
-	}
+	// Empty the receive buffer, ready for the next input...
+	socket.receiveBuffer = '';
 
 	sendData(socket, echo(true));
 	if(socket.username == undefined) {
@@ -294,7 +340,13 @@ function receiveData(socket, data) {
 		sendData(socket, "\r\n+----------------------------------------------------------------------------+\r\n");
 		sendData(socket, " Welcome to " + chalk.bold(talkername) + ", " + chalk.green(socket.username) + "!\r\n");
 		if (typeof(socket.lastLogin) !== "undefined") {
-			sendData(socket, " Your last login was at " + chalk.magenta(new Date(socket.lastLogin).toString()) + ".\r\n");
+			sendData(
+				socket,
+				" Your last login was at "
+					+ chalk.magenta(getDateTimeString(
+						socket.lastLogin
+					)) + ".\r\n"
+			);
 		}
 		sendData(socket, " Your rank is " + chalk.bold(ranks.list[socket.db.rank]) + ".\r\n");
 		sendData(socket, "+----------------------------------------------------------------------------+\r\n");
@@ -545,21 +597,41 @@ function closeSocket(socket) {
 	if (i != -1) {
 		// if the socket already belong to a user...
 		if (typeof socket.username !== 'undefined') {
-			// announce the user departure
-			command_utility().allButMe(socket,function(me,to){to.write(
-				chalk.bold("[" + chalk.red("Leaving ") + "is: "
-					+ chalk.yellow(me.username) + " ]\r\n")
-			);});
-			// write total time on socket db
-			sockets[i].db = usersdb.get(sockets[i].username).value();
-			if (typeof sockets[i].db !== 'undefined') {
-				if (typeof sockets[i].db.totalTime === 'undefined') {
-					sockets[i].db.totalTime = (Date.now() - sockets[i].db.loginTime);
-				} else {
-					sockets[i].db.totalTime += (Date.now() - sockets[i].db.loginTime);
-				}
-				usersdb.set(sockets[i].username, sockets[i].db).write();
+			// is there any other socket for this same user?
+			var announce = true;
+			for (var s = 0; s < sockets.length; s++) {
+				if (s !== i &&
+					socket.username.toLowerCase() ===
+						sockets[s].username.toLowerCase() &&
+					sockets[s].loggedin
+				) announce = false;
 			}
+
+			if (announce) {
+				// announce the user departure
+				command_utility().allButMe(socket,function(me,to){
+					try {
+						to.write(chalk.bold(
+							"[" + chalk.red("Leaving ") +
+							"is: " +
+							chalk.yellow(me.username) +
+							" ]\r\n"
+						));
+					} catch(err) {
+						// there are expectable and non-fatal
+						// errors that can happen here, but
+						// there can also be bugs. Let's print
+						// the error out so logs can be useful.
+						console.log(
+							"E: closeSocket's " +
+							"announcement failed for " +
+							"one socket: " + err
+						);
+					}
+				});
+			}
+			// write total time on socket db
+			saveTotalTime(sockets[i].username);
 		}
 		sockets.splice(i, 1);
 	}
@@ -571,6 +643,10 @@ function closeSocket(socket) {
 function newSocket(socket) {
 	require("fs").appendFileSync('auth.log', new Date().toISOString() + " " + socket.remoteAddress + " connected with port " + socket.remotePort + "\r\n");
 	socket.setKeepAlive(true);
+	// FIXME: socket errors are expected, there is no point in logging
+	//        them, at least if the error is
+	//        "Error [ERR_STREAM_WRITE_AFTER_END]: write after end"
+	socket.on('error',e=>console.log("client socket error: " + e));
 	sockets.push(socket);
 	try {  // load motd file
 		var motd = require("fs").readFileSync('motd.txt');
@@ -597,84 +673,56 @@ function newSocket(socket) {
 
 //
 function command_utility() {
-    var ret = {
-	    version: version,
-	    talkername: talkername,
-	    sockets: sockets,
-	    commands: commands,
-	    ranks: ranks,
-	    echo: echo,
-	    loadCommands: loadCommands,
-	    getCmdRank: getCmdRank,
-	    setCmdRank: setCmdRank,
-	    findCommand: findCommand,
-	    sendData: sendData,
+	return {
+		version: version,
+		talkername: talkername,
+		sockets: sockets,
+		commands: commands,
+		ranks: ranks,
+		echo: echo,
+		getDateTimeString: getDateTimeString,
+		loadCommands: loadCommands,
+		getCmdRank: getCmdRank,
+		setCmdRank: setCmdRank,
+		findCommand: findCommand,
+		sendData: sendData,
+		saveTotalTime: saveTotalTime,
 
 		/*
-		 * Returns a friendly time format 
+		 * Execute function to all connected users *but* the triggering
+		 * one.
+		 * It stops at the first connected user to which the function
+		 * returns true, returning true.
 		 */
-		friendlyTime: function friendlyTime(ms) {
-			let msec, sec, min, hour, day, month, year;
-			msec = Math.floor(ms % 1000);
-			sec = Math.floor((ms / 1000) % 60);
-			min = Math.floor((ms / 1000 / 60) % 60);
-			hour = Math.floor((ms / 1000 / 60 / 60) % 24);
-			day = Math.floor((ms / 1000 / 60 / 60 / 24) % 30);
-			month = Math.floor((ms / 1000 / 60 / 60 / 24 / 30) % 12);
-			year = Math.floor((ms / 1000 / 60 / 60 / 24 / 30 / 12));
-			let f_time = "";
-			if (msec) {
-				f_time = msec + " milliseconds";
+		allButMe: function allButMe(socket,fn) {
+			for(var i = 0; i<sockets.length; i++) {
+				if (sockets[i] !== socket) {
+					if ((typeof sockets[i].loggedin != 'undefined') &&
+						sockets[i].loggedin &&
+						(sockets[i].readyState === 'open')
+					){
+						if(fn(socket,sockets[i])) return true;
+					}
+				}
 			}
-			if (sec) {
-				f_time = sec + " seconds";
-			}
-			if (min) {
-				f_time = min + " minutes";
-			}
-			if (hour) {
-					f_time = hour + " hours, " + f_time;
-			}
-			if (day) {
-				f_time = day + " days, " + f_time;
-			}
-			if (month) {
-				f_time = month + " months, " + f_time;
-			}
-			if (year) {
-				f_time = year + " years, " + f_time;
-			}
-			return f_time;
 		},
-		
-	    /*
-	     * Execute function to all connected users *but* the triggering one.
-	     * It stops at the first connected user to which the function returns true, returning true.
-	     */
-	    allButMe: function allButMe(socket,fn) {
-	    	for(var i = 0; i<sockets.length; i++) {
-	    		if (sockets[i] !== socket) {
-	    			if ((typeof sockets[i].loggedin != 'undefined') && sockets[i].loggedin){
-	    				if(fn(socket,sockets[i])) return true;
-	    			}
-	    		}
-	    	}
-	    },
 
 		// same as allButMe, but only for those in the same room as me
 		allHereButMe: function allHereButMe(socket,fn) {
 			for(var i = 0 ; i < sockets.length; i++) {
 				if (sockets[i] !== socket) {
-				if ((typeof sockets[i].loggedin != 'undefined') && sockets[i].loggedin &&
-							(sockets[i].db.where[0] == socket.db.where[0]) &&
-							(sockets[i].db.where[1] == socket.db.where[1]) &&
-							(sockets[i].db.where[2] == socket.db.where[2])
+					if ((typeof sockets[i].loggedin != 'undefined') &&
+						sockets[i].loggedin &&
+						(sockets[i].readyState === 'open') &&
+						(sockets[i].db.where[0] == socket.db.where[0]) &&
+						(sockets[i].db.where[1] == socket.db.where[1]) &&
+						(sockets[i].db.where[2] == socket.db.where[2])
 					){
-	    				if(fn(socket,sockets[i])) return true;
+						if(fn(socket,sockets[i])) return true;
 					}
-	    		}
-	    	}
-	    },
+				}
+			}
+		},
 
 	    // returns socket for the user, or false if he doesn't exist
 	    getOnlineUser: function getOnlineUser(name) {
@@ -712,39 +760,39 @@ function command_utility() {
             return usersdb.get(name).value();
         },
 
-		// returns the username of an "aproximate" user
-		// read 'getAproxOnlineUser' to understand the difference between
-		// 'getOnlineUser' and it, same happens here between 'getUser' and
-		// 'getAproxUser'.
-		getAproxUser: function getAproxUser(name) {
-			if (this.getUser(name) !== undefined) return [name];
-			var possibilities = [];
-			for (var key in usersdb.getState()) {
-				if (name.toLowerCase() === key.toLowerCase().substr(0,name.length) && (name.length < key.length)) {
-					possibilities.push(key);
-				}
-			}
-			if (possibilities.length === 0) return [];
-			return possibilities;
-		},
+	// returns the username of an "aproximate" user
+	// read 'getAproxOnlineUser' to understand the difference between
+	// 'getOnlineUser' and it, same happens here between 'getUser' and
+	// 'getAproxUser'.
+	getAproxUser: function getAproxUser(name) {
+		if (this.getUser(name) !== undefined) return [name];
+		var possibilities = [];
+		for (var key in usersdb.getState()) {
+		    if (name.toLowerCase() === key.toLowerCase().substr(0,name.length) && (name.length < key.length)) {
+			    possibilities.push(key);
+		    }
+		}
+		if (possibilities.length === 0) return [];
+		return possibilities;
+	},
 
-		// updates a user in the database
-		// TODO: argh, we surely don't want this! harden it!
-		updateUser: function updateUser(username, userObj) {
-			username = username.toLowerCase().charAt(0).toUpperCase() + username.toLowerCase().slice(1);
-			usersdb.set(username,userObj).write();
-		},
+	// updates a user in the database
+	// TODO: argh, we surely don't want this! harden it!
+	updateUser: function updateUser(username, userObj) {
+		username = username.toLowerCase().charAt(0).toUpperCase() + username.toLowerCase().slice(1);
+		usersdb.set(username,userObj).write();
+	},
 
-		// get users list, only insensitive information
-		getUsersList: function getUsersList() {
-			var list = [];
-			for (var key in usersdb.getState()) {
-				// retrieving username, rank and loginTime. If needed, we can always add stuff later
-				var val = usersdb.get(key).value();
-				list.push({username:key, rank:val.rank, loginTime:val.loginTime, totalTime:val.totalTime, loginCount:val.loginCount});
-			}
-			return list;
-		},
+	// get users list, only insensitive information
+	getUsersList: function getUsersList() {
+		var list = [];
+		for (var key in usersdb.getState()) {
+			// retrieving username, rank, loginTime, totalTime and loginCount. If needed, we can always add stuff later
+			var val = usersdb.get(key).value();
+			list.push({username:key, rank:val.rank, loginTime:val.loginTime, totalTime:val.totalTime, loginCount:val.loginCount});
+		}
+		return list;
+	},
 
 		// gives a full view of the universe; TODO: we surely don't want this
 		// TODO: in the meantime, we don't need to define a function for this!
@@ -766,7 +814,6 @@ function command_utility() {
 		},
 
     };
-    return ret;
 };
 
 /*
@@ -807,6 +854,13 @@ function setPrompt() {
 	});
 }
 
+/*
+* Housekeeping function invoked periodically by watchdog feature
+*/
+function doHousekeeping() {
+	// All routine housekeeping calls should be added here
+	saveTotalTime();
+}
 
 /*
  * AND FINALLY... THE ACTUAL main()!
@@ -822,8 +876,14 @@ function main() {
 
 		// Listen on defined port
 		server.listen(port);
+		server.on('error',e=>console.log("server socket error: " + e));
 		console.log(talkername + " initialized on port "+ port);
 		console.log(loadCommands());
+		if(talkerdb.get("watchdog").value() > 0) {
+			console.log("Unleashing watchdog for housekeeping each " + talkerdb.get("watchdog").value() + " seconds");
+			setInterval(doHousekeeping, (talkerdb.get("watchdog").value()*1000));
+		}
+
 		setPrompt();
 	}
 }

@@ -30,7 +30,11 @@ exports.command = {
 		var connected = 0;
 		var connecting = 0;
 		command_access.sendData(socket, chalk.green("+----------------------------------------------------------------------------+\r\n"));
-		command_access.sendData(socket, chalk.cyan("   Current users on " + chalk.magenta(command_access.talkername) + " at " + chalk.bold(new Date().toLocaleDateString()) +", " + chalk.bold(new Date().toLocaleTimeString()) +"\r\n"));
+		command_access.sendData(socket, chalk.cyan(
+			"   Current users on " + chalk.magenta(command_access.talkername)
+				+ " at " + chalk.bold(command_access.getDateTimeString())
+				+ "\r\n"
+		));
 		command_access.sendData(socket, chalk.green("+----------------------------------------------------------------------------+\r\n"));
 		command_access.sendData(socket, chalk.green("  Name") + chalk.blue("              Description") + chalk.yellow("         Rank") + chalk.magenta("            Where") + chalk.cyan("      Time/Idle  \r\n"));
 		command_access.sendData(socket, chalk.green("+----------------------------------------------------------------------------+\r\n"));

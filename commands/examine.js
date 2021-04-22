@@ -13,6 +13,7 @@ exports.command = {
 	// Function to execute the command
 	execute: function(socket, command, command_access) {
 		var chalk = require('chalk');
+		var formatters = require('../utils/formatters.js');
 		var whom = command.split(' ')[0];
 		if (typeof whom === 'undefined' || whom.length < 1) {
 			whom = socket.username;
@@ -33,7 +34,12 @@ exports.command = {
 		if (typeof (w.registerTime) === 'undefined') {
 			command_access.sendData(socket, chalk.bold(":: ") + chalk.cyan(whom) + " was " + chalk.green("registered") + " in an " + chalk.bold("old version") + ".\r\n");
 		} else {
-			command_access.sendData(socket, chalk.bold(":: ") + chalk.cyan(whom) + " was " + chalk.green("registered") + " at " + chalk.bold(new Date(w.registerTime).toString()) + ".\r\n");
+			command_access.sendData(socket, chalk.bold(":: ") + chalk.cyan(whom)
+				+ " was " + chalk.green("registered") + " at "
+				+ chalk.bold(
+					command_access.getDateTimeString(w.registerTime)
+				) + ".\r\n"
+			);
 		}
 		if (typeof (w.totalTime) === 'undefined') {
 			// it either is his/her first time online, or it's an old user that
@@ -43,16 +49,16 @@ exports.command = {
 			} else {
 				// we should always be going into this if, but let's double check anyway
 				if (typeof w.loginTime !== 'undefined') {
-					command_access.sendData(socket, chalk.bold(":: ") + chalk.cyan(whom) + " has spent " + chalk.bold(command_access.friendlyTime(Date.now() - w.loginTime)) + chalk.green(" online") + ".\r\n");
+					command_access.sendData(socket, chalk.bold(":: ") + chalk.cyan(whom) + " has spent " + chalk.bold(formatters.friendly_time(Date.now() - w.loginTime)) + chalk.green(" online") + ".\r\n");
 				}
 			}
 		} else {
 			if (command_access.getOnlineUser(whom) !== false) {
 				// the user is currently online
-				command_access.sendData(socket, chalk.bold(":: ") + chalk.cyan(whom) + " has spent " + chalk.bold(command_access.friendlyTime(w.totalTime + (Date.now() - w.loginTime))) + chalk.green(" online") + ".\r\n");
+				command_access.sendData(socket, chalk.bold(":: ") + chalk.cyan(whom) + " has spent " + chalk.bold(formatters.friendly_time(w.totalTime + (Date.now() - w.loginTime))) + chalk.green(" online") + ".\r\n");
 			} else {
 				// the user isn't online
-				command_access.sendData(socket, chalk.bold(":: ") + chalk.cyan(whom) + " has spent " + chalk.bold(command_access.friendlyTime(w.totalTime)) + chalk.green(" online") + ".\r\n");
+				command_access.sendData(socket, chalk.bold(":: ") + chalk.cyan(whom) + " has spent " + chalk.bold(formatters.friendly_time(w.totalTime)) + chalk.green(" online") + ".\r\n");
 			}
 		}
 		command_access.sendData(socket,
@@ -60,7 +66,11 @@ exports.command = {
 			", and was last seen at " + chalk.yellow(command_access.getUniverse().get(w.where).name) + ".\r\n"
 		);
 		if (typeof w.loginTime !== 'undefined') {
-			command_access.sendData(socket, chalk.bold(":: ") + chalk.cyan(whom) + " last logged in at " + chalk.bold(new Date(w.loginTime).toString()) + ".\r\n");
+			command_access.sendData(socket, chalk.bold(":: ") + chalk.cyan(whom)
+				+ " last logged in at "
+				+ chalk.bold(command_access.getDateTimeString(w.loginTime))
+				+ ".\r\n"
+			);
 		}
 		if (typeof w.loginCount !== 'undefined') {
 			command_access.sendData(socket, chalk.bold(":: ") + chalk.cyan(whom) + " has logged in " + chalk.bold(w.loginCount) + " times.\r\n");
