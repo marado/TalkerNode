@@ -13,6 +13,7 @@ exports.command = {
 		var chalk = require('chalk');
 		var formatters = require('../utils/formatters.js');
 		var userlist;
+		var spodlength = 20; // default length of the spod results
 
 		// the usertime is found in a different way, depending on if they're online or not
 		// TODO: consider moving this into an helper function that can be used on .exa and elsewhere
@@ -32,7 +33,7 @@ exports.command = {
 			command_access.sendData(socket, "Invalid argument. Check .help " + this.name + " for usage instructions.\r\n");
 			return;
 		}
-		for (let index = 0; index < userList.length; index++) {
+		for (let index = 0; index < ((userList.length < spodlength) ? userList.length : spodlength); index++) {
 			const userObject = userList[index];
 
 			if(socket.username == userObject.username) { // hey, it's me!
