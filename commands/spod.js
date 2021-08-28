@@ -18,7 +18,8 @@ exports.command = {
 		// the usertime is found in a different way, depending on if they're online or not
 		// TODO: consider moving this into an helper function that can be used on .exa and elsewhere
 		var usertime = function(user) {
-				return user.loggedin ? (Date.now() - user.loginTime) : user.totalTime;
+			if (typeof user.totalTime === 'undefined') user.totalTime = 0;
+			return user.loggedin ? (Date.now() - user.loginTime) : user.totalTime;
 		}
 
 		if(command === "") { // sort by total time
@@ -26,7 +27,11 @@ exports.command = {
 			var lengthMaxFriendlyTotalTime = formatters.friendly_time(usertime(userList[0])).length;
 			command_access.sendData(socket, "\r\n" + chalk.cyan("+-- Top Users by login time -------------------------------------------------+\r\n\r\n"));
 		} else if(command === '-l') { // sort by login count
-			userList = command_access.getUsersList().sort(function(a,b){return b.loginCount - a.loginCount;});
+			userList = command_access.getUsersList().sort(function(a,b){
+				if ((typeof a.loginCount) === 'undefined') a.loginCount = 0;
+				if ((typeof b.loginCount) === 'undefined') b.loginCount = 0;
+				return b.loginCount - a.loginCount;
+			});
 			var lengthMaxLoginCount = userList[0].loginCount.toString().length;
 			command_access.sendData(socket, "\r\n" + chalk.cyan("+-- Top Users by login count ------------------------------------------------+\r\n\r\n"));
 		} else { // invalid argument
