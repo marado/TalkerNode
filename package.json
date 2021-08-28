@@ -15,7 +15,7 @@
   "dependencies": {
     "chalk": "",
     "lowdb": ">=0.17.0",
-    "mathjs": "",
+    "mathjs": "<9.4.4",
     "nodiverse": ">=0.3.4",
     "password-strength": "",
     "strip-ansi": "<7"
