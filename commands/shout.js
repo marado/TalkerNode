@@ -1,11 +1,12 @@
 exports.command = {
-	name: "shout", 			
+	name: "shout",
+	alias: '[',
 	autoload: true,			
 	unloadable: false,
 	min_rank: 2,
 	display: "you shout, everyone listens, no matter where they are",
 	help: "You shout, everyone listens, even if they're not in the same place as you!",
-	usage: ".shout <text>",
+	usage: [".shout <text>", "[<text>"],
 
 	execute: function(socket, command, command_access) {
 		var chalk = require('chalk');

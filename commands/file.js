@@ -5,7 +5,7 @@ exports.command = {
 	min_rank: 0,
 	display: "Show a list of files, or a the content of one",
 	help: "There can be a number of files available for you to read. This is the command used to either list or read them.",
-	usage: ".file, .file <filename>",
+	usage: ".file [<filename>]",
 
 	execute: function(socket, command, command_access) {
 
