@@ -1,4 +1,5 @@
 var formatters = require('../utils/formatters.js');
+const chalk = require("chalk");
 
 exports.command = {
 	name: "help",
@@ -7,7 +8,7 @@ exports.command = {
 	min_rank: 0,
 	display: "Shows all commands or information about one of them.",
 	help: "Shows you this list of commands or detailed help for a particular command.",
-	usage: ".help, .help <command>",
+	usage: ".help [<command>]",
 
 	execute: function(socket, command, command_access) {
 
@@ -29,19 +30,29 @@ exports.command = {
 					if (l == command_access.getCmdRank(c)) {
 						var cmd = command_access.commands[c].name;
 						var desc = command_access.commands[c].display;
+						var aliases = '';
+						if ('alias' in command_access.commands[c]) {
+							aliases = ' (';
+							if (command_access.commands[c].alias instanceof Array) {
+								aliases += command_access.commands[c].alias.join('');
+							} else {
+								aliases += command_access.commands[c].alias;
+							}
+							aliases += ')';
+						}
 
 						if(cmd.length > 10) {
 							cmd = cmd.substr(0, 10);
 						}
 
-						if(desc.length > 60) {
-							desc = desc.substr(0, 57) + "...";
+						if(desc.length > 58) {
+							desc = desc.substr(0, 55) + "...";
 						}
 
-						command_access.sendData(socket, chalk.blue("| " + chalk.bold("." +  cmd) +
-							Array(11 - cmd.length).join(' ') + chalk.yellow(" - ") +
-							chalk.green(desc) + Array(62 - desc.length).join(' ') +
-							" |\r\n"));
+						command_access.sendData(socket, chalk.blue("| " + chalk.bold("." + cmd + aliases)
+							+ Array((13 - aliases.length) - cmd.length).join(' ')
+							+ chalk.yellow(" - ") + chalk.green(desc)
+							+ Array(60 - desc.length).join(' ') + " |\r\n"));
 					}
 				}
 			}
@@ -66,7 +77,14 @@ exports.command = {
 			var command_to_show = commands[0];
 
 			command_access.sendData(socket, chalk.bold("Command : ") + command_to_show.name + "\r\n");
-			command_access.sendData(socket, chalk.bold("Usage   : ") + command_to_show.usage + "\r\n");
+			if (command_to_show.usage instanceof Array) {
+				command_to_show.usage.map((usage, index) => {
+					let prefix = !index ? 'Usage   : ' : '        : ';
+					command_access.sendData(socket, chalk.bold(prefix) + usage + "\r\n");
+				});
+			} else {
+				command_access.sendData(socket, chalk.bold("Usage   : ") + command_to_show.usage + "\r\n");
+			}
 			command_access.sendData(socket, "" + "\r\n");
 			command_access.sendData(socket, formatters.text_wrap(command_to_show.help) + "\r\n");
 			command_access.sendData(socket, "" + "\r\n");

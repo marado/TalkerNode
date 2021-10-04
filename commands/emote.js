@@ -1,11 +1,12 @@
 exports.command = {
-	name: "emote", 			
+	name: "emote",
+	alias: [':', ';'],
 	autoload: true,			
 	unloadable: false,
 	min_rank: 0,
 	display: "lets you pose something, as if you were acting",
 	help: "Lets you pose something, as if you were acting.",
-	usage: ".emote <text>",
+	usage: [".emote <text>", ":<text>", ";<text>"],
 	weigth: 10,
 
 	execute: function(socket, command, command_access) {
