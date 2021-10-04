@@ -4,7 +4,7 @@ exports.command = {
 	unloadable: true,			// Can the command be unloaded dynamically
 	min_rank: 0,				// Minimum rank to use to execute the command
 	display: "You look.",
-	help: "You figure out where you are and where to can you go.",
+	help: "You figure out where you are and where you can go.",
 	usage: ".look",
 
 	// Function to execute the command
@@ -44,7 +44,7 @@ exports.command = {
 		var neighbours = command_access.getUniverse().get_neighbours(
 			command_access.getUniverse().get(socket.db.where));
 		if (neighbours.length == 0) {
-			command_access.sendData(socket, chalk.green(":: ") + "You don't see anywhere to go to.\r\n");
+			command_access.sendData(socket, chalk.green(":: ") + "You don't see anywhere to go.\r\n");
 		} else {
 			command_access.sendData(socket, chalk.green(":: ") + "You see " + chalk.bold(neighbours.length) + " passages:\r\n   ");
 			for (var i=0; i < neighbours.length; i++) {

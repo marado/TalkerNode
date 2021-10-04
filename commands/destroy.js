@@ -6,7 +6,7 @@ exports.command = {
 	display: "destroys a nearby place",
 	help: ".destroy <direction> will destroy a nearby place, in <direction>'s direction. More info about directions in .file directions.",
 	usage: ".destroy <direction>",
-	weigth: 0,
+	weight: 0,
 
 	// Function to execute the command
 	execute: function(socket, command, command_access) {

@@ -302,7 +302,7 @@ function receiveData(socket, data) {
 					delete socket.registering;
 					delete socket.username;
 					delete socket.db;
-					sendData(socket, chalk.red("\r\nPasswords don't match!") + "\r\nLet's start from the beggining...\r\n" + chalk.cyan("Tell me your name:  "));
+					sendData(socket, chalk.red("\r\nPasswords don't match!") + "\r\nLet's start from the beginning...\r\n" + chalk.cyan("Tell me your name:  "));
 					return;
 				}
 			}
@@ -310,7 +310,7 @@ function receiveData(socket, data) {
 			require("fs").appendFileSync('auth.log', new Date().toISOString() + " " + socket.remoteAddress + " with port " + socket.remotePort + " failed to log in, username attempted was: " + socket.username + "\r\n");
 			delete socket.username;
 			delete socket.db;
-			sendData(socket, chalk.red("\r\nWrong password! ") + "\r\nLet's start from the beggining...\r\n" + chalk.cyan("Tell me your name:  "));
+			sendData(socket, chalk.red("\r\nWrong password! ") + "\r\nLet's start from the beginning...\r\n" + chalk.cyan("Tell me your name:  "));
 			return;
 		}
 
@@ -386,7 +386,7 @@ function receiveData(socket, data) {
 				if (socket.interactive.state === "confirmation") {
 					if (cleanData === "yes, I am sure") {
 						// they really want to .suicide, let's validate they are who they're supposed to be...
-						sendData(socket, chalk.bold("\r\n:: Alright then... just confirm you're who're you supposed to be, tell us your password: "));
+						sendData(socket, chalk.bold("\r\n:: Alright then... just confirm you're who you're supposed to be, tell us your password: "));
 						sendData(socket, echo(false));
 						socket.interactive.state = "pass";
 					} else {
@@ -511,7 +511,7 @@ function setCmdRank(command, rank) {
 /*
  * Method to find a command
  * hierarchy: direct match > alias direct match > weighted partial match
- * The 'weigthed partial match' gives precedence to commands of lower ranks
+ * The 'weighted partial match' gives precedence to commands of lower ranks
  */
 function findCommand(socket, command) {
 	var c = command;
@@ -524,7 +524,7 @@ function findCommand(socket, command) {
 		// choose the most heavier from the ones with lower
 		// getCmdRank
 		var results = [];
-		var weigth = 0;
+		var weight = 0;
 		var rank = ranks.list.length - 1;
 		for (var cmd in commands) {
 			// alias direct match
@@ -538,18 +538,18 @@ function findCommand(socket, command) {
 			if(cmd.substr(0, c.length) == c &&
 				userRank >= getCmdRank(cmd))
 			{
-				var cweigth = 0;
-				if (typeof commands[cmd].weigth !== 'undefined')
-					cweigth = commands[cmd].weigth;
+				var cweight = 0;
+				if (typeof commands[cmd].weight !== 'undefined')
+					cweight = commands[cmd].weight;
 				if (getCmdRank(cmd) < rank) {
 					rank = getCmdRank(cmd);
-					weigth = cweigth;
+					weight = cweight;
 					results = [commands[cmd]];
 				} else if (getCmdRank(cmd) === rank) {
-					if (cweigth > weigth) {
-						weigth = commands[cmd].weigth;
+					if (cweight > weight) {
+						weight = commands[cmd].weight;
 						results = [commands[cmd]];
-					} else if (cweigth === weigth) {
+					} else if (cweight === weight) {
 						results.push(commands[cmd]);
 					}
 				}

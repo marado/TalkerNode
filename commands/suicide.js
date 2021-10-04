@@ -4,7 +4,7 @@ exports.command = {
 	unloadable: false,
 	min_rank: 0,
 	display: "kill yourself FOREVER!",
-	help: "You will delete your user, forever! You probrably don't want to do this.",
+	help: "You will delete your user, forever! You probably don't want to do this.",
 	usage: ".suicide",
 
 	execute: function(socket, command, command_access) {

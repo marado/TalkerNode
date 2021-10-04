@@ -6,7 +6,7 @@ exports.command = {
 	display: "Shows top users per total time or login count",
 	help: "Shows top users per total time. Using -l will show the top login counts.",
 	usage: ".spod [-l]",
-	weigth: 0,
+	weight: 0,
 
 	// Function to execute the command
 	execute: function(socket, command, command_access) {

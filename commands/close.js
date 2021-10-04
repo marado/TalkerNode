@@ -6,7 +6,7 @@ exports.command = {
 	display: "closes an existent passage",
 	help: ".close <direction> will close the passage in that direction. More info about directions in .file directions.",
 	usage: ".close <direction>",
-	weigth: 0,
+	weight: 0,
 
 	// Function to execute the command
 	execute: function(socket, command, command_access) {
