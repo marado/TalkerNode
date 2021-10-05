@@ -1,6 +1,7 @@
 exports.command = {
 	name: "template", 			// Name of command to be executed (Max 10 chars)
 	aka: "ctemplate",			// Alias for the command (partial match not supported; Max 10 chars)
+	alias: "#",					// shortcut for the command (without the need of a dot)
 	autoload: false,			// Should the command be autoloaded at startup
 	unloadable: true,			// Can the command be unloaded dynamically
 	min_rank: 0,				// Minimum rank to use to execute the command
