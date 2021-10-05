@@ -4,7 +4,7 @@ exports.command = {
 	autoload: true,			
 	unloadable: false,
 	min_rank: 0,
-	display: "lets you know who is connected in the talker at this moment",
+	display: "shows who is connected in the talker at this moment",
 	help: "Lets you know who is connected in the talker at this moment.",
 	usage: [".who", "@"],
 	weigth: 10,
