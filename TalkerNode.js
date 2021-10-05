@@ -21,6 +21,7 @@ loadeddb++;
 
 // Instantiates the talker settings database
 var commands = {};
+var commandAliases = {};
 const talkeradapter = new FileSync('talker.db');
 const talkerdb = low(talkeradapter);
 
@@ -426,6 +427,11 @@ function receiveData(socket, data) {
 			doCommand(socket, socket.lastcommand);
 	} else if (cleanData.charAt(0) === ".") {
 		doCommand(socket, cleanData);
+	} else if (cleanData.charAt(0) in commandAliases) {
+		let alias = cleanData.charAt(0);
+		let re = new RegExp(`^\\${alias}( +)?`);
+		cleanData = cleanData.replace(re, '');
+		doCommand(socket, `.${commandAliases[alias]} ${cleanData}`);
 	} else {
 		doCommand(socket, ".say " + cleanData);
 	}
@@ -453,6 +459,15 @@ function loadCommands() {
 						+ file + "')\r\n";
 					cmd.loaded_date = new Date();
 					commands[cmd.name] = cmd;
+					if ('alias' in cmd) {
+						if (cmd.alias instanceof Array) {
+							cmd.alias.map(alias => {
+								commandAliases[alias] = cmd.name;
+							});
+						} else {
+							commandAliases[cmd.alias] = cmd.name;
+						}
+					}
 				} else {
 					output += "Loading Command: Skipping "
 						+ cmd.name + " (from '"
@@ -529,8 +544,8 @@ function findCommand(socket, command) {
 		for (var cmd in commands) {
 			// alias direct match
 			if (
-				commands[cmd].alias !== 'undefined' &&
-				commands[cmd] !== "" && commands[cmd].alias === c
+				commands[cmd].aka !== 'undefined' &&
+				commands[cmd] !== "" && commands[cmd].aka === c
 			) {
 				return [commands[cmd]];
 			}

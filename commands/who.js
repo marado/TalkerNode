@@ -1,12 +1,13 @@
 exports.command = {
-	name: "who", 			
+	name: "who",
+	alias: "@",
 	autoload: true,			
 	unloadable: false,
 	min_rank: 0,
-	display: "lets you know who is connected in the talker at this moment",
+	display: "shows who is connected in the talker at this moment",
 	help: "Lets you know who is connected in the talker at this moment.",
-	usage: ".who",
-	weight: 10,
+	usage: [".who", "@"],
+  weight: 10,
 
 	// helper functions that should probably be global, instead of stuck here in the command file
 	spaces: function(howMany) {
