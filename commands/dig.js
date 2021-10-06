@@ -10,7 +10,7 @@ exports.command = {
 		"called <name>, in <direction>'s direction. If that place already exists, " +
 		"but a passage doesn't, just create the passage. More info about directions in .file directions.",
 	usage: ".dig <direction> <name>",
-	weigth: 0,
+	weight: 0,
 
 	// Function to execute the command
 	execute: function(socket, command, command_access) {

@@ -6,7 +6,7 @@ exports.command = {
 	display: "renames the talker!",
 	help: ".rntalker <new-name> will change this talker name to <new-name>.",
 	usage: ".rntalker <new-name>",
-	weigth: 0,
+	weight: 0,
 
 	// Function to execute the command
 	execute: function(socket, command, command_access) {

@@ -6,7 +6,7 @@ exports.command = {
 	display: "sets which rank new users start with",
 	help: "Sets which rank new users start with, when they enter for the first time.",
 	usage: ".entrylevel <rank number>",
-	weigth: 0,
+	weight: 0,
 
 	// Function to execute the command
 	execute: function(socket, command, command_access) {

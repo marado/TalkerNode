@@ -8,7 +8,7 @@ exports.command = {
 	display: "removes a rank",
 	help: "Removes a rank from the rank list, adjusting all the others.",
 	usage: ".rmrank <rank number>",
-	weigth: 0,
+	weight: 0,
 
 	// Function to execute the command
 	execute: function(socket, command, command_access) {

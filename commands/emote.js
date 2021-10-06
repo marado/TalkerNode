@@ -8,6 +8,7 @@ exports.command = {
 	help: "Lets you pose something, as if you were acting.",
 	usage: [".emote <text>", ":<text>", ";<text>"],
 	weigth: 10,
+  weight: 10,
 
 	execute: function(socket, command, command_access) {
 		var chalk = require('chalk');

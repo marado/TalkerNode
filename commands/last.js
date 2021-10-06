@@ -98,7 +98,7 @@ exports.command = {
 					)
 				);
 			} else {
-				command_access.sendData(socket, chalk.green(":: There is no information about when did " + chalk.cyan(whom) + " last logged in. \r\n"));
+				command_access.sendData(socket, chalk.green(":: There is no information about when " + chalk.cyan(whom) + " last logged in. \r\n"));
 			}
 			if (command_access.getOnlineUser(whom)) {
 				command_access.sendData(socket, chalk.green(":: " + chalk.cyan(whom) + " is still online.\r\n"));

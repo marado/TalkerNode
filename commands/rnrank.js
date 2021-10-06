@@ -6,7 +6,7 @@ exports.command = {
 	display: "renames a rank",
 	help: "Renames a rank.",
 	usage: ".rnrank <rank number> <new-name>",
-	weigth: 0,
+	weight: 0,
 
 	// Function to execute the command
 	execute: function(socket, command, command_access) {

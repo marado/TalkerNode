@@ -48,7 +48,7 @@ exports.command = {
 			command_access.allButMe(socket,function(me,to){to.write(sentence);});
 			command_access.sendData(socket, chalk.green(":: ") + "You promoted " + chalk.bold(whom) + " to the rank of " + chalk.green(rankName) + "!\r\n");
 		} else {
-			me.write(chalk.red(":: ") + "You cannot promote someone to an higher level than yourse!\r\n");
+			me.write(chalk.red(":: ") + "You cannot promote someone to a higher level than yours!\r\n");
 		}
 	}
 }

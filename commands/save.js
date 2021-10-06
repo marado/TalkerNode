@@ -6,7 +6,7 @@ exports.command = {
 	display: "Saves total time for all users",
 	help: "Saves total time for all users",
 	usage: ".save",
-	weigth: 0,
+	weight: 0,
 
 	// Function to execute the command
 	execute: function(socket, command, command_access) {
