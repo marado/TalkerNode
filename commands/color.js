@@ -37,6 +37,7 @@ exports.command = {
 		colorCodes.forEach(code => {
 			command_access.sendData(socket, `^${code}: ${code}TalkerNode, version ${command_access.version}~RS\r\n`);
 		});
+		command_access.sendData(socket, "\r\n");
 
 		for (let i = 0; i < 256; i++) {
 			let code = '~F' + i;
