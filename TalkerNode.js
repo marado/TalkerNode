@@ -757,14 +757,24 @@ function command_utility() {
 	    // that case, an user can type '.tell mr hello', meaning '.tell MrMe
 	    // hello'. On that case, 'getAproxOnlineUser' should be used.
 	    getAproxOnlineUser: function getOnlineUser(name) {
-		if (this.getOnlineUser(name) !== false) return [this.getOnlineUser(name)];
-		var possibilities = [];
-		for (var i = 0; i < sockets.length; i++) {
-		    if (name.toLowerCase() === sockets[i].username.toLowerCase().substr(0,name.length) && sockets[i].loggedin && (name.length < sockets[i].username.length))
-			possibilities.push(sockets[i]);
-		}
-		return possibilities;
+			if (this.getOnlineUser(name) !== false) return [this.getOnlineUser(name)];
+			var possibilities = [];
+			for (var i = 0; i < sockets.length; i++) {
+				if (name.toLowerCase() === sockets[i].username.toLowerCase().substr(0,name.length) && sockets[i].loggedin && (name.length < sockets[i].username.length))
+				possibilities.push(sockets[i]);
+			}
+			return possibilities;
 	    },
+
+		// As with `getAproxOnlineUser` except it will filter out the excluded
+		// user from the list (typically the person running the command)
+		getAproxOnlineUserExcluding: function getOnlineUser(name, excludeName, onlyIfMultiple = false) {
+			let possibilities = this.getAproxOnlineUser(name);
+			if (!onlyIfMultiple || (onlyIfMultiple && possibilities.length > 1)) {
+				possibilities = possibilities.filter(user => user.username.toLowerCase() !== excludeName.toLowerCase());
+			}
+			return possibilities;
+		},
 
         // returns the user object, in all its db glory
         // TODO: Let's give just a subset of data from the user, OK? I mean, we
