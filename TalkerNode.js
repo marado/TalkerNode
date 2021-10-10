@@ -54,6 +54,7 @@ loadeddb++;
 
 // Instantiates the universe
 var nodiverse = require('nodiverse');
+const {monotone, colorize} = require("./utils/formatters");
 var universe;
 var talkername = "Moosville"; // TODO: make this configurable
 const universeadapter = new FileSync('universe.db');
@@ -170,9 +171,9 @@ function sendData(socket, data) {
 			parseInt(socket.db.pager) >= datalines
 		) {
 			if (typeof socket.db !== 'undefined' && typeof socket.db.color !== 'undefined' && !(socket.db.color)) {
-				socket.write(stripAnsi(data));
+				socket.write(monotone(stripAnsi(data)));
 			} else {
-				socket.write(data);
+				socket.write(colorize(data));
 			}
 		} else {
 			// TODO: react to socket.db.pager :
@@ -182,9 +183,9 @@ function sendData(socket, data) {
 			// While that's not done...
 			// socket.write("This message should be cut and within a pager.\r\n");
 			if (typeof socket.db !== 'undefined' && typeof socket.db.color !== 'undefined' && !(socket.db.color)) {
-				socket.write(stripAnsi(data));
+				socket.write(monotone(stripAnsi(data)));
 			} else {
-				socket.write(data);
+				socket.write(colorize(data));
 			}
 		}
 	} catch (e) {
