@@ -10,16 +10,6 @@ exports.command = {
   weight: 10,
 
 	// helper functions that should probably be global, instead of stuck here in the command file
-	spaces: function(howMany) {
-		ret = "";
-		for (var i = 0; i < howMany; i++) {
-			ret += " ";
-		}
-		return ret;
-	},
-	stringPadding: function(what, howMuch) {
-		return (what + this.spaces(howMuch-1)).substr(0,howMuch);
-	},
 	timeString: function(time) {
 		var hh = Math.floor(time/1000/60/60);
 		var mm = Math.floor((time/1000/60) % 60);
@@ -30,6 +20,19 @@ exports.command = {
 		var chalk = require('chalk');
 		var connected = 0;
 		var connecting = 0;
+		var spaces = function(howMany) {
+			ret = "";
+			for (var i = 0; i < howMany; i++) {
+				ret += " ";
+			}
+			return ret;
+		};
+		var stringPadding = function(what, howMuch) {
+			// take into account invisible characters (color codes, for eg.)
+			howMuch += what.length - command_access.stripAnsi(what).length;
+			return (what + spaces(howMuch-1)).substr(0,howMuch);
+		};
+
 		command_access.sendData(socket, chalk.green("+----------------------------------------------------------------------------+\r\n"));
 		command_access.sendData(socket, chalk.cyan(
 			"   Current users on " + chalk.magenta(command_access.talkername)
@@ -45,10 +48,10 @@ exports.command = {
 			} else {
 				connected++;
 				command_access.sendData(socket, 
-					"  " + this.stringPadding(command_access.sockets[i].username, 16) +
-					"  " + this.stringPadding((typeof command_access.sockets[i].db.desc !== "undefined") ? command_access.sockets[i].db.desc : "has no .desc yet!", 18)+
-					"  " + this.stringPadding(command_access.ranks.list[command_access.sockets[i].db.rank], 14) +
-					"  " + this.stringPadding(command_access.getUniverse().get(command_access.sockets[i].db.where).name, 8) +
+					"  " + stringPadding(command_access.sockets[i].username, 16) +
+					"  " + stringPadding((typeof command_access.sockets[i].db.desc !== "undefined") ? command_access.sockets[i].db.desc : "has no .desc yet!", 18)+
+					"  " + stringPadding(command_access.ranks.list[command_access.sockets[i].db.rank], 14) +
+					"  " + stringPadding(command_access.getUniverse().get(command_access.sockets[i].db.where).name, 8) +
 					"  " + this.timeString(Date.now() - command_access.sockets[i].db.loginTime) + "/" + this.timeString(Date.now() - command_access.sockets[i].activityTime) +
 					"\r\n");
 			}

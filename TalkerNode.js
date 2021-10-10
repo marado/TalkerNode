@@ -704,6 +704,9 @@ function command_utility() {
 		findCommand: findCommand,
 		sendData: sendData,
 		saveTotalTime: saveTotalTime,
+		colorize: colorize,
+		monotone: monotone,
+		stripAnsi: stripAnsi,
 
 		/*
 		 * Execute function to all connected users *but* the triggering

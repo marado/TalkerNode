@@ -26,10 +26,10 @@ exports.command = {
 		var chalk = require('chalk');
 		command = this.cleanUp(command);
  		if (command === 'undefined' || command.length < 1)
-			return command_access.sendData(socket, chalk.red(":: ") + "Say what?\r\n");
+			return command_access.sendData(socket, chalk.red(":: ") + "Say what? ~RS\r\n");
 		command_access.allHereButMe(socket, function(me,to){
-			to.write(me.username + chalk.bold(" says: ") + command + "\r\n");
+			to.write(me.username + chalk.bold(" says: ") + command + " ~RS\r\n");
 		});
-		command_access.sendData(socket, chalk.bold("You said: ") + command + "\r\n");
+		command_access.sendData(socket, chalk.bold("You said: ") + command + " ~RS\r\n");
 	}
 }

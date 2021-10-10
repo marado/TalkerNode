@@ -17,7 +17,7 @@ exports.command = {
 		}
 		// add the new rank
 		var updated = command_access.ranks;
-		updated.list.push(command);
+		updated.list.push(command_access.colorize(command));
 		command_access.updateRanks(updated);
 		// promote top-rank users to the new rank
 		var oldrank = updated.list.length - 2;

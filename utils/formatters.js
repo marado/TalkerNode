@@ -138,7 +138,8 @@ let colorize = function(str) {
     return "\033[" + `${fb};5;${p3}m`;
   });
 
-  return str;
+  // making sure we reset everything in the end, so we don't leak colors...
+  return str+colors.RS;
 }
 
 let monotone = function(str) {
