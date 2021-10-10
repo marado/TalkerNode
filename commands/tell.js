@@ -16,7 +16,7 @@ exports.command = {
 		if ((typeof to === 'undefined') || (typeof message === 'undefined') || to.length < 1 || message.length < 1) {
 			command_access.sendData(socket, chalk.yellow(":: ") + "You have to use it this way:" + chalk.yellow(" .tell someone something\r\n"));
 		} else {
-			var s = command_access.getAproxOnlineUser(to);
+			var s = command_access.getAproxOnlineUserExcluding(to, socket.username, true);
 			if (s.length === 1) {
 				if (socket.username.toLowerCase() === s[0].username.toLowerCase()) {
 					return command_access.sendData(socket, chalk.red(":: ") + "Talking to yourself is the first sign of madness.\r\n");
