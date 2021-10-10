@@ -545,7 +545,8 @@ function findCommand(socket, command) {
 			// alias direct match
 			if (
 				commands[cmd].aka !== 'undefined' &&
-				commands[cmd] !== "" && commands[cmd].aka === c
+				commands[cmd] !== "" && commands[cmd].aka === c &&
+				userRank >= getCmdRank(cmd)
 			) {
 				return [commands[cmd]];
 			}
