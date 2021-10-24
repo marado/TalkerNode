@@ -10,16 +10,16 @@ exports.command = {
 	// Function to execute the command
 	execute: function(socket, command, command_access) {
 		var chalk = require('chalk');
-		var to = command.split(' ')[0];
+		var to = command_access.stripAnsi(command_access.monotone(command.split(' ')[0]));
 		if ((typeof to === 'undefined') || (to.length < 1)) return command_access.sendData(socket, chalk.yellow(":: Where do you want to go to?\r\n"));
-		if (to.toLowerCase() === command_access.getUniverse().get(socket.db.where).name.toLowerCase()) return command_access.sendData(socket, chalk.red(":: You are already there!\r\n"));
+		if (to.toLowerCase() === command_access.monotone(command_access.stripAnsi(command_access.getUniverse().get(socket.db.where).name.toLowerCase()))) return command_access.sendData(socket, chalk.red(":: You are already there!\r\n"));
 		var neighbours = command_access.getUniverse().get_neighbours(command_access.getUniverse().get(socket.db.where));
 		if (neighbours.length == 0) return command_access.sendData(socket, chalk.yellow(":: You don't see anywhere to go to.\r\n"));
 		var toId = null;
 		var abrev = [];
 		for (var i=0; i < neighbours.length; i++) {
-			if (neighbours[i].name.toLowerCase() == to.toLowerCase()) toId = i;
-			if (neighbours[i].name.toLowerCase().substring(0,to.length) == to.toLowerCase()) abrev.push(i);
+			if (command_access.stripAnsi(command_access.monotone(neighbours[i].name.toLowerCase())) == to.toLowerCase()) toId = i;
+			if (command_access.stripAnsi(command_access.monotone(neighbours[i].name.toLowerCase())).substring(0,to.length) == to.toLowerCase()) abrev.push(i);
 		}
 		if (toId == null) {
 			if (abrev.length === 0) return command_access.sendData(socket, chalk.red(":: I don't know where " + chalk.bold(to) + " is...\r\n"));
@@ -29,7 +29,7 @@ exports.command = {
 					possibilities += chalk.bold(neighbours[p].name) + ", ";
 				}
 				possibilities += neighbours[abrev[abrev.length-1]].name;
-				return command_access.sendData(socket, chalk.yellow(":: There are several possible exits you might mean: " + possibilities + ". Can you be more specific?\r\n"));
+				return command_access.sendData(socket, "~FY:: There are several possible exits you might mean: " + possibilities + "~RS~FY. Can you be more specific?\r\n");
 			}
 			toId = abrev[0];
 		}
