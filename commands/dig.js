@@ -41,7 +41,7 @@ exports.command = {
 		// name: first char needs to be a letter, can't be a dupe
 		if ((typeof name !== 'string') ||
 			(name.length === 0) ||
-			!(/^[a-zA-Z\u00C0-\u00ff]+$/.test(name.substring(0,1)))
+			!(/^[a-zA-Z\u00C0-\u00ff]+$/.test(command_access.monotone(name).substring(0,1)))
 		) {
 			command_access.sendData(socket, chalk.red(":: Place names need to start with a letter!\r\n"));
 			return;
@@ -77,9 +77,9 @@ exports.command = {
 		if (targObj !== null) {
 			// deal with situations where the place is not the same
 			if (targObj.name !== name) {
-				command_access.sendData(socket, formatters.text_wrap(chalk.red(":: You're trying to create a " +
-					"place called " + chalk.bold(name) + " where there's already another " +
-					"place called " + chalk.bold(targObj.name) + "! ") + chalk.yellow("Maybe you want to " +
+				command_access.sendData(socket, formatters.text_wrap("~FR:: You're trying to create a " +
+					"place called " + name + "~RS~FR where there's already another " +
+					"place called " + targObj.name + "~RS~FR! " + chalk.yellow("Maybe you want to " +
 					chalk.bold(".destroy") + " that one first, or recheck your " + chalk.bold(".map ") + "and make " +
 					"sure of what you're trying to do?\r\n")));
 				return;
@@ -118,7 +118,7 @@ exports.command = {
 				return;
 			}
 			done = command_access.getUniverse().get(target);
-			if (done !== null) done.name = name;
+			if (done !== null) done.name = command_access.colorize(name);
 			if (!command_access.getUniverse().update(done)) {
 				// we shouldn't be able to get here. Is this a Nodiverse bug?
 				command_access.sendData(socket, "You dug, but you weren't able to make the new place " +
