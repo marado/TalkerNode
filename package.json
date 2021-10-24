@@ -16,7 +16,7 @@
     "chalk": "",
     "lowdb": ">=0.17.0 <2.0.0",
     "mathjs": "<9.4.4",
-    "nodiverse": ">=0.3.4",
+    "nodiverse": ">=0.4.0",
     "password-strength": "",
     "strip-ansi": "<7"
   },
