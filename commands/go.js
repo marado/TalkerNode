@@ -47,7 +47,7 @@ exports.command = {
 		if (movement[0] > 0) direction += "west";
 		if (movement[0] < 0) direction += "east";
 
-		command_access.allHereButMe(socket,function(me,t){t.write(chalk.bold(":: " + chalk.yellow(me.username) + " starts walking to " + chalk.green(direction) + " towards " + chalk.cyan(to.toLowerCase()) + "...\r\n"));});
+		command_access.allHereButMe(socket,function(me,t){t.write(chalk.bold(":: " + chalk.yellow(me.username) + " starts walking to " + chalk.green(direction) + " towards " + chalk.cyan(neighbours[toId].name) + "...\r\n"));});
 		command_access.sendData(socket, chalk.bold(":: You start walking to " + chalk.green(direction) + " towards " + chalk.cyan(neighbours[toId].name) + "...\r\n"));
 		socket.db.where = neighbours[toId].coords;
 		var tmp = command_access.getUser(socket.username);
