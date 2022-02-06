@@ -29,7 +29,7 @@ exports.command = {
 					// show commands of level l
 					if (l == command_access.getCmdRank(c)) {
 						var cmd = command_access.commands[c].name;
-						var desc = command_access.commands[c].display;
+						var desc = command_access.monotone(command_access.commands[c].display);
 						var aliases = '';
 						if ('alias' in command_access.commands[c]) {
 							aliases = ' (';
