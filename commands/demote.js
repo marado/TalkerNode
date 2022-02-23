@@ -15,17 +15,17 @@ exports.command = {
 		var w = null;
 		// check if we got an whom
 		if (typeof whom === 'undefined' || whom.length < 1) {
-			return me.write("Demote whom?\r\n");
+			return command_access.sendData(me, "Demote whom?\r\n");
 		} else { // check if it's an user
 			var wArr = command_access.getAproxUser(whom);
-			if (wArr.length === 0) return me.write("Demote whom?\r\n");
+			if (wArr.length === 0) return command_access.sendData(me, "Demote whom?\r\n");
 			if (wArr.length > 1) {
 				var possibilities = "";
 				for (var p = 0; p < wArr.length - 1; p++) {
 					possibilities += wArr[p] + ", ";
 				}
 				possibilities += wArr[wArr.length - 1];
-				return me.write("Be more explicit: whom do you want to demote ("+possibilities+")?\r\n");
+				return command_access.sendData(me, "Be more explicit: whom do you want to demote ("+possibilities+")?\r\n");
 			}
 			whom = wArr[0];
 			w = command_access.getUser(whom);
@@ -48,10 +48,10 @@ exports.command = {
 			whom = whom.toLowerCase().charAt(0).toUpperCase() + whom.toLowerCase().slice(1);
 			var sentence = chalk.red(":: ") + chalk.white(me.username) + chalk.red(" has demoted ") +
 					chalk.yellow(whom) + chalk.red(" to the rank of ") + chalk.green(rankName) + chalk.red("! ::\r\n");
-			command_access.allButMe(socket,function(me,to){to.write(sentence);});
+			command_access.allButMe(socket,function(me,to){command_access.sendData(to, sentence);});
 			command_access.sendData(socket, "You " + chalk.red("demoted ") + chalk.yellow(whom) + " to the rank of " + chalk.green(rankName) + "!\r\n");
 		} else {
-			me.write("You cannot demote someone with the same or an higher rank than yours!\r\n");
+			command_access.sendData(me, "You cannot demote someone with the same or an higher rank than yours!\r\n");
 		}
 	}
 }

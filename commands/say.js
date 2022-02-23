@@ -28,7 +28,7 @@ exports.command = {
  		if (command === 'undefined' || command.length < 1)
 			return command_access.sendData(socket, chalk.red(":: ") + "Say what? ~RS\r\n");
 		command_access.allHereButMe(socket, function(me,to){
-			to.write(me.username + chalk.bold(" says: ") + command + " ~RS\r\n");
+			command_access.sendData(to, me.username + chalk.bold(" says: ") + command + " ~RS\r\n");
 		});
 		command_access.sendData(socket, chalk.bold("You said: ") + command + " ~RS\r\n");
 	}

@@ -27,9 +27,9 @@ exports.command = {
 				return command_access.sendData(socket, chalk.red(":: ") + "Talking to yourself is the first sign of madness.\r\n");
 			}
 			command_access.allButMe(socket,function(me, to) {
-				to.write(`${chalk.bold('!')} ${me.username} ${chalk.bold('shouts')} to ${chalk.bold(possibleUsers[0].username)}: ${message}\r\n`);
+				command_access.sendData(to, `${chalk.bold('!')} ${me.username} ${chalk.bold('shouts')} to ${chalk.bold(possibleUsers[0].username)}: ${message} ~RS\r\n`);
 			});
-			command_access.sendData(socket, `${chalk.bold('!')} You ${chalk.bold('shout')} to ${chalk.bold(possibleUsers[0].username)}: ${message}\r\n`);
+			command_access.sendData(socket, `${chalk.bold('!')} You ${chalk.bold('shout')} to ${chalk.bold(possibleUsers[0].username)}: ${message} ~RS\r\n`);
 		} else {
 			let possibilities = "";
 			for (let p = 0; p < possibleUsers.length - 1; p++) {

@@ -13,8 +13,8 @@ exports.command = {
 		if (command === 'undefined' || command.length < 1)
 			return command_access.sendData(socket, chalk.red(":: ") + "Shout what?\r\n");
 		command_access.allButMe(socket,function(me,to){
-			to.write(chalk.bold("! ") + me.username + chalk.bold(" shouts: ") + command + "\r\n");
+			command_access.sendData(to, chalk.bold("! ") + me.username + chalk.bold(" shouts: ") + command + " ~RS\r\n");
 		});
-		command_access.sendData(socket, chalk.bold("! You shout: ") + command + "\r\n");
+		command_access.sendData(socket, chalk.bold("! You shout: ") + command + " ~RS\r\n");
 	}
 }

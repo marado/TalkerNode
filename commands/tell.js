@@ -21,8 +21,8 @@ exports.command = {
 				if (socket.username.toLowerCase() === s[0].username.toLowerCase()) {
 					return command_access.sendData(socket, chalk.red(":: ") + "Talking to yourself is the first sign of madness.\r\n");
 				}
-				command_access.sendData(socket, chalk.green("You tell ") + s[0].username + chalk.green(": ") + message + "\r\n");
-				s[0].write(socket.username + chalk.green(" tells you: ") + message + "\r\n");
+				command_access.sendData(socket, chalk.green("You tell ") + s[0].username + chalk.green(": ") + message + " ~RS\r\n");
+				command_access.sendData(s[0], socket.username + chalk.green(" tells you: ") + message + " ~RS\r\n");
 			} else if (s.length === 0) {
 				command_access.sendData(socket, chalk.red(":: ") + "There is no one of that name logged on.\r\n");
 			} else {

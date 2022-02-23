@@ -47,13 +47,13 @@ exports.command = {
 		if (movement[0] > 0) direction += "west";
 		if (movement[0] < 0) direction += "east";
 
-		command_access.allHereButMe(socket,function(me,t){t.write(chalk.bold(":: " + chalk.yellow(me.username) + " starts walking to " + chalk.green(direction) + " towards " + chalk.cyan(neighbours[toId].name) + "...\r\n"));});
+		command_access.allHereButMe(socket,function(me,t){command_access.sendData(t, chalk.bold(":: " + chalk.yellow(me.username) + " starts walking to " + chalk.green(direction) + " towards " + chalk.cyan(neighbours[toId].name) + "...\r\n"));});
 		command_access.sendData(socket, chalk.bold(":: You start walking to " + chalk.green(direction) + " towards " + chalk.cyan(neighbours[toId].name) + "...\r\n"));
 		socket.db.where = neighbours[toId].coords;
 		var tmp = command_access.getUser(socket.username);
 		tmp.where = socket.db.where;
 		command_access.updateUser(socket.username, tmp);
-		command_access.allHereButMe(socket,function(me,to){to.write(chalk.bold(":: " + chalk.yellow(me.username) + " walks in.\r\n"));});
+		command_access.allHereButMe(socket,function(me,to){command_access.sendData(to, chalk.bold(":: " + chalk.yellow(me.username) + " walks in.\r\n"));});
 		command_access.sendData(socket, chalk.green(":: You arrive.\r\n"));
 	}
 }
