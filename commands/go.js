@@ -28,8 +28,8 @@ exports.command = {
 				for (var p = 0; p < abrev.length-1; p++) {
 					possibilities += chalk.bold(neighbours[p].name) + ", ";
 				}
-				possibilities += neighbours[abrev[abrev.length-1]].name;
-				return command_access.sendData(socket, "~FY:: There are several possible exits you might mean: " + possibilities + "~RS~FY. Can you be more specific?\r\n");
+				possibilities += chalk.bold(neighbours[abrev[abrev.length-1]].name);
+				return command_access.sendData(socket, "~FY:: There are several possible exits you might mean:~RS " + possibilities + "~RS~FY. Can you be more specific?\r\n");
 			}
 			toId = abrev[0];
 		}
