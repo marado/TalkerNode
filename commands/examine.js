@@ -14,7 +14,7 @@ exports.command = {
 	execute: function(socket, command, command_access) {
 		var chalk = require('chalk');
 		var formatters = require('../utils/formatters.js');
-		var whom = command.split(' ')[0];
+		var whom = command_access.monotone(command.split(' ')[0]);
 		if (typeof whom === 'undefined' || whom.length < 1) {
 			whom = socket.username;
 		}
