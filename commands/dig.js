@@ -131,7 +131,7 @@ exports.command = {
 				return;
 			}
 			command_access.sendData(socket, chalk.green(":: ") + "You dig towards " + chalk.bold(direction) +
-				", and create a new place called " + chalk.bold(name) + ".\r\n");
+				", and create a new place called " + name + "~RS.\r\n");
 		}
 		// saving the altered universe
 		command_access.saveUniverse();
